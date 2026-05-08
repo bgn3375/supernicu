@@ -67,7 +67,7 @@ Fiecare pas are un **contract** care definește exact ce primește și ce livrea
 |-------|-----------|
 | Backend | .NET 10, ASP.NET Core, NHibernate, MariaDB |
 | Frontend | Next.js 15, React 19, TypeScript, Tailwind, shadcn/ui |
-| Design | Bono The Edge — Apple Liquid Glass (frosted glass, teal, dark mode) |
+| Design | Bono The Edge — flat, bej surfaces, pink accent, dot grid |
 | Auth | Magic Link + Google OAuth + JWT |
 | Multi-tenant | Header X-Team-Id + NHibernate filter |
 | Teste | Vitest (unit), Playwright (E2E) |

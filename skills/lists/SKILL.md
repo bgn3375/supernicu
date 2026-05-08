@@ -97,6 +97,6 @@ export function ExpensesList({ teamId }: { teamId: string }) {
 1. `useSearchParams` din `next/navigation`, NU din react-router-dom.
 2. Filtrele sunt URL-driven (searchParams). Refresh-ul păstrează filtrele.
 3. Server actions pentru data fetching, nu fetch direct din componente.
-4. Stiluri din prototip (Bono The Edge, Apple Liquid Glass).
+4. Stiluri din prototip (Bono The Edge — flat, bej, pink accent).
 5. Fiecare fișier sub 150 linii.
 6. Dark mode suportat.

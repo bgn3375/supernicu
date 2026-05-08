@@ -26,11 +26,12 @@ SuperNicu primește de la Bruce un PRD confirmat + prototip UI (screenshots + co
 - Vitest (unit tests)
 - Playwright (E2E tests)
 
-**Design System:** Bono The Edge — Apple Liquid Glass style
-- Frosted glass: backdrop-filter blur, semi-transparent cards
-- Culoare primară: teal (accente, calendare, luna curentă)
-- Tokens din design system, niciun hex hardcodat
-- Dark mode complet
+**Design System:** Bono The Edge
+- Flat design: bej backgrounds (bej-0 #FBFAF7, bej-1 #EFEBE4), fără glassmorphism
+- Culoare brand: pink (#EE4379) — accente, CTA, focus states
+- Tokens din bono-ds.css, niciun hex hardcodat
+- Dot grid pattern pe body, shadows minimale
+- Tipografie: Inter + Fraunces (display accent) + Source Serif 4 (blog)
 
 **Multi-tenant:**
 - Header `X-Team-Id` pe fiecare request

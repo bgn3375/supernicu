@@ -46,10 +46,9 @@ Cod Next.js per ecran, în ordinea din contract:
 ## Reguli de stil
 
 - **Copiază din prototip.** Clasele Tailwind vin din codul prototip, nu inventate.
-- **Tokens only.** Culori din Bono The Edge. Dacă prototipul are hex, caută tokenul.
-- **Apple Liquid Glass.** backdrop-filter, transparențe, shadows — exact din prototip.
-- **Teal pe calendare.** Toate date-pickers au tema teal.
-- **Dark mode.** next-themes, funcționează fără artefacte.
+- **Tokens only.** Culori din Bono The Edge (bono-ds.css). Dacă prototipul are hex, caută tokenul.
+- **Flat design.** Fără backdrop-filter, fără blur, fără glassmorphism. Bej backgrounds, pink accent.
+- **Pink sparingly.** Max 1 pink CTA per ecran. Pink pe fills/borders, nu pe text.
 - **Luna curentă.** Evidențiată vizual în tabelele cu perioade.
 - **An fiscal.** 13 coloane Aug-Aug, nu 12 Jan-Dec.
 - **Revenue inline.** Celule editabile în tabelul P&L tab Realizat.

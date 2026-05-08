@@ -13,7 +13,7 @@ Proiectează arhitectura tehnică a unui modul sau a întregii aplicații.
 - **Frontend:** Next.js 15 (App Router) + React 19 + TypeScript 5 + Tailwind + shadcn/ui
 - **Multi-tenant:** X-Team-Id header + NHibernate tenantFilter pe team_id
 - **Auth:** Magic Link + Google OAuth + JWT
-- **Design:** Apple Liquid Glass (Bono The Edge tokens, teal accents)
+- **Design:** Bono The Edge (flat, bej surfaces, pink accent, tokens din bono-ds.css)
 
 ## Output: architecture.md
 

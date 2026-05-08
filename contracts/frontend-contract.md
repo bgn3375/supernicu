@@ -44,10 +44,9 @@ Cod Next.js 15 funcțional care arată identic cu prototipul dar are logica real
 
 - Clasele Tailwind se copiază din codul prototip — nu se inventează noi
 - Dacă prototipul folosește un token Bono The Edge, se folosește acel token
-- Dacă prototipul folosește un hex hardcodat, se caută tokenul echivalent
-- Apple Liquid Glass: backdrop-filter, transparențe, shadows — se copiază exact
-- Tema teal pe calendare și date-pickers
-- Dark mode suportat (next-themes)
+- Dacă prototipul folosește un hex hardcodat, se caută tokenul echivalent din bono-ds.css
+- Flat design: fără backdrop-filter, fără blur, fără glassmorphism
+- Bej backgrounds (bej-0 page bg, bej-1 tonal), pink (#EE4379) ca accent
 - Luna curentă evidențiată în tabele cu perioade
 
 ### Structura fișiere
@@ -83,7 +82,7 @@ types/
 
 ### UI checklist (verificat de nicu-verify în mod verify-ui)
 - [ ] Layout-ul fiecărui ecran se potrivește cu screenshot-ul prototip?
-- [ ] Culorile se potrivesc (tokens, nu hex-uri hardcodate)?
+- [ ] Culorile folosesc tokens din bono-ds.css (pink accent, bej surfaces), nu hex-uri hardcodate?
 - [ ] Spațierile sunt consistente cu prototipul?
 - [ ] Empty states există și arată ca în prototip?
 - [ ] Loading states există?

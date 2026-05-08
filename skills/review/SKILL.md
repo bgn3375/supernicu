@@ -47,10 +47,11 @@ Vezi `contracts/review-contract.md` pentru output format complet.
 
 ### 4. Design System
 
-- Tokens din Bono The Edge, nu hex hardcodat?
-- Apple Liquid Glass: backdrop-filter, transparențe, shadows din prototip?
-- Teal pe calendare și date-pickers?
-- Dark mode fără artefacte?
+- Tokens din Bono The Edge (bono-ds.css), nu hex hardcodat?
+- Flat design: fără backdrop-blur, fără glassmorphism, fără transparențe?
+- Pink (#EE4379) ca accent, nu alte culori inventate?
+- Bej surfaces (bej-0 page bg, bej-1 tonal), white pe lifted cards?
+- Max 1 pink CTA per ecran?
 
 ### 5. Architecture Alignment
 

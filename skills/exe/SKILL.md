@@ -41,7 +41,7 @@ Cum procesează Hands un task de la Brain.
 ### Domain (selectează pe baza task-ului)
 - `auth` — Magic Link, Google OAuth, JWT, 5 roluri
 - `multitenant` — X-Team-Id + NHibernate tenantFilter
-- `design-system` — Bono The Edge, Apple Liquid Glass
+- `design-system` — Bono The Edge, flat, bej + pink accent
 - `api-endpoints` — .NET 4-layer pattern
 - `forms` — React forms, validare, mutații
 - `lists` — Liste, tabele, paginare, filtre

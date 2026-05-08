@@ -46,7 +46,7 @@ Ecrane verificate: 5/5
 ### Per ecran
 - [MATCH] expenses-list — layout, culori, spațiere OK
 - [MISMATCH] pnl-table-realizat:
-  - Luna curentă nu are highlight teal
+  - Luna curentă nu are highlight vizual
   - Header-ul tabelului e aliniat stânga, în prototip e centrat
   - Lipsește hover effect pe coloane
 ```
