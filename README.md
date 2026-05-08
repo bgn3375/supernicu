@@ -1,18 +1,14 @@
 # SuperNicu
 
-**Un super-agent de engineering care transformă specificații în aplicații funcționale.**
+**Un super-agent care transformă specificații în aplicații funcționale.**
 
 SuperNicu primește un PRD (Product Requirements Document) de la Bruce și un prototip UI din Claude Design, apoi generează singur o aplicație full-stack — backend, frontend, bază de date, teste — gata de deploy.
 
 ---
 
-## De ce există
-
-Echipa BONO folosește Claude Code pentru development, dar rezultatele nu sunt 100% funcționale: lipsesc pattern-uri consistente, verificări automate, și un ciclu complet de la specificație la cod testat.
-
-SuperNicu rezolvă asta. E un sistem de agenți AI care lucrează ca o echipă de programatori — fiecare cu un rol clar, reguli stricte, și verificări la fiecare pas.
-
 ## Cum funcționează
+
+E un sistem de agenți AI care lucrează ca o echipă de programatori — fiecare cu un rol clar, reguli stricte, și verificări la fiecare pas.
 
 Trei agenți principali, șase sub-agenți specializați:
 
