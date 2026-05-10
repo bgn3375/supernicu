@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bono · Pilot automat pentru contabilitate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="bono-ds.css">
+<style>
+  /* ═══ Landing-specific layout ═══ */
+  .ld-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 56px;
+    max-width: 1280px; margin: 0 auto;
+  }
+  .ld-nav .logo { font-weight: 600; font-size: 20px; letter-spacing: -0.020em; color: var(--c-ink); }
+  .ld-nav .logo em { font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; color: var(--c-pink); }
+  .ld-nav .links { display: flex; gap: 28px; }
+  .ld-nav .links a { font-size: 14px; color: var(--c-graphite); transition: color 140ms; }
+  .ld-nav .links a:hover { color: var(--c-pink); }
+  .ld-nav .cta { display: flex; gap: 8px; align-items: center; }
+
+  .ld-hero { padding: 56px 56px 100px; max-width: 1280px; margin: 0 auto; }
+  .ld-hero-wrap { background: transparent; }
+  .ld-hero .display-wrap { max-width: 980px; margin-bottom: 28px; }
+  .ld-hero .lead { max-width: 680px; margin-bottom: 32px; }
+
+  /* Section background variants — page (bej-0+grid din body) sau accent (tonal/dark) */
+  .ld-sec-wrap { width: 100%; }
+  .ld-sec-wrap.bg-mkt,
+  .ld-sec-wrap.bg-mkt-grid,
+  .ld-sec-wrap.bg-app-grid  { background: transparent; }
+  .ld-sec-wrap.bg-tonal     { background: var(--c-bej-1); }
+  .ld-sec-wrap.bg-dark      { background: var(--c-dark); color: #fff; }
+  .ld-sec-wrap.bg-dark .t-h1 { color: #fff; }
+  .ld-sec-wrap.bg-dark .t-h1 em { color: var(--c-pink); }
+  .ld-sec-wrap.bg-dark .t-eyebrow { color: rgba(255,255,255,0.50); }
+  .ld-sec-wrap.bg-dark .t-lead { color: rgba(255,255,255,0.60); }
+
+  .ld-sec { padding: 92px 56px; max-width: 1280px; margin: 0 auto; }
+
+  .ld-sec-hd { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 48px; }
+  .ld-sec-hd > div:first-child > .t-eyebrow { margin-bottom: 14px; }
+  .ld-sec-hd .t-lead { max-width: 360px; }
+
+  .ld-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .ld-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: flex-start; }
+
+  /* Step card */
+  .step .num {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 13px; color: var(--c-pink);
+    display: inline-block; margin-bottom: 14px;
+  }
+  .step .h {
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 19px; letter-spacing: -0.020em; line-height: 1.20;
+    color: var(--c-ink); margin: 0 0 10px;
+  }
+  .step .p {
+    font-size: 14px; line-height: 1.55; color: var(--c-graphite); margin: 0;
+  }
+  .step .p strong { color: var(--c-ink); font-weight: 500; }
+  .step .p .actor { color: var(--c-pink); font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; }
+
+  /* Quote card on dark */
+  .quote {
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--r-lg);
+    padding: 28px;
+    color: rgba(255,255,255,0.92);
+  }
+  .quote .q {
+    font-family: 'Fraunces', serif; font-weight: 400;
+    font-size: 21px; line-height: 1.42; letter-spacing: -0.012em;
+    margin: 0 0 22px; color: rgba(255,255,255,0.94);
+  }
+  .quote .q em { font-style: italic; color: var(--c-pink); font-weight: 500; }
+  .quote .att { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.6); }
+  .quote .att strong { color: #fff; font-weight: 500; }
+  .quote .att .secondary { display: block; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* Pricing */
+  .price { display: flex; flex-direction: column; }
+  .price .lb {
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--c-fog); margin-bottom: 10px;
+  }
+  .price.feat .lb { color: var(--c-pink); }
+  .price .nm {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+    font-size: 22px; color: var(--c-ink); margin-bottom: 6px;
+  }
+  .price .cost {
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 42px; letter-spacing: -0.035em;
+    color: var(--c-ink); margin: 4px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .price .cost .per { font-size: 14px; color: var(--c-fog); font-weight: 400; letter-spacing: 0; }
+  .price .desc {
+    font-size: 14px; color: var(--c-graphite); line-height: 1.5;
+    margin: 8px 0 18px;
+  }
+  .price .li {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 14px; color: var(--c-graphite);
+    padding: 6px 0;
+  }
+  .price .li svg { color: var(--c-success); flex-shrink: 0; margin-top: 3px; }
+  .price .btn { margin-top: auto; width: 100%; }
+
+  /* Final CTA grid */
+  .cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+
+  /* Footer */
+  .ld-foot {
+    padding: 32px 56px; max-width: 1280px; margin: 0 auto;
+    border-top: 1px solid var(--c-rule-soft);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--c-fog);
+  }
+  .ld-foot a { margin-left: 18px; color: var(--c-fog); }
+  .ld-foot a:hover { color: var(--c-pink); }
+
+  @media (max-width: 1024px) {
+    .ld-hero { padding: 40px 24px 64px; }
+    .ld-sec { padding: 56px 24px; }
+    .ld-grid-3, .ld-grid-2, .cta-grid { grid-template-columns: 1fr; gap: 18px; }
+    .ld-nav { padding: 18px 24px; }
+    .ld-nav .links { display: none; }
+    .ld-foot { padding: 24px; flex-direction: column; gap: 12px; align-items: flex-start; }
+    .ld-foot a { margin: 0 18px 0 0; }
+  }
+</style>
+</head>
+<body class="has-grid">
+
+<!-- v3 topnav -->
+<nav class="v3-topnav">
+  <a href="bono-ds-landing.html" class="active" title="Landing">L</a>
+  <a href="bono-ds-dublin.html" title="Dublin">D</a>
+  <a href="bono-ds-blog.html" title="Blog">B</a>
+  <a href="bono-ds-system.html" title="System">S</a>
+  <span class="sep">DS</span>
+</nav>
+
+<header class="ld-nav">
+  <div class="logo">Bono<em>.</em></div>
+  <div class="links">
+    <a href="#produs">Produs</a>
+    <a href="#proof">Clienți</a>
+    <a href="#pret">Preț</a>
+    <a href="bono-ds-blog.html">Ghiduri</a>
+  </div>
+  <div class="cta">
+    <span class="ai-feed"><strong>Vox</strong> a clasificat 37 documente · acum 2h</span>
+    <button class="btn ghost sm">Intră în cont</button>
+    <button class="btn primary sm">Încearcă gratuit</button>
+  </div>
+</header>
+
+<div class="ld-sec-wrap bg-mkt-grid">
+<section class="ld-hero">
+  <div class="t-eyebrow" style="margin-bottom:24px;"><span class="dot"></span>Pilot automat pentru contabilitate</div>
+  <div class="display-wrap">
+    <h1 class="t-display">Contabilitate pentru oameni cărora <em>nu le place</em> contabilitatea.</h1>
+  </div>
+  <p class="t-lead lead"><strong>Bono</strong> îți ține totul la zi — declarații, scadențe, TVA, salarii — și-ți spune în limba ta ce trebuie să faci, când. Fără jargon. Fără surprize la final de an.</p>
+  <div class="row lg">
+    <button class="btn primary lg">Pornește SRL-ul tău</button>
+    <button class="btn secondary lg">Vezi un demo</button>
+    <span class="t-meta" style="margin-left:8px;">30 zile gratuit · fără card</span>
+  </div>
+</section>
+</div>
+
+<div class="ld-sec-wrap bg-app-grid">
+<section class="ld-sec" id="produs">
+  <div style="margin-bottom:48px;max-width:720px;">
+    <div class="t-eyebrow" style="margin-bottom:14px;"><span class="dot"></span>Cum funcționează</div>
+    <h2 class="t-h1">Trei pași până la <em>liniște</em>.</h2>
+  </div>
+  <div class="ld-grid-3">
+    <div class="card step">
+      <span class="num">01</span>
+      <h3 class="h">Conectezi conturile</h3>
+      <p class="p">Banca, ANAF, eFactura. Tot ce ai. <span class="actor">Vox citește automat</span> și clasifică tranzacțiile.</p>
+    </div>
+    <div class="card step">
+      <span class="num">02</span>
+      <h3 class="h">Vezi tot pe un singur ecran</h3>
+      <p class="p">Sold, scadențe, profitul lunii. <strong>Alina, contabila ta dedicată,</strong> primește notificări exact ca tine.</p>
+    </div>
+    <div class="card step">
+      <span class="num">03</span>
+      <h3 class="h">Semnezi cu un clic</h3>
+      <p class="p">Declarațiile sunt pregătite. Tu doar verifici și semnezi. Dacă ratăm o scadență, plătim noi penalitatea.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="ld-sec-wrap bg-dark">
+<section class="ld-sec" id="proof">
+  <div style="margin-bottom:48px;max-width:760px;">
+    <div class="t-eyebrow" style="margin-bottom:14px;color:rgba(255,255,255,0.55);"><span class="dot"></span>Clienți</div>
+    <h2 class="t-h1">Antreprenori care au scăpat de <em>panica</em> de final de lună.</h2>
+  </div>
+  <div class="ld-grid-3">
+    <div class="quote">
+      <p class="q">«Am scos <em>două SRL-uri</em> dintr-o penalitate pe care nici contabilul nu a văzut-o.»</p>
+      <div class="att"><div class="avatar">IP</div><div><strong>Ioana Pascu</strong><span class="secondary">Studio Aria · interior design</span></div></div>
+    </div>
+    <div class="quote">
+      <p class="q">«Primul SRL la 26 de ani. <em>Nu aș fi făcut-o</em> fără ceva care să-mi zică pas cu pas.»</p>
+      <div class="att"><div class="avatar">RM</div><div><strong>Radu Matei</strong><span class="secondary">Freelance dev → Matei Labs SRL</span></div></div>
+    </div>
+    <div class="quote">
+      <p class="q">«Mi-a salvat <em>două zile</em> pe lună. Plus liniștea că totul e la zi.»</p>
+      <div class="att"><div class="avatar">AM</div><div><strong>Alexandra Moraru</strong><span class="secondary">Atelier Moraru · patiserie</span></div></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="ld-sec-wrap bg-tonal">
+<section class="ld-sec" id="pret">
+  <div class="ld-sec-hd">
+    <div>
+      <div class="t-eyebrow"><span class="dot"></span>Preț</div>
+      <h2 class="t-h1" style="margin-top:14px;">Un preț <em>predictibil</em>, fără surprize.</h2>
+    </div>
+    <p class="t-lead">Toate planurile includ contabil dedicat, declarații depuse și suport pe WhatsApp.</p>
+  </div>
+  <div class="ld-grid-3">
+    <div class="card price">
+      <div class="lb">Pornire</div>
+      <div class="nm">Start</div>
+      <div class="cost">149<span class="per"> lei/lună</span></div>
+      <div class="desc">SRL-uri noi sau cu volum mic — până la 30 facturi/lună.</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>30 facturi procesate lunar</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Toate declarațiile lunare</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Contabil dedicat</div>
+      <button class="btn secondary" style="margin-top:14px;">Începe cu Start</button>
+    </div>
+    <div class="card price feat">
+      <div class="lb">Cel mai popular</div>
+      <div class="nm">Activ <em>·</em></div>
+      <div class="cost">289<span class="per"> lei/lună</span></div>
+      <div class="desc">SRL-uri cu volum mediu — până la 150 facturi/lună și plătitor TVA.</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>150 facturi procesate</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Declarații + depunere ANAF</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Contracte SSE incluse</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>D394 + D390 UE</div>
+      <button class="btn primary" style="margin-top:14px;">Începe cu Activ</button>
+    </div>
+    <div class="card price">
+      <div class="lb">Volum mare</div>
+      <div class="nm">Pro</div>
+      <div class="cost">489<span class="per"> lei/lună</span></div>
+      <div class="desc">Până la 400 facturi, 5 salariați, audit semestrial.</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>400 facturi procesate</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Salarizare (5 pers.)</div>
+      <div class="li"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Bilanț semestrial audit</div>
+      <button class="btn secondary" style="margin-top:14px;">Vorbește cu noi</button>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="ld-sec-wrap bg-mkt-grid">
+<section class="ld-sec">
+  <div class="cta-grid">
+    <div>
+      <h2 class="t-h1">Începe cu <em>zero</em> fricțiune.</h2>
+      <p class="t-lead" style="margin:20px 0 24px;font-size:17px;">Primele 30 de zile sunt pe noi. Dacă nu ți se pare că-ți ia de pe umeri cel puțin două zile pe lună, nu mai plătești nimic.</p>
+      <div class="row">
+        <button class="btn primary lg">Pornește SRL-ul tău</button>
+        <button class="btn secondary lg">Vorbește cu cineva</button>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="lb">Promisiunea Bono</div>
+      <div class="h">Nu te lăsăm să <em>ratezi o scadență</em>.</div>
+      <p class="p">Iar dacă totuși se întâmplă din vina noastră, plătim penalitatea. E scris în contract, nu e o figură de stil.</p>
+      <div class="sig">
+        <div class="avatar dark">AP</div>
+        <div><div class="nm">Andrei Popescu</div><div class="rl">Fondator · Bono</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+
+
+<footer class="ld-foot">
+  <div>© 2026 Bono · ANAF-registered accounting software</div>
+  <div>
+    <a href="#">Despre</a>
+    <a href="#">Preț</a>
+    <a href="bono-ds-blog.html">Ghiduri</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+
+<button class="vox-fab">
+  <span>Întreabă <em>Vox</em></span>
+  <span class="meta">Răspuns ca de la prieten · 4s</span>
+</button>
+
+</body>
+</html>

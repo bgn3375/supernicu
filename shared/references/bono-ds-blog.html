@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cum alegi codul CAEN potrivit · Bono Ghiduri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="bono-ds.css">
+<style>
+  /* ═══ Article shell ═══ */
+  .bl-shell { max-width: 720px; margin: 0 auto; padding: 64px 32px 120px; }
+  .bl-back { font-size: 13px; color: var(--c-graphite); display: inline-flex; align-items: center; gap: 6px; margin-bottom: 32px; transition: color 140ms; }
+  .bl-back:hover { color: var(--c-pink); }
+
+  .bl-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--c-pink-deep);
+    padding: 5px 11px; background: var(--c-pink-tint); border-radius: var(--r-pill);
+    margin-bottom: 24px;
+  }
+
+  .bl-h1 {
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: 52px; letter-spacing: -0.025em; line-height: 1.05;
+    color: var(--c-ink); margin: 0 0 20px;
+  }
+  .bl-h1 em { font-style: italic; color: var(--c-pink); }
+
+  .bl-meta {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 0;
+    border-top: 1px solid var(--c-rule-soft);
+    border-bottom: 1px solid var(--c-rule-soft);
+    margin-bottom: 48px;
+    font-size: 13px; color: var(--c-fog);
+  }
+  .bl-meta strong { color: var(--c-ink); font-weight: 500; }
+
+  .bl-body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 19px; font-weight: 400; line-height: 1.75;
+    color: #2A2422;
+  }
+  .bl-body p { margin: 0 0 24px; }
+  .bl-body p:first-of-type::first-letter {
+    font-family: 'Fraunces', serif; font-weight: 500; font-size: 72px;
+    float: left; line-height: 0.9; padding: 6px 12px 0 0; color: var(--c-pink);
+  }
+  .bl-body h2 {
+    /* aligned to T4 system class — Inter 700, 32px, tracking -0.02em */
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 32px; letter-spacing: -0.02em; line-height: 1.19;
+    color: var(--c-ink); margin: 48px 0 18px;
+  }
+  .bl-body h2 em { font-family: 'Fraunces', serif; font-style: italic; font-weight: 600; color: var(--c-pink); letter-spacing: inherit; }
+  .bl-body h3 {
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 18px; color: var(--c-ink);
+    margin: 32px 0 12px;
+  }
+  .bl-body strong { color: var(--c-ink); font-weight: 500; }
+  .bl-body em { font-style: italic; }
+  .bl-body a { color: var(--c-pink); text-decoration: underline; text-underline-offset: 3px; }
+
+  .bl-quote {
+    font-family: 'Fraunces', serif; font-style: italic; font-size: 24px; line-height: 1.45;
+    color: var(--c-ink);
+    padding: 6px 0 6px 28px;
+    border-left: 3px solid var(--c-pink);
+    margin: 36px 0;
+  }
+  .bl-quote em { color: var(--c-pink); font-style: italic; }
+
+  .bl-callout {
+    background: var(--c-pink-ultra);
+    border: 1px solid color-mix(in oklab, var(--c-pink) 18%, var(--c-rule));
+    border-radius: var(--r-lg);
+    padding: 22px 24px; margin: 36px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; line-height: 1.55; color: var(--c-graphite);
+  }
+  .bl-callout .lb { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--c-pink-deep); margin-bottom: 8px; }
+  .bl-callout strong { color: var(--c-ink); font-weight: 500; }
+
+  .bl-list { padding-left: 0; list-style: none; margin: 18px 0 28px; }
+  .bl-list li { padding: 8px 0 8px 28px; position: relative; }
+  .bl-list li::before {
+    content: ''; position: absolute; left: 0; top: 18px;
+    width: 14px; height: 1.5px;
+    background: var(--c-pink); border-radius: 2px;
+  }
+
+  .bl-end {
+    margin-top: 64px; padding: 32px 0;
+    border-top: 1px solid var(--c-rule);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 20px; flex-wrap: wrap;
+  }
+
+  @media (max-width: 700px) {
+    .bl-shell { padding: 40px 20px 100px; }
+    .bl-h1 { font-size: 36px; }
+    .bl-body { font-size: 17px; }
+    .bl-body h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body class="has-grid">
+
+<nav class="v3-topnav">
+  <a href="bono-ds-landing.html" title="Landing">L</a>
+  <a href="bono-ds-dublin.html" title="Dublin">D</a>
+  <a href="bono-ds-blog.html" class="active" title="Blog">B</a>
+  <a href="bono-ds-system.html" title="System">S</a>
+  <span class="sep">DS</span>
+</nav>
+
+<article class="bl-shell">
+  <a class="bl-back" href="bono-ds-landing.html">← Înapoi la Bono</a>
+  <div class="bl-eyebrow">Ghid practic · CAEN</div>
+  <h1 class="bl-h1">Cum alegi <em>codul CAEN potrivit</em> când îți deschizi SRL-ul.</h1>
+
+  <div class="bl-meta">
+    <div class="avatar sm dark">AP</div>
+    <div>de <strong>Andrei Popescu</strong></div>
+    <span>·</span>
+    <span>8 min citire</span>
+    <span>·</span>
+    <span>Actualizat 12 apr 2026</span>
+  </div>
+
+  <div class="bl-body">
+    <p>Codurile CAEN sunt acele patru cifre care decid, mai mult decât crezi, ce poate să factureze firma ta. Dacă alegi greșit la înființare, ajungi peste șase luni să modifici actul constitutiv, să plătești la notariat și să stai la coadă la Registrul Comerțului. Iar uneori, codul greșit te poate scoate dintr-o categorie de impozitare.</p>
+
+    <p>Vestea bună: nu trebuie să devii expert. Trebuie doar să înțelegi <strong>trei lucruri</strong>: ce e un cod principal, cum funcționează cele secundare, și de ce e o idee bună să adaugi mai multe încă din prima.</p>
+
+    <h2>Codul principal vs. <em>codurile secundare</em></h2>
+
+    <p>Fiecare SRL are <strong>un singur cod principal</strong> — cel care descrie activitatea ta dominantă, cea pentru care e cel mai probabil să factori. Dincolo de el, poți avea oricâte coduri secundare vrei.</p>
+
+    <div class="bl-quote">«Pune toate codurile pe care le-ai putea folosi în următorii doi ani. <em>E gratis acum, scump mai târziu.»</em></div>
+
+    <p>Adăugarea unui cod secundar la înființare nu costă nimic în plus. Adăugarea aceluiași cod peste șase luni înseamnă: modificarea actului constitutiv, drum la notariat, hotărâre AGA, depunere la Registrul Comerțului. Total: undeva la 400–600 lei și două săptămâni de așteptare.</p>
+
+    <h3>Exemple concrete</h3>
+
+    <ul class="bl-list">
+      <li>Ești freelance dev și deschizi SRL? <strong>Cod principal 6201</strong> (activități de realizare a soft-ului la comandă) plus <strong>6202</strong> (consultanță IT) și <strong>7022</strong> (consultanță pentru afaceri).</li>
+      <li>Ai un studio de design? <strong>7410</strong> ca principal, cu <strong>7311</strong> (publicitate) și <strong>5814</strong> (editare reviste) ca secundare.</li>
+      <li>Vinzi produse handmade online? <strong>4791</strong> ca principal, plus <strong>1419</strong> sau codul corespunzător producției efective.</li>
+    </ul>
+
+    <h2>Atenție la <em>microîntreprindere</em></h2>
+
+    <p>Aici e capcana. Anumite coduri CAEN <strong>te scot automat</strong> din regimul de microîntreprindere și te trec pe profit (16%). Cele mai cunoscute: <em>consultanță și management</em> (7022, 7021), <em>activități juridice</em> (69xx), <em>activități de asigurări</em> (66xx).</p>
+
+    <div class="bl-callout">
+      <div class="lb">Sfat de la contabil</div>
+      Dacă peste 20% din venitul anual îți vine din cod 7022, ANAF te poate trece pe impozit pe profit retroactiv de la 1 ianuarie. <strong>Verifică cu Alina la fiecare T1</strong> dacă ești aproape de prag.
+    </div>
+
+    <h2>Pe scurt — checklist înainte de notariat</h2>
+
+    <ul class="bl-list">
+      <li>Alege un cod principal cât mai apropiat de ce factori cel mai des.</li>
+      <li>Adaugă 3–5 coduri secundare pentru activități pe care <em>le-ai putea</em> face.</li>
+      <li>Verifică dacă vreun cod te scoate din microîntreprindere — și dacă te aștepți la asta.</li>
+      <li>Dacă ai dubii, treci codurile printr-un contabil înainte să semnezi actul.</li>
+    </ul>
+
+    <p>În rest — nu te complica. CAEN-ul e administrare, nu strategie. Dacă pui codurile potrivite din start, n-o să te mai gândești la asta niciodată.</p>
+  </div>
+
+  <div class="bl-end">
+    <span class="ai-feed"><strong>Vox</strong> a verificat acest ghid · ultima actualizare ANAF aprilie 2026</span>
+    <button class="btn primary">Pornește SRL-ul tău</button>
+  </div>
+</article>
+
+<button class="vox-fab">
+  <span>Întreabă <em>Vox</em></span>
+  <span class="meta">Răspuns ca de la prieten · 4s</span>
+</button>
+
+</body>
+</html>

@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bono · Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="bono-ds.css">
+<style>
+  /* ═══ System layout ═══ */
+  .sys-app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+  }
+  .sys-side {
+    position: sticky; top: 0;
+    height: 100vh;
+    background: var(--c-bg-deep);
+    border-right: 1px solid var(--c-rule-soft);
+    padding: 28px 22px;
+    overflow-y: auto;
+  }
+  .sys-side .brand {
+    font-size: 18px; font-weight: 600; letter-spacing: -0.020em;
+    margin-bottom: 24px;
+    color: var(--c-ink);
+  }
+  .sys-side .brand em { font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; color: var(--c-pink); }
+  .sys-side .brand .ver { font-size: 10px; color: var(--c-fog); margin-left: 6px; letter-spacing: 0.10em; }
+  .sys-side .grp {
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--c-fog);
+    margin: 22px 0 8px;
+  }
+  .sys-side .grp:first-of-type { margin-top: 0; }
+  .sys-side a {
+    display: block;
+    padding: 7px 10px;
+    font-size: 13px; color: var(--c-fog);
+    border-radius: 8px;
+    transition: all 140ms;
+  }
+  .sys-side a:hover { background: var(--c-bg-card); color: var(--c-ink); }
+  .sys-side a.active { background: var(--c-pink-tint); color: var(--c-pink-deep); font-weight: 500; }
+
+  .sys-main { padding: 56px 56px 120px; max-width: 1100px; }
+  .sys-head { margin-bottom: 56px; padding-bottom: 28px; border-bottom: 1px solid var(--c-rule); }
+
+  .sys-sec { margin-bottom: 88px; scroll-margin-top: 24px; padding: 32px; border-radius: var(--r-md); }
+  /* Section background variants — page (transparent → grid din body) sau accent */
+  .sys-sec.bg-mkt,
+  .sys-sec.bg-mkt-grid,
+  .sys-sec.bg-app-grid  { background: transparent; }
+  .sys-sec.bg-tonal     { background: var(--c-bej-1); }
+  .sys-sec.bg-dark      { background: var(--c-dark); color: #fff; }
+  .sys-sec.bg-dark .sys-sec-hd h2 { color: #fff; }
+  .sys-sec.bg-dark .sys-sec-hd { border-bottom-color: rgba(255,255,255,0.10); }
+  .sys-sec.bg-dark .sys-sec-hd .num { color: rgba(255,255,255,0.50); }
+  .sys-sec.bg-dark .t-lead, .sys-sec.bg-dark .t-body, .sys-sec.bg-dark .sys-sub { color: rgba(255,255,255,0.70); }
+  .sys-sec-hd {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 24px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--c-rule-soft);
+  }
+  .sys-sec-hd .num {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.06em; color: var(--c-fog);
+  }
+  .sys-sec-hd h2 {
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 28px; letter-spacing: -0.025em; margin: 0;
+    color: var(--c-ink);
+  }
+  .sys-sec-hd h2 em { font-family: 'Fraunces', serif; font-style: italic; color: var(--c-pink); font-weight: 500; }
+
+  .sys-sub {
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--c-fog);
+    margin: 28px 0 12px;
+  }
+  .sys-sub:first-child { margin-top: 0; }
+
+  .sys-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .sys-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .sys-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .sys-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+
+  /* Swatch */
+  .sw {
+    background: var(--c-surface);
+    border: 1px solid var(--c-rule-soft);
+    border-radius: var(--r-md);
+    padding: 12px;
+  }
+  .sw .chip {
+    width: 100%; height: 64px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in oklab, var(--c-ink) 6%, transparent);
+    margin-bottom: 10px;
+  }
+  .sw .nm { font-size: 12px; font-weight: 500; color: var(--c-ink); }
+  .sw .hex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; color: var(--c-fog);
+    margin-top: 2px;
+  }
+  .sw .var {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--c-mist);
+    margin-top: 1px;
+  }
+
+  /* Type spec row */
+  .ts {
+    background: var(--c-surface);
+    border: 1px solid var(--c-rule-soft);
+    border-radius: var(--r-md);
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: baseline;
+  }
+  .ts .lb { font-size: 11px; color: var(--c-fog); font-family: 'JetBrains Mono', monospace; }
+  .ts .lb strong { display: block; color: var(--c-ink); font-size: 12px; font-weight: 600; margin-bottom: 4px; font-family: 'Inter', sans-serif; letter-spacing: 0; }
+
+  /* Demo container */
+  .demo {
+    background: var(--c-surface);
+    border: 1px solid var(--c-rule-soft);
+    border-radius: var(--r-md);
+    padding: 24px;
+    margin-bottom: 12px;
+  }
+  .demo.deep { background: var(--c-bg-deep); }
+  .demo.dark { background: var(--c-night); border-color: var(--c-night); }
+  .demo .dsplit { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .demo + .demo { margin-top: 12px; }
+  .demo-cap {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--c-mist);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* Spec table */
+  .spec-tbl {
+    width: 100%; border-collapse: collapse;
+    background: var(--c-surface);
+    border: 1px solid var(--c-rule-soft);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .spec-tbl th {
+    text-align: left; padding: 10px 16px;
+    background: var(--c-bg-deep);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--c-fog);
+  }
+  .spec-tbl td {
+    padding: 12px 16px;
+    font-size: 13px; color: var(--c-ink);
+    border-top: 1px solid var(--c-rule-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .spec-tbl td.token { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--c-pink-deep); }
+  .spec-tbl td.value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--c-ink); }
+
+  /* Radius / shadow demo */
+  .radius-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-rule-soft);
+    padding: 20px;
+    height: 84px;
+    display: flex; align-items: flex-end;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--c-fog);
+  }
+
+  .shadow-card {
+    background: var(--c-surface);
+    height: 84px;
+    border-radius: var(--r-md);
+    padding: 16px;
+    display: flex; align-items: flex-end;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--c-fog);
+  }
+
+  /* Spacing demo */
+  .space-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--c-rule-soft);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .space-row:last-child { border-bottom: none; }
+  .space-row .name { width: 80px; color: var(--c-ink); }
+  .space-row .val { width: 60px; color: var(--c-fog); }
+  .space-row .bar { height: 14px; background: var(--c-pink); border-radius: 3px; }
+
+  /* Form demo */
+  .form-demo .field { margin-bottom: 16px; }
+
+  /* Sample table */
+  .sample-tbl-wrap {
+    background: var(--c-surface);
+    border: 1px solid var(--c-rule-soft);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+
+  /* anchor offset */
+  section[id] { scroll-margin-top: 24px; }
+
+  @media (max-width: 1024px) {
+    .sys-app { grid-template-columns: 1fr; }
+    .sys-side { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--c-rule-soft); }
+    .sys-main { padding: 40px 24px 100px; }
+    .sys-grid-3, .sys-grid-4, .sys-grid-5 { grid-template-columns: repeat(2, 1fr); }
+    .ts { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  /* AI badge pulse — alb peste gradient pink */
+  @keyframes liveDot {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.30); }
+    50%      { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.10); }
+  }
+</style>
+</head>
+<body class="has-grid">
+
+<nav class="v3-topnav">
+  <a href="bono-ds-landing.html" title="Landing">L</a>
+  <a href="bono-ds-dublin.html" title="Dublin">D</a>
+  <a href="bono-ds-blog.html" title="Blog">B</a>
+  <a href="bono-ds-system.html" class="active" title="System">S</a>
+  <span class="sep">DS</span>
+</nav>
+
+<div class="sys-app">
+
+  <!-- Sidebar nav -->
+  <aside class="sys-side">
+    <div class="brand">Bono<em>.</em><span class="ver">DS</span></div>
+
+    <div class="grp">Foundations</div>
+    <a href="#colors">Colors</a>
+    <a href="#type">Typography</a>
+    <a href="#spacing">Spacing &amp; radius</a>
+    <a href="#grid">Grid pattern</a>
+
+    <div class="grp">Components</div>
+    <a href="#buttons">Buttons</a>
+    <a href="#inputs">Inputs</a>
+    <a href="#badges">Badges</a>
+    <a href="#cards">Cards</a>
+    <a href="#kpi">KPIs</a>
+    <a href="#tabs">Tabs &amp; toggle</a>
+    <a href="#alerts">Alerts</a>
+    <a href="#avatars">Avatars</a>
+    <a href="#tables">Tables</a>
+
+    <div class="grp">Patterns</div>
+    <a href="#vox">Vox &amp; AI</a>
+    <a href="#topnav">Topnav</a>
+  </aside>
+
+  <!-- Main -->
+  <main class="sys-main">
+
+    <header class="sys-head">
+      <div class="t-eyebrow" style="margin-bottom:14px;"><span class="dot"></span>Design System</div>
+      <h1 class="t-display">Bono <em>Design System</em></h1>
+      <p class="t-lead" style="margin-top:18px;max-width:680px;font-size:17px;">Sistemul vizual care unește Landing, Dublin (dashboard) și Ghiduri. Bej cald (R&gt;G&gt;B), pink #EE4379 ca brand, Inter 600 pentru titluri și Fraunces italic pentru accente. Grid 28px, line @ 6%.</p>
+    </header>
+
+    <!-- ═══ COLORS ═══ -->
+    <section class="sys-sec bg-mkt" id="colors">
+      <div class="sys-sec-hd"><h2>Culori</h2><span class="num">01 · Locked</span></div>
+
+      <p class="t-lead" style="margin:0 0 8px;font-size:18px;max-width:760px;">Patru suprafețe. <strong>Două bej-uri</strong> (calde, cu o tentă imperceptibilă spre roz), plus alb și un singur dark.</p>
+      <p class="t16" style="margin:0 0 28px;color:var(--c-ink);max-width:760px;">Un singur ink închis peste toate suprafețele light. Variația tipografică vine din ierarhie (size + weight), nu din schimbarea darkness-ului per surface.</p>
+
+      <div class="sys-sub">Suprafețe</div>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#FFFFFF;border:1px solid var(--c-rule);"></div><div class="nm">White · lifted</div><div class="hex">#FFFFFF</div><div class="var">--c-white</div></div>
+        <div class="sw"><div class="chip" style="background:#FBFAF7;"></div><div class="nm">bej-0 · page bg unic</div><div class="hex">#FBFAF7</div><div class="var">--c-bej-0</div></div>
+        <div class="sw"><div class="chip" style="background:#EFEBE4;"></div><div class="nm">bej-1 · universal</div><div class="hex">#EFEBE4</div><div class="var">--c-bej-1</div></div>
+      </div>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#110D10;"></div><div class="nm">Dark · surface + ink</div><div class="hex">#110D10</div><div class="var">--c-dark</div></div>
+      </div>
+
+      <p class="t14" style="margin:14px 0 28px;color:var(--c-fog);max-width:760px;">
+        <strong style="color:var(--c-ink);">White</strong> — KPI, table, all inputs (lifted), table card body. ·
+        <strong style="color:var(--c-ink);">bej-0</strong> — page bg unic, peste tot (Landing, Dublin, Blog), cu dot grid (ink @ 15%, 32px). ·
+        <strong style="color:var(--c-ink);">bej-1</strong> — sidebar, rail „De făcut", action cards (input hosts), thead tabel, tip badges. Identic în Dublin + Landing + Blog. ·
+        <strong style="color:var(--c-ink);">Dark</strong> — TVA card, logo bg, topnav, plus text primar.
+      </p>
+
+      <div class="sys-sub">Brand</div>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#EE4379;"></div><div class="nm">Pink</div><div class="hex">#EE4379</div><div class="var">--c-pink</div></div>
+        <div class="sw"><div class="chip" style="background:#C9255B;"></div><div class="nm">Pink deep</div><div class="hex">#C9255B</div><div class="var">--c-pink-deep</div></div>
+        <div class="sw"><div class="chip" style="background:#FDE7F0;"></div><div class="nm">Pink tint</div><div class="hex">#FDE7F0</div><div class="var">--c-pink-tint</div></div>
+      </div>
+
+      <div class="sys-sub">Text · un singur ink închis</div>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#110D10;"></div><div class="nm">Ink — primary</div><div class="hex">#110D10</div><div class="var">--c-ink</div></div>
+        <div class="sw"><div class="chip" style="background:#7A7570;"></div><div class="nm">Fog — meta minor</div><div class="hex">#7A7570</div><div class="var">--c-fog</div></div>
+        <div class="sw"><div class="chip" style="background:#ABA59E;"></div><div class="nm">Mist — placeholder</div><div class="hex">#ABA59E</div><div class="var">--c-mist</div></div>
+        <div class="sw"><div class="chip" style="background:#FFFFFF;border:1px solid var(--c-rule);"></div><div class="nm">White text · pe Dark</div><div class="hex">#FFFFFF · 65%</div><div class="var">on dark surface</div></div>
+      </div>
+
+      <div class="sys-sub">Lines · ink-alpha (modern)</div>
+      <p class="t14" style="margin:0 0 14px;color:var(--c-fog);max-width:760px;">Bordurile folosesc ink (#110D10) cu alpha, nu o nuanță de bej. Avantaj: aceeași vizibilitate relativă pe white, bej-0, bej-1 sau dark — nu trebuie scală separată pe fundal.</p>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#FFFFFF;border:1px solid rgba(17,13,16,0.12);"></div><div class="nm">Rule card</div><div class="hex">ink @ 12%</div><div class="var">--c-rule-card</div></div>
+        <div class="sw"><div class="chip" style="background:#FFFFFF;border:1px solid rgba(17,13,16,0.10);"></div><div class="nm">Rule</div><div class="hex">ink @ 10%</div><div class="var">--c-rule</div></div>
+        <div class="sw"><div class="chip" style="background:#FFFFFF;border:1px solid rgba(17,13,16,0.06);"></div><div class="nm">Rule soft</div><div class="hex">ink @ 6%</div><div class="var">--c-rule-soft</div></div>
+        <div class="sw"><div class="chip" style="background:#DDD6C9;"></div><div class="nm">Rule · solid fallback</div><div class="hex">#DDD6C9</div><div class="var">--c-rule-solid</div></div>
+      </div>
+      <div style="background:var(--c-bej-1);border-radius:14px;padding:16px 20px;margin-top:14px;">
+        <pre style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px;line-height:1.7;color:var(--c-ink);margin:0;white-space:pre-wrap;">REGULĂ · Lines sunt scoped, nu universale
+
+✓ Card alb / KPI / Input  →  border 1px --c-rule-card (ink @ 12%)
+✓ Dividers interni / tabel →  --c-rule-soft (ink @ 6%)
+✓ Hairline secundar         →  --c-rule (ink @ 10%)
+
+✗ Card bej-1 pe bej-0      →  FĂRĂ border (diferențiere prin culoare)
+✗ Card dark                →  FĂRĂ border
+✗ KPI tonal (bej-1)        →  FĂRĂ border</pre>
+      </div>
+      <p class="t14" style="margin:14px 0 0;color:var(--c-fog);max-width:760px;"><strong style="color:var(--c-ink);">Cum se folosesc:</strong> rgba peste tot — inputs, cards albe, dividers, tabele. Solid hex doar când alpha nu poate fi compus (ex: peste imagini sau gradient bg).</p>
+
+      <div class="sys-sub">Status</div>
+      <p class="t14" style="margin:0 0 14px;color:var(--c-fog);max-width:760px;">Fiecare status are <strong>solid</strong> (text/icon/border) și <strong>tint bg</strong> (background pentru badges tonale, alerts).</p>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#1F7A4D;"></div><div class="nm">Success</div><div class="hex">#1F7A4D</div><div class="var">--c-success</div></div>
+        <div class="sw"><div class="chip" style="background:#ECF7F1;"></div><div class="nm">Success bg</div><div class="hex">#ECF7F1</div><div class="var">--c-success-bg</div></div>
+        <div class="sw"><div class="chip" style="background:#B8580A;"></div><div class="nm">Warning</div><div class="hex">#B8580A</div><div class="var">--c-warn</div></div>
+        <div class="sw"><div class="chip" style="background:#FBF1E2;"></div><div class="nm">Warning bg</div><div class="hex">#FBF1E2</div><div class="var">--c-warn-bg</div></div>
+      </div>
+      <div class="sys-grid-4" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:#B91C1C;"></div><div class="nm">Error</div><div class="hex">#B91C1C</div><div class="var">--c-error</div></div>
+        <div class="sw"><div class="chip" style="background:#FCEAEA;"></div><div class="nm">Error bg</div><div class="hex">#FCEAEA</div><div class="var">--c-error-bg</div></div>
+        <div class="sw"><div class="chip" style="background:rgba(238,67,121,0.06);border:1px solid var(--c-rule-soft);"></div><div class="nm">Pink ultra</div><div class="hex">pink @ 6%</div><div class="var">--c-pink-ultra</div></div>
+        <div class="sw"><div class="chip" style="background:linear-gradient(135deg,#EE4379 0%,#7B2A6E 100%);"></div><div class="nm">AI gradient</div><div class="hex">#EE4379 → #7B2A6E</div><div class="var">--c-ai-grad</div></div>
+      </div>
+      <p class="t14" style="margin:14px 0 36px;color:var(--c-fog);max-width:760px;"><strong style="color:var(--c-ink);">Pink ultra</strong> — fundal pentru cards „brand emphasis” (insight cards, alerts brand). Rolul: notice fără culoare de status.</p>
+
+      <div class="sys-sub" style="margin-top:24px;">AI · sistem complet</div>
+      <p class="t14" style="margin:0 0 14px;color:var(--c-fog);max-width:760px;">AI nu mai e o culoare separată — e un treatment derivat din pink Bono. Pink → magenta (135°). Variante de uz în UI:</p>
+      <div class="sys-grid-3" style="margin-bottom:8px;">
+        <div class="sw"><div class="chip" style="background:linear-gradient(135deg,#EE4379 0%,#7B2A6E 100%);height:64px;"></div><div class="nm">Gradient · fill</div><div class="hex">--c-ai-grad</div><div class="var">badge filled, icon container, sparkle bg</div></div>
+        <div class="sw"><div class="chip" style="background:#A8336E;height:64px;"></div><div class="nm">Solid · text/icon</div><div class="hex">#A8336E · --c-ai</div><div class="var">badge tonal text, icon stroke, link AI</div></div>
+        <div class="sw"><div class="chip" style="background:#F4E4EE;height:64px;border:1px solid var(--c-rule-soft);"></div><div class="nm">Tint · background</div><div class="hex">#F4E4EE · --c-ai-bg</div><div class="var">badge tonal bg, AI feed inline bg</div></div>
+      </div>
+
+      <div class="sys-sub">Reguli de mapare text</div>
+      <div style="background:var(--c-bej-1);border-radius:14px;padding:20px 24px;margin-bottom:18px;">
+        <pre style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px;line-height:1.7;color:var(--c-ink);margin:0;white-space:pre-wrap;">Pe White cards   →  Ink #110D10
+Pe bej-0 page    →  Ink #110D10
+Pe bej-1 tonal   →  Ink #110D10
+Pe Dark surface  →  #FFFFFF (heading) + rgba(255,255,255,0.65) (body)</pre>
+      </div>
+
+      <!-- Live preview: cele 4 contexte -->
+      <div class="sys-sub">Preview · cele 4 contexte</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="background:#FFFFFF;border:1px solid var(--c-rule);border-radius:14px;padding:18px;">
+          <div class="t12" style="color:var(--c-fog);margin-bottom:8px;">WHITE</div>
+          <div class="t18" style="color:var(--c-ink);margin-bottom:4px;">Heading aici</div>
+          <p class="t14" style="color:var(--c-ink);margin:0;">Body & emphasis stă pe ink #110D10.</p>
+        </div>
+        <div style="background:#FBFAF7;border:1px solid var(--c-rule-soft);border-radius:14px;padding:18px;">
+          <div class="t12" style="color:var(--c-fog);margin-bottom:8px;">BEJ-0 · PAGE BG</div>
+          <div class="t18" style="color:var(--c-ink);margin-bottom:4px;">Heading aici</div>
+          <p class="t14" style="color:var(--c-ink);margin:0;">Body & emphasis stă pe ink #110D10.</p>
+        </div>
+        <div style="background:#EFEBE4;border-radius:14px;padding:18px;">
+          <div class="t12" style="color:var(--c-fog);margin-bottom:8px;">BEJ-1 · TONAL</div>
+          <div class="t18" style="color:var(--c-ink);margin-bottom:4px;">Heading aici</div>
+          <p class="t14" style="color:var(--c-ink);margin:0;">Body & emphasis stă pe ink #110D10.</p>
+        </div>
+        <div style="background:#110D10;border-radius:14px;padding:18px;">
+          <div class="t12" style="color:rgba(255,255,255,0.55);margin-bottom:8px;">DARK</div>
+          <div class="t18" style="color:#FFFFFF;margin-bottom:4px;">Heading aici</div>
+          <p class="t14" style="color:rgba(255,255,255,0.65);margin:0;">Body stă pe white 65%.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TYPE ═══ -->
+    <section class="sys-sec bg-app-grid" id="type">
+      <div class="sys-sec-hd"><h2>Tipografie</h2><span class="num">02 · Scala v1.1 — 11 niveluri + speciale</span></div>
+
+      <p class="t-lead" style="margin:0 0 12px 0;font-size:18px;max-width:760px;">Sistem cu <strong>3 fonturi</strong> și <strong>11 niveluri</strong> (T60–T12) plus speciale. Inter pentru UI și headings, Fraunces italic exclusiv pentru accent T-em și T-actor, Source Serif 4 exclusiv pentru body editorial blog (T20).</p>
+      <p class="t16" style="margin:0 0 28px 0;color:var(--c-fog);max-width:760px;">Clasele scurte <code>.t60</code>–<code>.t12</code> sunt sursa de adevăr. Alias-urile vechi (<code>.t-display</code>, <code>.t-h1</code>, etc.) coexistă pentru compatibilitate dar mapează exact pe scala T.</p>
+
+      <!-- ─────────── FONTURI ─────────── -->
+      <div class="sys-sub">Fonturi & roluri</div>
+      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:36px;">
+        <div style="padding:24px;background:var(--c-surface);border:1px solid var(--c-rule-soft);border-radius:14px;">
+          <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:48px;line-height:1;letter-spacing:-0.04em;color:var(--c-ink);margin-bottom:12px;">Aa</div>
+          <div class="t12" style="margin-bottom:8px;color:var(--c-pink-deep);">INTER</div>
+          <p class="t16" style="margin:0 0 8px;font-size:14px;">UI, headings, toate elementele de interfață. Fontul de bază — nu se înlocuiește.</p>
+          <div class="t14" style="color:var(--c-fog);font-size:12px;">400 · 500 · 600 · 700</div>
+        </div>
+        <div style="padding:24px;background:var(--c-surface);border:1px solid var(--c-rule-soft);border-radius:14px;">
+          <div style="font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:48px;line-height:1;letter-spacing:-0.02em;color:var(--c-pink);margin-bottom:12px;">Aa</div>
+          <div class="t12" style="margin-bottom:8px;color:var(--c-pink-deep);">FRAUNCES</div>
+          <p class="t16" style="margin:0 0 8px;font-size:14px;">Exclusiv: accent italic T-em în headings + numele agenților AI (T-actor).</p>
+          <div class="t14" style="color:var(--c-fog);font-size:12px;">italic 500 · 600</div>
+        </div>
+        <div style="padding:24px;background:var(--c-surface);border:1px solid var(--c-rule-soft);border-radius:14px;">
+          <div style="font-family:'Source Serif 4',Georgia,serif;font-weight:400;font-size:48px;line-height:1;color:#2A2422;margin-bottom:12px;">Aa</div>
+          <div class="t12" style="margin-bottom:8px;color:var(--c-pink-deep);">SOURCE SERIF 4</div>
+          <p class="t16" style="margin:0 0 8px;font-size:14px;">Exclusiv pe T20 — body text articole blog. Niciodată în UI.</p>
+          <div class="t14" style="color:var(--c-fog);font-size:12px;">400 · 600</div>
+        </div>
+      </div>
+
+      <!-- ─────────── HEADINGS ─────────── -->
+      <div class="sys-sub">Heading-uri — Inter 700, tracking negativ</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="ts">
+          <div class="lb"><strong>T60 · Display</strong>Inter 700<br>clamp(36→60px) · line 1.10<br>tracking -0.04em<br><br><span style="color:var(--c-fog);">Hero landing</span></div>
+          <h1 class="t60">Contabilitate pe pilot automat.</h1>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T48 · H1</strong>Inter 700<br>clamp(32→48px) · line 1.08<br>tracking -0.03em<br><br><span style="color:var(--c-fog);">Capitol landing<br>+ Greeting Dublin</span></div>
+          <h1 class="t48">Salut, <em>Eduard.</em> Totul e ok azi.</h1>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T40 · H2</strong>Inter 700<br>clamp(28→40px) · line 1.15<br>tracking -0.03em<br><br><span style="color:var(--c-fog);">Titlu pagină internă</span></div>
+          <h2 class="t40">Cum alegi <em>codul CAEN potrivit</em> când îți deschizi SRL-ul.</h2>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T32 · H3</strong>Inter 700<br>clamp(24→32px) · line 1.19<br>tracking -0.02em<br><br><span style="color:var(--c-fog);">Subtitlu secțiune<br>landing / blog</span></div>
+          <h3 class="t32">Codul principal vs. codurile secundare</h3>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T28 · H4</strong>Inter 700<br>clamp(22→28px) · line 1.21<br>tracking -0.02em<br><br><span style="color:var(--c-fog);">Titlu card mare,<br>titlu modal</span></div>
+          <h4 class="t28">Plan activ · Documente în așteptare</h4>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:36px;">Editorial &amp; body</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="ts">
+          <div class="lb"><strong>T24 · Lead</strong>Inter 400 · 24px<br>line 30px · tracking -0.01em<br><br><span style="color:var(--c-fog);">Lead editorial<br>(prim paragraf blog<br>sau descriere mare landing)</span></div>
+          <p class="t24">Codurile CAEN sunt acele <strong>patru cifre</strong> care decid, mai mult decât crezi, ce poate să factureze firma ta.</p>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T20 · Editorial</strong>Source Serif 4 · 20px<br>weight 400 · line 32px<br><br><span style="color:var(--c-fog);">EXCLUSIV body blog.<br>Niciodată în UI.</span></div>
+          <p class="t20">Vestea bună: nu trebuie să devii expert. Trebuie să înțelegi ce e un cod principal, cum funcționează cele secundare și de ce e bună ideea să adaugi mai multe încă din prima.</p>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T18 · Subhead</strong>Inter 600 · 18px<br>line 24px · tracking -0.01em<br><br><span style="color:var(--c-fog);">Subhead card,<br>titlu subsecțiune UI.<br>EXCLUSIV heading.</span></div>
+          <p class="t18">Detalii factură</p>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:36px;">UI &amp; interface</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="ts">
+          <div class="lb"><strong>T16 · Body UI</strong>Inter 400 · 16px<br>line 24px<br><br><span style="color:var(--c-fog);">Texte de bază,<br>descrieri în carduri</span></div>
+          <p class="t16">Alina M. · pregătit pentru declarație. <strong>Trage o poză sau un PDF</strong> pentru factură nouă.</p>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T14 · Texte mici UI</strong>Inter 500 · 14px<br>line 20px<br><br><span style="color:var(--c-fog);">Tabel, input, buton,<br>link, list-item</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <span class="t14">OMV Petrom · Combustibil · Dacia Spring</span>
+            <span class="t14" style="color:var(--c-pink-deep);">Emite factura →</span>
+          </div>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T12 · Eyebrow</strong>Inter 600 · 12px<br>line 16px · +0.10em uppercase<br><br><span style="color:var(--c-fog);">Label KPI, cap tabel.<br>NU pe touch targets.</span></div>
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+            <span class="t12"><span class="dot"></span>Venituri</span>
+            <span class="t12">Furnizor</span>
+            <span class="t12 brand">TVA · scadent 25 aprilie</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:36px;">Cifre financiare — toate cu <code>tabular-nums</code></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="ts">
+          <div class="lb"><strong>Tn40</strong>Inter 700 · clamp(28→40px)<br>line 1 · tracking -0.04em<br>tabular-nums<br><br><span style="color:var(--c-fog);">KPI principale<br>(dashboard)</span></div>
+          <div style="display:flex;gap:24px;align-items:baseline;flex-wrap:wrap;">
+            <span class="tn40">387.420<span class="t-suffix-lg" style="margin-left:4px;">lei</span></span>
+            <span class="tn40">142.880<span class="t-suffix-lg" style="margin-left:4px;">lei</span></span>
+            <span class="tn40">244.540<span class="t-suffix-lg" style="margin-left:4px;">lei</span></span>
+          </div>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>Tn28</strong>Inter 700 · clamp(22→28px)<br>line 1 · tracking -0.02em<br>tabular-nums<br><br><span style="color:var(--c-fog);">Cifre secundare<br>în carduri</span></div>
+          <span class="tn28">2.184<span class="t-suffix-md" style="margin-left:3px;">RON</span></span>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T-suffix-lg</strong>Inter 400 · 13px<br>line 1<br><br><span style="color:var(--c-fog);">Sufix după Tn40<br>(„lei”, „RON”)</span></div>
+          <span style="display:inline-flex;align-items:baseline;gap:4px;"><span class="tn40">387.420</span><span class="t-suffix-lg">lei</span></span>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T-suffix-md</strong>Inter 400 · 14px<br>line 1<br><br><span style="color:var(--c-fog);">Sufix după Tn28</span></div>
+          <span style="display:inline-flex;align-items:baseline;gap:3px;"><span class="tn28">2.184</span><span class="t-suffix-md">RON</span></span>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T-num-inline</strong>Inter 500 · 14px<br>line 1 · tabular-nums<br><br><span style="color:var(--c-fog);">Cifre mici inline:<br>timestamps, %, coduri</span></div>
+          <p class="t16">Încasare la <span class="t-num-inline">14:23</span> — creștere de <span class="t-num-inline" style="color:var(--c-success);">+2.4%</span> față de luna trecută. CUI: <span class="t-num-inline">RO12345678</span>.</p>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:36px;">Speciale</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="ts">
+          <div class="lb"><strong>T-badge</strong>Inter 600 · 10px<br>line 1 · +0.06em uppercase<br><br><span style="color:var(--c-fog);">Badge micro:<br>tip document, status</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span class="t-badge" style="background:var(--c-bg-card);color:var(--c-ink);padding:3px 7px;border-radius:6px;">BON FISCAL</span>
+            <span class="t-badge" style="background:var(--c-pink-tint);color:var(--c-pink-deep);padding:3px 7px;border-radius:6px;">E-FACTURĂ</span>
+            <span class="t-badge" style="background:var(--c-bg-card);color:var(--c-ink);padding:3px 7px;border-radius:6px;">FACTURĂ</span>
+            <span class="t-badge" style="background:var(--c-ai-grad);color:#fff;padding:3px 7px 3px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;letter-spacing:0.08em;"><span style="width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,0.30);animation:liveDot 2.4s ease-in-out infinite;"></span>AI EXTRAGE</span>
+            <span class="t-badge" style="background:var(--c-success-bg);color:var(--c-success);padding:3px 7px;border-radius:6px;">100%</span>
+          </div>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T-actor</strong>Fraunces italic 500 · 13px<br>line 1 · tracking -0.01em<br>color: pink<br><br><span style="color:var(--c-fog);">Numele agenților AI în<br>ticker și listă De Făcut</span></div>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;">
+            <span class="t-actor">Iris</span>
+            <span class="t-actor">Vox</span>
+            <span class="t-actor">Mihai</span>
+            <span class="t-actor">Alina</span>
+          </div>
+        </div>
+        <div class="ts">
+          <div class="lb"><strong>T-mono</strong>JetBrains Mono · 12px<br>line 1<br><br><span style="color:var(--c-fog);">Coduri tehnice<br>(non-financiare)</span></div>
+          <span class="t-mono">CUI 47281930 · J40/2148/2019</span>
+        </div>
+      </div>
+
+      <!-- ─────────── T-EM ─────────── -->
+      <div class="sys-sub" style="margin-top:36px;">T-em — accent editorial în T60/T48/T40</div>
+      <p class="t16" style="margin:0 0 16px 0;color:var(--c-fog);max-width:760px;">Pe 1–3 cuvinte per heading, cuvintele cu încărcătură emoțională sau temporală se scriu în Fraunces italic 600, culoare <code>--c-pink</code>. Letter-spacing identic cu heading-ul (Fraunces italic are tracking natural strâns — nu se reduce suplimentar).</p>
+
+      <div class="sys-grid-2" style="gap:12px;margin-bottom:16px;">
+        <div style="padding:24px;background:var(--c-surface);border:1px solid var(--c-success);border-radius:14px;">
+          <div class="t12" style="margin-bottom:12px;color:var(--c-success);"><span class="dot" style="background:var(--c-success);"></span>CORECT</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <h2 class="t40" style="font-size:24px;">Salut, <em>Eduard.</em> Totul e ok azi.</h2>
+            <h2 class="t40" style="font-size:24px;">Contabilitate pe pilot automat, ținută de <em>oameni reali.</em></h2>
+            <h2 class="t40" style="font-size:24px;">3 facturi de <em>decis.</em></h2>
+            <h2 class="t40" style="font-size:24px;">Facturi de <em>noiembrie.</em></h2>
+          </div>
+        </div>
+        <div style="padding:24px;background:var(--c-surface);border:1px solid var(--c-error);border-radius:14px;">
+          <div class="t12" style="margin-bottom:12px;color:var(--c-error);"><span class="dot" style="background:var(--c-error);"></span>GREȘIT</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <h2 class="t40" style="font-size:24px;"><em>Salut, Eduard. Totul e ok azi.</em></h2>
+              <p class="t14" style="color:var(--c-error);margin-top:4px;">Tot heading-ul în italic — t-em e accent, nu corp.</p>
+            </div>
+            <div>
+              <h2 class="t40" style="font-size:24px;">Aprobă D394 înainte de <em>depunere</em></h2>
+              <p class="t14" style="color:var(--c-error);margin-top:4px;">Italic în UI / list-item — doar headings.</p>
+            </div>
+            <div>
+              <h2 class="t40" style="font-size:24px;"><em>387.420</em> lei</h2>
+              <p class="t14" style="color:var(--c-error);margin-top:4px;">Italic pe cifre financiare — niciodată.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────── TABEL MOBIL ─────────── -->
+      <div class="sys-sub" style="margin-top:36px;">Scala mobilă</div>
+      <p class="t16" style="margin:0 0 16px 0;color:var(--c-fog);max-width:760px;">T60–T28 și Tn40/Tn28 se reduc via <code>clamp()</code>. T24–T18 se reduc via breakpoint <code>@media (max-width: 768px)</code>. T16–T12 și toate specialele rămân identice.</p>
+      <div style="background:var(--c-surface);border:1px solid var(--c-rule-soft);border-radius:14px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;">
+          <thead>
+            <tr style="background:var(--c-bg-deep);">
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Clasă</th>
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Desktop</th>
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Mobil</th>
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Line mobil</th>
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Metodă</th>
+            </tr>
+          </thead>
+          <tbody style="font-size:14px;color:var(--c-ink);font-variant-numeric:tabular-nums;">
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T60</td><td style="padding:10px 16px;">60px</td><td style="padding:10px 16px;">36px</td><td style="padding:10px 16px;">40px (1.11)</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T48</td><td style="padding:10px 16px;">48px</td><td style="padding:10px 16px;">32px</td><td style="padding:10px 16px;">36px (1.13)</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T40</td><td style="padding:10px 16px;">40px</td><td style="padding:10px 16px;">28px</td><td style="padding:10px 16px;">32px (1.14)</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T32</td><td style="padding:10px 16px;">32px</td><td style="padding:10px 16px;">24px</td><td style="padding:10px 16px;">28px (1.17)</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T28</td><td style="padding:10px 16px;">28px</td><td style="padding:10px 16px;">22px</td><td style="padding:10px 16px;">26px (1.18)</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T24</td><td style="padding:10px 16px;">24px</td><td style="padding:10px 16px;">20px</td><td style="padding:10px 16px;">26px (1.30)</td><td style="padding:10px 16px;color:var(--c-fog);">breakpoint</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T20</td><td style="padding:10px 16px;">20px</td><td style="padding:10px 16px;">18px</td><td style="padding:10px 16px;">30px (1.67)</td><td style="padding:10px 16px;color:var(--c-fog);">breakpoint</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T18</td><td style="padding:10px 16px;">18px</td><td style="padding:10px 16px;">16px</td><td style="padding:10px 16px;">22px (1.38)</td><td style="padding:10px 16px;color:var(--c-fog);">breakpoint</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T16</td><td style="padding:10px 16px;">16px</td><td style="padding:10px 16px;">16px</td><td style="padding:10px 16px;">24px</td><td style="padding:10px 16px;color:var(--c-fog);">—</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T14</td><td style="padding:10px 16px;">14px</td><td style="padding:10px 16px;">14px</td><td style="padding:10px 16px;">20px</td><td style="padding:10px 16px;color:var(--c-fog);">—</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">T12</td><td style="padding:10px 16px;">12px</td><td style="padding:10px 16px;">12px</td><td style="padding:10px 16px;">16px</td><td style="padding:10px 16px;color:var(--c-fog);">—</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">Tn40</td><td style="padding:10px 16px;">40px</td><td style="padding:10px 16px;">28px</td><td style="padding:10px 16px;">1</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">Tn28</td><td style="padding:10px 16px;">28px</td><td style="padding:10px 16px;">22px</td><td style="padding:10px 16px;">1</td><td style="padding:10px 16px;color:var(--c-fog);">clamp</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="t14" style="margin:12px 0 0 0;color:var(--c-fog);">Notă T20 mobil: line-height 30px (1.67) în loc de 28px — serif la 18px necesită mai mult spațiu pentru lectură lungă pe mobil.</p>
+
+      <!-- ─────────── LETTER-SPACING REFERINTA ─────────── -->
+      <div class="sys-sub" style="margin-top:36px;">Letter-spacing — tabel referință</div>
+      <p class="t16" style="margin:0 0 16px 0;color:var(--c-fog);max-width:760px;"><strong>Tracking negativ obligatoriu</strong> pe orice text peste 24px. Fără el, textul bold arată „desfăcut” și generic.</p>
+      <div style="background:var(--c-surface);border:1px solid var(--c-rule-soft);border-radius:14px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;">
+          <thead>
+            <tr style="background:var(--c-bg-deep);">
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Size</th>
+              <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);">Tracking</th>
+            </tr>
+          </thead>
+          <tbody style="font-size:14px;color:var(--c-ink);">
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">≥ 48px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">-0.04em</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">32–47px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">-0.03em</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">20–31px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">-0.02em</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">16–19px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">-0.01em</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">≤ 14px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">0</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">Eyebrow ≤ 12px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">+0.10em</td></tr>
+            <tr style="border-top:1px solid var(--c-rule-soft);"><td style="padding:10px 16px;color:var(--c-ink);font-weight:600;">Badge ≤ 10px</td><td style="padding:10px 16px;font-variant-numeric:tabular-nums;">+0.06em</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ─────────── REGULI ─────────── -->
+      <div class="sys-sub" style="margin-top:36px;">11 reguli de utilizare</div>
+      <ol style="margin:0;padding:0 0 0 24px;display:flex;flex-direction:column;gap:8px;font-family:'Inter',sans-serif;font-size:15px;line-height:1.55;color:var(--c-ink);">
+        <li><strong style="color:var(--c-ink);">Tracking negativ obligatoriu</strong> pe orice text peste 24px.</li>
+        <li><strong style="color:var(--c-ink);">Source Serif 4 exclusiv pe T20</strong> (body blog) — niciodată în UI.</li>
+        <li><strong style="color:var(--c-ink);">Fraunces exclusiv pe T-em și T-actor</strong> — niciodată altundeva.</li>
+        <li><strong style="color:var(--c-ink);">tabular-nums obligatoriu</strong> pe toate cifrele financiare și T-num-inline.</li>
+        <li><strong style="color:var(--c-ink);">T-em</strong> — maxim 3 cuvinte per heading, exclusiv T60/T48/T40, culoare pink, weight 600.</li>
+        <li><strong style="color:var(--c-ink);">T-em letter-spacing</strong> — identic cu heading-ul de bază, nu se reduce suplimentar.</li>
+        <li><strong style="color:var(--c-ink);">T12 eyebrow</strong> — exclusiv label static, nu pe touch targets interactive.</li>
+        <li><strong style="color:var(--c-ink);">T-actor weight 500</strong> — nu 400, italic subțire la 13px dispare pe non-Retina.</li>
+        <li><strong style="color:var(--c-ink);">Tn40 și Tn28 ambele weight 700</strong> — diferența de size e suficientă pentru ierarhie.</li>
+        <li><strong style="color:var(--c-ink);">Nu folosim zecimale</strong> în dimensiuni de font (13.5px, 14.5px etc.).</li>
+        <li><strong style="color:var(--c-ink);">T60.tight</strong> — exclusiv pentru titluri single-line garantate, nu ca default.</li>
+      </ol>
+
+      <!-- ─────────── CHANGELOG ─────────── -->
+      <div class="sys-sub" style="margin-top:36px;">Changelog v1.0 → v1.1</div>
+      <ul style="margin:0;padding:0 0 0 24px;display:flex;flex-direction:column;gap:6px;font-family:'Inter',sans-serif;font-size:14px;line-height:1.55;color:var(--c-fog);">
+        <li>T60 line-height: 1.07 → <strong>1.10</strong> (default), + <code>.t60.tight</code> pentru single-line</li>
+        <li>T-actor weight: 400 → <strong>500</strong></li>
+        <li>Tn28 weight: 600 → <strong>700</strong></li>
+        <li>T-em weight: 500 → <strong>600</strong></li>
+        <li>T-em letter-spacing: eliminat -0.005em suplimentar</li>
+        <li>T20 mobil line-height: 28px → <strong>30px</strong></li>
+        <li>Adăugat <strong>T-num-inline</strong> (14px / 500 / tabular-nums)</li>
+        <li>Adăugat notă T12 — nu pe touch targets</li>
+        <li>Adăugat notă T18 — exclusiv heading, nu emfază de paragraf</li>
+      </ul>
+    </section>
+
+    <!-- ═══ SPACING & RADIUS ═══ -->
+    <section class="sys-sec bg-tonal" id="spacing">
+      <div class="sys-sec-hd"><h2>Spacing &amp; radius</h2><span class="num">03 · Geometrie</span></div>
+
+      <div class="sys-sub">Spacing scale — denumire = valoare px</div>
+      <p class="t14" style="margin:0 0 16px 0;color:var(--c-fog);max-width:680px;">Aceeași logică ca la tipografie: <strong style="color:var(--c-ink);">numele tokenului include valoarea în pixeli</strong>. <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">sp16</code> = 16px. Fără tabel de tradus în cap.</p>
+      <div class="demo">
+        <div class="space-row"><span class="name">sp4</span><span class="val">4px</span><span class="bar" style="width:4px;"></span></div>
+        <div class="space-row"><span class="name">sp8</span><span class="val">8px</span><span class="bar" style="width:8px;"></span></div>
+        <div class="space-row"><span class="name">sp12</span><span class="val">12px</span><span class="bar" style="width:12px;"></span></div>
+        <div class="space-row"><span class="name">sp16</span><span class="val">16px</span><span class="bar" style="width:16px;"></span></div>
+        <div class="space-row"><span class="name">sp24</span><span class="val">24px</span><span class="bar" style="width:24px;"></span></div>
+        <div class="space-row"><span class="name">sp28</span><span class="val">28px</span><span class="bar" style="width:28px;"></span></div>
+        <div class="space-row"><span class="name">sp40</span><span class="val">40px</span><span class="bar" style="width:40px;"></span></div>
+        <div class="space-row"><span class="name">sp56</span><span class="val">56px</span><span class="bar" style="width:56px;"></span></div>
+        <div class="space-row"><span class="name">sp92</span><span class="val">92px</span><span class="bar" style="width:92px;"></span></div>
+      </div>
+
+      <div class="sys-sub">Border radius — scară 6/10/14/20/24</div>
+      <p class="t14" style="margin:0 0 16px 0;color:var(--c-fog);max-width:680px;">Scară progresivă pentru ierarhie clară: <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">xs</code> badges/dots, <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">sm</code> chips/btn mici, <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">md</code> btn standard/elemente compacte, <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">lg</code> inputs/CTA principal, <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">xl</code> carduri uzuale.</p>
+      <div class="sys-grid-5">
+        <div class="radius-card" style="border-radius:6px;">--r-xs · 6</div>
+        <div class="radius-card" style="border-radius:10px;">--r-sm · 10</div>
+        <div class="radius-card" style="border-radius:14px;">--r-md · 14</div>
+        <div class="radius-card" style="border-radius:20px;">--r-lg · 20</div>
+        <div class="radius-card" style="border-radius:24px;">--r-xl · 24</div>
+      </div>
+    </section>
+
+    <!-- ═══ GRID PATTERN ═══ -->
+    <section class="sys-sec bg-mkt" id="grid">
+      <div class="sys-sec-hd"><h2>Grid pattern</h2><span class="num">03b · Texture</span></div>
+
+      <p class="t-body" style="margin-bottom:18px;max-width:760px;">
+        Dot grid subtil, ink @ 15% alpha, 32px spacing. Aplicat pe fundalul bej-0 al tuturor paginilor (Landing, Dublin, Blog, System) prin clasa <code>.has-grid</code> pe <code>&lt;body&gt;</code>.
+      </p>
+
+      <div class="sys-sub">Tokens</div>
+      <div style="background:var(--c-bej-1);border-radius:14px;padding:20px 24px;margin:0 0 28px;">
+        <pre style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px;line-height:1.7;color:var(--c-ink);margin:0;white-space:pre-wrap;">--grid-color   rgba(17, 13, 16, 0.15)   /* ink @ 15% */
+--grid-size    32px                       /* spacing punct la punct */
+--grid-radius  1px                        /* radius dot (Ø 2px) */
+--grid-edge    1.5px                      /* tranziție sharp */</pre>
+      </div>
+
+      <div class="sys-sub">Live preview</div>
+      <div class="has-grid" style="height:180px;background:var(--c-bej-0);border-radius:14px;border:1px solid var(--c-rule-soft);margin-bottom:28px;"></div>
+
+      <div class="sys-sub">Decizii &amp; rationale</div>
+      <ul class="t-body" style="margin:0 0 0 18px;padding:0;max-width:760px;">
+        <li style="margin-bottom:6px;"><strong>Ink, nu auriu</strong> — la luminanță scăzută, ink dă contrast perceptual stabil cross-device la alpha mic.</li>
+        <li style="margin-bottom:6px;"><strong>Dots, nu lines</strong> — pattern „graphite paper / Notion canvas", nu „spreadsheet / engineering blueprint".</li>
+        <li style="margin-bottom:6px;"><strong>0.15 alpha</strong> — pragul „vizibil clar fără să strige". Sub 0.10 dispare; peste 0.20 devine pattern.</li>
+        <li style="margin-bottom:6px;"><strong>32px spacing</strong> — densitate mid-range. 24px = prea „graph paper", 48px = prea aerisit.</li>
+        <li><strong>No mask</strong> — textura e deja subtilă; mask-ul ar lăsa goluri.</li>
+      </ul>
+    </section>
+
+    <!-- ═══ BUTTONS ═══ -->
+    <section class="sys-sec bg-mkt" id="buttons">
+      <div class="sys-sec-hd"><h2>Butoane</h2><span class="num">04 · Components</span></div>
+
+      <div class="sys-sub">Variante</div>
+      <div class="demo">
+        <div class="demo-cap">.btn .primary / .secondary / .ghost / .dark / .outline / .outline-pink / .danger</div>
+        <div class="dsplit">
+          <button class="btn primary">Primary</button>
+          <button class="btn secondary">Secondary</button>
+          <button class="btn ghost">Ghost</button>
+          <button class="btn dark">Dark</button>
+          <button class="btn outline">Outline</button>
+          <button class="btn outline-pink">Outline Pink</button>
+          <button class="btn danger">Danger</button>
+        </div>
+      </div>
+
+      <div class="sys-sub">Mărimi</div>
+      <p class="t14" style="margin:0 0 16px 0;color:var(--c-fog);max-width:680px;">Două mărimi principale: <strong>md (40h / fs 14)</strong> default în dashboard, <strong>lg (44h / fs 16)</strong> pentru acțiuni principale (modal submit, hero CTA, formulare 1-3 câmpuri). Btn mici (<strong>sm 30h / xs 26h</strong>) sunt <strong>pill</strong> — la dimensiuni reduse, pill citește mai clar.</p>
+      <div class="demo">
+        <div class="demo-cap">.lg · default (md) · .sm · .xs</div>
+        <div class="dsplit">
+          <button class="btn primary lg">Large — 44h</button>
+          <button class="btn primary">Default — 40h</button>
+          <button class="btn primary sm">Small — 30h</button>
+          <button class="btn primary xs">Xs — 26h</button>
+        </div>
+      </div>
+
+      <div class="sys-sub">Reguli</div>
+      <div class="demo" style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;">
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Default (md) · dashboard</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;"><strong>40h · fs 14 · weight 600 · padding-x 24 · radius 20</strong>. Folosit în dashboard, table actions, topbar, navigation — contexte dense.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Large (lg) · acțiune principală</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;"><strong>44h · fs 16 · weight 600 · padding-x 32 · radius 24</strong>. Folosit pe modal submit, hero CTA, formulare 1-3 câmpuri — contexte unde butonul e <em>the</em> acțiunea.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Small (sm) · inline</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;"><strong>30h · fs 13 · padding-x 18 · radius pill</strong>. Filtrele din tabele, acțiuni inline, badge-uri acționabile.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Xs · micro-acțiune</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;"><strong>26h · fs 12 · padding-x 14 · radius pill</strong>. În ticker AI, chip-uri acționabile, controls minimale.</p>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:24px;">Cu iconiță &amp; states</div>
+      <div class="demo">
+        <div class="dsplit">
+          <button class="btn primary">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7L6 10L11 4"/></svg>
+            Confirmă plata
+          </button>
+          <button class="btn secondary">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>
+            Adaugă factură
+          </button>
+          <button class="btn ghost">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7L6 10L11 4"/></svg>
+            Salvat
+          </button>
+          <button class="btn primary" disabled>Disabled</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ INPUTS ═══ -->
+    <section class="sys-sec bg-mkt" id="inputs">
+      <div class="sys-sec-hd"><h2>Inputs</h2><span class="num">05 · Forms</span></div>
+
+      <div class="sys-sub">Reguli</div>
+      <div class="demo" style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;">
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Padding interior (orizontal)</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Egal cu radius-ul: <strong>16px</strong> pe input default (h 40, r 20), <strong>20px</strong> pe input <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">.lg</code> (h 44, r 20). Textul începe unde se termină curba — aliniat optic.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Padding exterior (vertical)</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Gap label → input → help: <strong>4px</strong>. Densitate strânsă, label pare ancorat de câmp. Între câmpuri în formular: <strong>16px</strong> (margin-bottom pe <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">.field</code>).</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Aliniere label → text</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Label și help <strong>padding-left 16px</strong> (= padding interior input md). Label, text input și help încep de la aceeași coloană verticală.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Tipografie</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Label: <strong>Inter 12 / 500 / sentence case / tracking 0.04em</strong>, color fog (label-quiet — discret, nu strigă). Text input: <strong>Inter 14 / 400</strong> (md) sau <strong>16 / 400</strong> (lg), color ink. Help: <strong>Inter 12 / 400</strong>, color fog.</p>
+        </div>
+      </div>
+
+      <div class="sys-sub">A · Input alb pe card bej-1 (default — context Dublin)</div>
+      <p class="t14" style="margin:0 0 16px 0;color:var(--c-fog);max-width:680px;">Cazul comun: card "Acțiuni" / dashboard / modal pe pagină bej-0. Input alb iese clar peste cardul bej-1.</p>
+      <div class="sys-grid-2 form-demo">
+        <div class="demo deep">
+          <div class="demo-cap">Default + label + help</div>
+          <div class="field">
+            <label class="field-label">Denumire firmă</label>
+            <input class="input" placeholder="Ex. Youngblood SRL" value="Youngblood SRL">
+            <span class="field-help">Apare pe facturile emise.</span>
+          </div>
+        </div>
+        <div class="demo deep">
+          <div class="demo-cap">Search input</div>
+          <div class="field">
+            <label class="field-label">Caută în Bono</label>
+            <div class="search-wrap">
+              <svg class="search-ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L13.5 13.5" stroke-linecap="round"/></svg>
+              <input class="input" placeholder="Facturi, furnizori, declarații…">
+              <span class="kbd">⌘K</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo deep">
+          <div class="demo-cap">Focus state · :focus (border + halo pink)</div>
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input class="input is-focused" value="contact@youngblood.ro" id="focus-demo-input">
+            <span class="field-help">Border pink + halo subtil 3px.</span>
+          </div>
+        </div>
+        <div class="demo deep">
+          <div class="demo-cap">Success state</div>
+          <div class="field">
+            <label class="field-label">CUI</label>
+            <input class="input success" value="47281930">
+            <span class="field-help success">✓ Validat în Registrul Comerțului.</span>
+          </div>
+        </div>
+        <div class="demo deep">
+          <div class="demo-cap">Error state</div>
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input class="input error" value="eduard@">
+            <span class="field-help error">Format email invalid.</span>
+          </div>
+        </div>
+        <div class="demo deep">
+          <div class="demo-cap">Disabled</div>
+          <div class="field">
+            <label class="field-label">CUI (readonly)</label>
+            <input class="input" value="47281930" disabled>
+          </div>
+        </div>
+        <div class="demo deep">
+          <div class="demo-cap">Large</div>
+          <div class="field">
+            <label class="field-label">Denumire SRL nou</label>
+            <input class="input lg" placeholder="Ex. Atelier Moraru">
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:48px;">B · Input tonal pe card alb (excepție — formulare dedicate)</div>
+      <p class="t14" style="margin:0 0 16px 0;color:var(--c-fog);max-width:680px;">Cazul rar: pagini de setup, formulare dedicate sau wizard pe card alb. Input bej-1 (<code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">.input.tonal</code>) iese clar peste cardul alb.</p>
+      <div class="sys-grid-2 form-demo">
+        <div class="demo">
+          <div class="demo-cap">Tonal default</div>
+          <div class="field">
+            <label class="field-label">Nume complet</label>
+            <input class="input tonal" placeholder="Ex. Andrei Popescu" value="Andrei Popescu">
+            <span class="field-help">Apare pe contractul de servicii.</span>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo-cap">Tonal large</div>
+          <div class="field">
+            <label class="field-label">Denumire firmă nouă</label>
+            <input class="input tonal lg" placeholder="Ex. Atelier Moraru SRL">
+          </div>
+        </div>
+      </div>
+      <div class="sys-sub" style="margin-top:48px;">C · Modal — formular dedicat (lg)</div>
+      <p class="t14" style="margin:0 0 16px 0;color:var(--c-fog);max-width:680px;">Modal-ul e un context dedicat pentru o acțiune principală. Folosește exclusiv mărimea <strong>lg</strong> (44h / fs 16) — input și buton la aceeași dimensiune. Card bej-1 cu <strong>radius 24 (--r-xl)</strong>, halo <code style="background:var(--c-bg-deep);padding:1px 6px;border-radius:4px;">outline 1px white + offset 16</code>, backdrop blur 6 + ink 25%.</p>
+
+      <!-- Modal specimen — pe backdrop simulat -->
+      <div style="background:rgba(17,13,16,0.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:24px;padding:64px 32px;display:flex;justify-content:center;margin-bottom:24px;position:relative;overflow:hidden;">
+        <!-- pseudo-content în spate ca să se vadă blur-ul -->
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg, var(--c-bej-0) 0%, var(--c-bej-1) 100%);z-index:-1;"></div>
+
+        <div style="background:var(--c-bej-1);border-radius:24px;padding:32px 36px 28px;width:100%;max-width:480px;outline:1px solid #FFFFFF;outline-offset:16px;position:relative;">
+          <div style="display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--c-fog);margin-bottom:18px;">
+            <span style="width:5px;height:5px;border-radius:50%;background:var(--c-pink);"></span>
+            Factură nouă
+          </div>
+
+          <h2 style="font-family:'Inter',sans-serif;font-weight:700;font-size:28px;line-height:1.15;letter-spacing:-0.022em;color:var(--c-ink);margin:0 0 8px;">
+            Către cine emitem <em style="font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--c-pink);">factura?</em>
+          </h2>
+          <p style="font-family:'Inter',sans-serif;font-size:14px;font-weight:400;line-height:1.55;color:var(--c-fog);margin:0 0 24px;">Adaugă datele clientului. Le păstrăm pentru următoarele facturi.</p>
+
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <input class="input lg" placeholder="CUI sau denumire client" value="ACME Studio SRL" style="background:#FFFFFF;border:1px solid rgba(17,13,16,0.12);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <input class="input lg" placeholder="Sumă" value="2 850 RON" style="background:#FFFFFF;border:1px solid rgba(17,13,16,0.12);">
+              <input class="input lg" placeholder="Scadență" value="14 zile" style="background:#FFFFFF;border:1px solid rgba(17,13,16,0.12);">
+            </div>
+          </div>
+
+          <button class="btn primary lg" style="width:100%;margin-top:22px;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7L6 10L11 4"/></svg>
+            Emite factura
+          </button>
+        </div>
+      </div>
+
+      <div class="demo" style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;">
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Container</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Card <strong>bej-1</strong>, max-width 480, padding 32, radius 24, halo white outline 1px / offset 16. Centrat în viewport pe backdrop blur.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Inputs</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Toate input-urile: <strong>44h / fs 16 / radius 20 / pad-x 20</strong>. Background <strong>alb</strong> peste cardul bej-1 = contrast clar. Border <strong>ink @ 12%</strong>. Focus = border pink + halo pink 10%.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Submit</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Buton primary <strong>full-width 44h / fs 16 / radius 24</strong>. Pe modal, butonul este <em>the</em> acțiune — generos, ușor de țintit.</p>
+        </div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--c-fog);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Header</div>
+          <p class="t14" style="margin:0;color:var(--c-fog);line-height:1.5;">Eyebrow pink (Inter 11 / 600 / 0.10em / uppercase) + <strong>T28 cu T-em italic</strong> pe accent pink + lead T14 fog. Acțiunea exprimată ca întrebare („Către cine emitem <em>factura?</em>").</p>
+        </div>
+      </div>
+    </section>
+    <section class="sys-sec bg-app-grid" id="badges">
+      <div class="sys-sec-hd"><h2>Badges</h2><span class="num">06 · Status</span></div>
+
+      <div class="sys-sub">Tonal (background tint)</div>
+      <div class="demo">
+        <div class="demo-cap">.badge .success / .warn / .error / .ai / .pink / .neutral / .dark</div>
+        <div class="dsplit">
+          <span class="badge success">La zi</span>
+          <span class="badge warn">Atenție</span>
+          <span class="badge error">Eroare</span>
+          <span class="badge ai">În triaj</span>
+          <span class="badge pink">Vox</span>
+          <span class="badge neutral">Finalizat</span>
+          <span class="badge dark">Live</span>
+        </div>
+      </div>
+
+      <div class="sys-sub">Filled</div>
+      <div class="demo">
+        <div class="demo-cap">.badge .filled.success / .warn / .error / .pink / .neutral</div>
+        <div class="dsplit">
+          <span class="badge filled success">Plătit</span>
+          <span class="badge filled warn">Scadent</span>
+          <span class="badge filled error">Restant</span>
+          <span class="badge filled ai">AI</span>
+          <span class="badge filled pink">Nou</span>
+          <span class="badge filled neutral">Arhivat</span>
+        </div>
+      </div>
+
+      <div class="sys-sub">AI feed inline</div>
+      <div class="demo">
+        <div class="dsplit">
+          <span class="ai-tag">clasificat AI</span>
+          <span class="ai-feed"><strong>Vox</strong> a verificat 12 documente · acum 18 min</span>
+          <span class="ai-feed"><strong>Iris</strong> a clasificat 3 cheltuieli · acum 2h</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CARDS ═══ -->
+    <section class="sys-sec bg-mkt-grid" id="cards">
+      <div class="sys-sec-hd"><h2>Cards</h2><span class="num">07 · Containers</span></div>
+
+      <div class="sys-grid-3">
+        <div class="card">
+          <div class="t-eyebrow" style="margin-bottom:10px;"><span class="dot"></span>Default</div>
+          <h3 class="t-h3">Card surface</h3>
+          <p class="t-body" style="margin-top:8px;">Pe fundal alb, border subtil. Folosit pentru carduri de produs și KPI.</p>
+        </div>
+        <div class="card tonal">
+          <div class="t-eyebrow" style="margin-bottom:10px;"><span class="dot"></span>Tonal</div>
+          <h3 class="t-h3">Card bej</h3>
+          <p class="t-body" style="margin-top:8px;">Pe bej cald, fără border. Pentru zone secundare sau gruparea de informații.</p>
+        </div>
+        <div class="card dark">
+          <div class="t-eyebrow" style="margin-bottom:10px;color:rgba(255,255,255,0.55);"><span class="dot"></span>Dark</div>
+          <h3 class="t-h3">Card dark</h3>
+          <p class="t-body" style="margin-top:8px;">Negru cald, contrast puternic. Pentru CTA și secțiuni "deep".</p>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:36px;">Border · token --c-rule-card</div>
+      <p class="t14" style="margin:0 0 18px;color:var(--c-fog);max-width:760px;">
+        Decis: <strong>1px solid var(--c-rule-card)</strong> = ink @ 12% pe orice card alb, KPI și input. Linear-style — vizibil clar, fără să devină prezent vizual. Nu folosim alte alphas pe containere.
+      </p>
+      <div style="background:#FBFAF7;padding:32px;border-radius:18px;max-width:380px;">
+        <div style="background:#FFFFFF;border:1px solid var(--c-rule-card);border-radius:14px;padding:20px;">
+          <div class="t12" style="color:var(--c-fog);margin-bottom:10px;">CARD ALB · BORDER STANDARD</div>
+          <div class="t18" style="color:var(--c-ink);margin-bottom:6px;">Total facturat</div>
+          <div class="tn40" style="margin-bottom:8px;">12 480<span class="t-suffix-lg" style="margin-left:4px;color:var(--c-mist);">RON</span></div>
+          <p class="t14" style="color:var(--c-ink);margin:0;">1px solid var(--c-rule-card)</p>
+        </div>
+      </div>
+
+      <div class="sys-sub" style="margin-top:36px;">Regula completă · containers</div>
+      <div style="background:var(--c-bej-1);border-radius:14px;padding:20px 24px;">
+        <pre style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px;line-height:1.7;color:var(--c-ink);margin:0;white-space:pre-wrap;">Card cu inputs / acțiune    →  bej-1 #EFEBE4, NO border
+Card cu doar text / cifre   →  white #FFFFFF, border 1px hairline
+Card "deep" (CTA, TVA)      →  dark #110D10, NO border</pre>
+      </div>
+    </section>
+
+    <!-- ═══ KPI ═══ -->
+    <section class="sys-sec bg-tonal" id="kpi">
+      <div class="sys-sec-hd"><h2>KPI</h2><span class="num">08 · Dashboard</span></div>
+
+      <div class="sys-grid-3">
+        <div class="kpi income">
+          <div class="label"><span class="dot"></span>Venituri</div>
+          <div class="value">387.420<span class="unit">lei</span></div>
+          <div class="delta up">↑ 23,4% vs 2025</div>
+        </div>
+        <div class="kpi expense">
+          <div class="label"><span class="dot"></span>Cheltuieli</div>
+          <div class="value">142.880<span class="unit">lei</span></div>
+          <div class="delta neutral">— stabil</div>
+        </div>
+        <div class="kpi profit">
+          <div class="label"><span class="dot"></span>Profit net</div>
+          <div class="value">244.540<span class="unit">lei</span></div>
+          <div class="delta up">↑ 38% vs 2025</div>
+        </div>
+      </div>
+
+      <div class="sys-sub">Dark variant — pentru scadențe critice</div>
+      <div class="sys-grid-3">
+        <div class="kpi dark due">
+          <div class="label"><span class="dot"></span>TVA · scadent</div>
+          <div class="value">2.184<span class="unit">lei</span></div>
+          <div class="delta neutral">2 zile · pregătit de Alina</div>
+        </div>
+        <div class="kpi dark">
+          <div class="label"><span class="dot"></span>Sold disponibil</div>
+          <div class="value">9.347<span class="unit">lei</span></div>
+          <div class="delta neutral">BCR · cont curent</div>
+        </div>
+        <div class="kpi dark">
+          <div class="label"><span class="dot"></span>D300 · 25 mai</div>
+          <div class="value">31<span class="unit">zile</span></div>
+          <div class="delta neutral">declarația lunară</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TABS ═══ -->
+    <section class="sys-sec bg-mkt" id="tabs">
+      <div class="sys-sec-hd"><h2>Tabs &amp; toggle</h2><span class="num">09 · Switching</span></div>
+
+      <div class="sys-sub">Tabs (segmented)</div>
+      <div class="demo">
+        <div class="demo-cap">.tabs &gt; button.active</div>
+        <div class="dsplit">
+          <div class="tabs">
+            <button class="active">Toate</button>
+            <button>Venituri <span class="count">42</span></button>
+            <button>Cheltuieli <span class="count">17</span></button>
+          </div>
+          <div class="tabs">
+            <button>Lună</button>
+            <button>Trimestru</button>
+            <button class="active">An</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-sub">Tabs dark</div>
+      <div class="demo dark">
+        <div class="tabs dark">
+          <button class="active">Activitate</button>
+          <button>Documente</button>
+          <button>Mesaje</button>
+        </div>
+      </div>
+
+      <div class="sys-sub">Toggle / switch</div>
+      <div class="demo">
+        <div class="dsplit">
+          <button class="switch on" aria-pressed="true"></button>
+          <span class="t-body">Notificări active</span>
+          <button class="switch" aria-pressed="false" style="margin-left:24px;"></button>
+          <span class="t-body">Auto-clasificare AI</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ALERTS ═══ -->
+    <section class="sys-sec bg-mkt-grid" id="alerts">
+      <div class="sys-sec-hd"><h2>Alerts</h2><span class="num">10 · Feedback</span></div>
+
+      <div class="stack">
+        <div class="alert info">
+          <svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11h.01" stroke-linecap="round"/></svg>
+          <div><strong>Info.</strong> Vox a procesat 37 documente noi din SPV.</div>
+        </div>
+        <div class="alert success">
+          <svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8L7 12L13 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><strong>Gata.</strong> D112 depusă cu succes la ANAF · referință 2026-04-22-7841.</div>
+        </div>
+        <div class="alert warn">
+          <svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L14 13H2L8 2zM8 7v3M8 12h.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><strong>Atenție.</strong> Mai sunt 2 zile până la depunerea TVA.</div>
+        </div>
+        <div class="alert error">
+          <svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.5"/><path d="M5 5l6 6M11 5l-6 6" stroke-linecap="round"/></svg>
+          <div><strong>Eroare.</strong> Conexiunea cu SPV a expirat. <a href="#" style="text-decoration:underline;">Reautorizează</a>.</div>
+        </div>
+        <div class="alert brand">
+          <svg class="ic" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.5"/><path d="M8 5l2 3-2 3M6 8h4" stroke-linecap="round"/></svg>
+          <div><strong>Sfat de la Vox.</strong> Cheltuiala "cazare Hartmann" pare personală — vrei s-o marchez nedeductibilă?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ AVATARS ═══ -->
+    <section class="sys-sec bg-mkt" id="avatars">
+      <div class="sys-sec-hd"><h2>Avatars</h2><span class="num">11 · Identity</span></div>
+
+      <div class="sys-sub">Mărimi</div>
+      <div class="demo">
+        <div class="dsplit" style="align-items:center;">
+          <div class="avatar lg">EN</div>
+          <div class="avatar">AP</div>
+          <div class="avatar sm">AM</div>
+        </div>
+      </div>
+
+      <div class="sys-sub">Variante</div>
+      <div class="demo">
+        <div class="dsplit">
+          <div class="avatar">AP</div>
+          <div class="avatar dark">AP</div>
+          <div class="avatar tinted">AP</div>
+          <div class="avatar gradient">AP</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TABLES ═══ -->
+    <section class="sys-sec bg-app-grid" id="tables">
+      <div class="sys-sec-hd"><h2>Tables</h2><span class="num">12 · Data</span></div>
+
+      <div class="sample-tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Furnizor</th>
+              <th>Tip</th>
+              <th>Descriere</th>
+              <th class="right">Sumă</th>
+              <th>Deduct.</th>
+              <th class="right">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">Hartmann Consulting GmbH</td>
+              <td><span class="badge neutral">eFactura</span></td>
+              <td>Consultanță aprilie</td>
+              <td class="right amount">12.480 lei</td>
+              <td><span class="badge success">100%</span></td>
+              <td class="right date">22 apr</td>
+            </tr>
+            <tr>
+              <td class="name">Petrom · Stația Pipera</td>
+              <td><span class="badge neutral">Bon fiscal</span></td>
+              <td>Combustibil</td>
+              <td class="right amount">487 lei</td>
+              <td><span class="badge warn">50%</span></td>
+              <td class="right date">21 apr</td>
+            </tr>
+            <tr>
+              <td class="name">Hotel Capsa</td>
+              <td><span class="badge neutral">Factură</span></td>
+              <td>Cazare personală (Iris)</td>
+              <td class="right amount">1.840 lei</td>
+              <td><span class="badge error">Nu</span></td>
+              <td class="right date">19 apr</td>
+            </tr>
+            <tr>
+              <td class="name">Regus București</td>
+              <td><span class="badge neutral">eFactura</span></td>
+              <td>Chirie birou · aprilie</td>
+              <td class="right amount">3.200 lei</td>
+              <td><span class="badge success">100%</span></td>
+              <td class="right date">3 apr</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══ VOX & AI ═══ -->
+    <section class="sys-sec bg-dark" id="vox">
+      <div class="sys-sec-hd"><h2>Vox &amp; AI</h2><span class="num">13 · Patterns</span></div>
+
+      <div class="sys-sub">Vox FAB (floating)</div>
+      <div class="demo" style="position:relative;height:120px;background:var(--c-bg-deep);">
+        <button class="vox-fab" style="position:absolute;bottom:16px;right:16px;">
+          <span>Întreabă <em>Vox</em></span>
+          <span class="meta">Răspuns ca de la prieten · 4s</span>
+        </button>
+      </div>
+
+      <div class="sys-sub">AI signature inline</div>
+      <div class="demo">
+        <div class="dsplit">
+          <span class="ai-tag">clasificat AI</span>
+          <span class="ai-feed"><strong>Vox</strong> · acum 2h</span>
+          <span class="ai-feed"><strong>Iris</strong> · acum 18 min</span>
+          <span class="ai-feed"><strong>Alina</strong> · acum 4h</span>
+        </div>
+      </div>
+
+      <div class="sys-sub">Live status pulse</div>
+      <div class="demo">
+        <div class="dsplit">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--c-fog);"><span class="pulse-dot"></span>Live · Joi 24 apr 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TOPNAV ═══ -->
+    <section class="sys-sec bg-tonal" id="topnav">
+      <div class="sys-sec-hd"><h2>Topnav</h2><span class="num">14 · Navigation</span></div>
+      <p class="t-body" style="margin-bottom:14px;">Pill dark fix bottom-center, prezent pe toate paginile (L, D, B, S). Pink active state.</p>
+      <div class="demo deep" style="position:relative;height:80px;">
+        <nav class="v3-topnav" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);">
+          <a href="#" title="Landing">L</a>
+          <a href="#" class="active" title="Dublin">D</a>
+          <a href="#" title="Blog">B</a>
+          <a href="#" title="System">S</a>
+          <span class="sep">DS</span>
+        </nav>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="vox-fab">
+  <span>Întreabă <em>Vox</em></span>
+  <span class="meta">Răspuns ca de la prieten · 4s</span>
+</button>
+
+</body>
+</html>

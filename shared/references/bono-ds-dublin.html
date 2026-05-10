@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dublin · Bono</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="bono-ds.css">
+<style>
+/* ═══ Dublin — page-specific layout (folosește tokens bono-ds.css) ═══ */
+body.dublin {
+  background-color: var(--c-bej-0);
+  padding-left: 64px;
+}
+
+/* Sidebar — icon-only, bej-1 */
+.da-side {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 64px;
+  background: var(--c-bej-1);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 18px 0 22px; z-index: 50;
+}
+.da-side .logo {
+  width: 32px; height: 32px; border-radius: var(--r-sm);
+  background: var(--c-dark); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 16px;
+  margin-bottom: 22px;
+  position: relative;
+}
+.da-side .logo::after {
+  content:''; position:absolute; right:-3px; top:-3px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--c-pink);
+  box-shadow: 0 0 0 2px var(--c-bej-1);
+}
+.da-side nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.da-side a {
+  width: 40px; height: 40px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-fog); transition: background 140ms, color 140ms;
+  position: relative; text-decoration: none;
+}
+.da-side a:hover { background: rgba(255,255,255,0.5); color: var(--c-ink); }
+.da-side a.active { background: var(--c-pink-tint); color: var(--c-pink-deep); }
+.da-side a .badge-mini {
+  position: absolute; top: 4px; right: 4px;
+  min-width: 14px; height: 14px; border-radius: var(--r-xs);
+  background: var(--c-pink); color: #fff;
+  font-size: 9px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; line-height: 1;
+}
+.da-side .avatar-self {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #2D2926, #5A5450);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-weight: 500; font-size: 12px;
+  border: 2px solid var(--c-bej-1);
+  box-shadow: 0 0 0 1px var(--c-rule);
+}
+
+/* Main grid — content + ticker (grid auriu vine din body.has-grid) */
+.da-main {
+  display: grid; grid-template-columns: 1fr 290px; gap: 0; min-height: 100vh;
+}
+.da-content { padding: 28px 32px 120px; max-width: 1180px; }
+.da-ticker-col {
+  padding: 28px 22px 120px;
+  position: relative;
+  background: transparent;
+}
+
+/* Topbar */
+.da-topbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+.da-topbar .row-tb { display: flex; align-items: center; justify-content: space-between; }
+.da-topbar .top-row { gap: 16px; }
+.da-topbar .firma {
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--c-fog); letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 10px;
+  flex: 0 0 auto;
+}
+.da-topbar .firma .pulse {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--c-success);
+  animation: liveDot 2.4s ease-in-out infinite;
+}
+@keyframes liveDot {
+  0% { box-shadow: 0 0 0 0 rgba(31, 122, 77, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(31, 122, 77, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 122, 77, 0); }
+}
+.da-topbar .firma .cui { color: var(--c-mist); }
+
+.da-search { position: relative; flex: 1 1 320px; max-width: 460px; }
+.da-search input {
+  width: 100%; height: 40px;
+  padding: 0 44px;
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-pill);
+  font-family: 'Inter', sans-serif; font-size: 14px;
+  color: var(--c-ink);
+  transition: border-color 140ms, background 140ms, box-shadow 140ms;
+}
+.da-search input::placeholder { color: var(--c-mist); }
+.da-search input:focus {
+  outline: none; background: #fff;
+  border-color: var(--c-pink);
+  box-shadow: 0 0 0 3px rgba(238,67,121,0.10);
+}
+.da-search .ic {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--c-fog); pointer-events: none;
+  width: 15px; height: 15px;
+}
+.da-search .kbd {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--c-fog);
+  padding: 2px 6px; border-radius: var(--r-xs);
+  background: #fff; border: 1px solid var(--c-rule-soft);
+  pointer-events: none;
+}
+
+.da-topbar .live-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 10px;
+  background: #FFFFFF; border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-pill);
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  color: var(--c-fog); letter-spacing: 0.08em; text-transform: uppercase;
+  flex: 0 0 auto;
+}
+.da-topbar .live-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-success);
+  animation: liveDot 2.4s ease-in-out infinite;
+}
+
+/* Period selector */
+.da-period {
+  display: inline-flex; padding: 3px;
+  background: #FFFFFF; border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-pill);
+}
+.da-period button {
+  border: none; background: transparent; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  padding: 5px 12px; border-radius: var(--r-pill);
+  color: var(--c-fog); transition: all 160ms;
+  font-variant-numeric: tabular-nums;
+}
+.da-period button:hover { color: var(--c-ink); }
+.da-period button.active { background: var(--c-ink); color: #fff; }
+.da-period .yr {
+  color: var(--c-mist); font-size: 11px;
+  padding: 5px 8px 5px 10px; align-self: center;
+}
+.da-period .yr em {
+  font-family: 'Fraunces', serif; font-style: italic;
+  color: var(--c-pink); font-weight: 400;
+}
+
+/* KPI cards — rândul 1: white + hairline (Venituri/Cheltuieli/Profit) */
+.da-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+.da-kpi {
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-xl);
+  padding: 18px 20px;
+  position: relative;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.da-kpi:hover { transform: translateY(-1px); }
+.da-kpi .label {
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--c-fog); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.da-kpi .label .dot { width: 6px; height: 6px; border-radius: 50%; }
+.da-kpi.income .label .dot { background: var(--c-pink); }
+.da-kpi.expense .label .dot { background: var(--c-ink); }
+.da-kpi.profit .label .dot { background: var(--c-success); }
+
+.da-kpi .value {
+  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-size: 32px; letter-spacing: -0.040em; line-height: 1;
+  color: var(--c-ink);
+  font-variant-numeric: tabular-nums;
+}
+.da-kpi .value .unit {
+  font-size: 14px; color: var(--c-mist);
+  margin-left: 4px; font-weight: 400; letter-spacing: 0;
+}
+.da-kpi .delta {
+  margin-top: 10px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.da-kpi .delta.up { color: var(--c-success); }
+.da-kpi .delta.neutral { color: var(--c-fog); }
+
+/* Action cards row — rândul 2: tonal/dark/upload */
+.da-actions {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  margin-bottom: 22px; align-items: stretch;
+}
+.da-act {
+  background: var(--c-bej-1);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+  min-height: 240px;
+}
+.da-act h3 {
+  font-family: 'Inter', sans-serif; font-weight: 500; font-size: 14px;
+  color: var(--c-ink); margin: 0 0 2px;
+  display: flex; align-items: center; gap: 8px;
+}
+.da-act h3 .tag-ai {
+  font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  background: var(--c-pink-tint); color: var(--c-pink-deep);
+  padding: 2px 7px; border-radius: var(--r-pill);
+}
+
+/* Invoice form: inputs centrate vertical sus, buton lipit jos */
+.da-form { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.da-form input:first-child { margin-top: auto; }
+.da-form .da-btn-emit { margin-top: auto; }
+.da-form input,
+.da-form .amount-wrap {
+  width: 100%; height: 40px; box-sizing: border-box;
+}
+.da-form .da-btn-emit {
+  width: 100%; height: 40px; box-sizing: border-box;
+  margin-top: auto;
+}
+.da-form input {
+  font-family: 'Inter', sans-serif; font-size: 14px;
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-lg);
+  padding: 0 16px;
+  color: var(--c-ink);
+  transition: border-color 140ms, background 140ms;
+}
+.da-form input::placeholder { color: var(--c-mist); }
+.da-form input:focus {
+  outline: none; border-color: var(--c-pink);
+  box-shadow: 0 0 0 3px rgba(238,67,121,0.10);
+}
+.da-form .amount-wrap {
+  position: relative; display: flex; align-items: center;
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-lg);
+  padding: 0 8px 0 16px;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+.da-form .amount-wrap:focus-within {
+  border-color: var(--c-pink);
+  box-shadow: 0 0 0 3px rgba(238,67,121,0.10);
+}
+.da-form input.amount {
+  border: 0; background: transparent;
+  flex: 1; min-width: 0;
+  padding: 0; height: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  box-shadow: none;
+}
+.da-form input.amount:focus { box-shadow: none; }
+.da-form .ron {
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; color: var(--c-fog);
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  padding: 4px 10px;
+  border-radius: var(--r-xs);
+}
+.da-btn-emit {
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  background: var(--c-pink); color: #fff;
+  border: none; border-radius: var(--r-lg);
+  cursor: pointer; transition: all 140ms;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
+.da-btn-emit:hover {
+  background: var(--c-pink-deep);
+  transform: translateY(-1px);
+  box-shadow: var(--sh-pink);
+}
+.da-btn-emit svg { width: 12px; height: 12px; }
+
+/* Drop zone */
+.da-drop {
+  border: 1.5px dashed var(--c-rule);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  text-align: center;
+  background: #FFFFFF;
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer;
+  transition: border-color 160ms, background 160ms;
+}
+.da-drop:hover { border-color: var(--c-pink); background: var(--c-pink-ultra); }
+.da-drop .icon { width: 26px; height: 26px; color: var(--c-fog); }
+.da-drop .label-main { font-size: 12px; color: var(--c-fog); font-weight: 500; }
+.da-drop .actions { display: inline-flex; gap: 8px; }
+.da-drop button {
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  background: #FFFFFF; color: var(--c-ink);
+  border: 1px solid var(--c-rule-card);
+  padding: 5px 12px; border-radius: var(--r-md);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  transition: all 140ms;
+}
+.da-drop button:hover { background: var(--c-ink); color: #fff; border-color: var(--c-ink); }
+.da-drop button svg { width: 11px; height: 11px; }
+
+/* TVA dark card */
+.da-act.tva-due {
+  background: var(--c-dark);
+  color: #fff;
+  position: relative; overflow: hidden;
+  justify-content: space-between;
+  justify-content: space-between;
+}
+.da-act.tva-due::after {
+  content:''; position:absolute; right:0; bottom:0; width: 140px; height: 80px;
+  background: radial-gradient(ellipse at bottom right, rgba(238,67,121,0.20), transparent 70%);
+  pointer-events: none;
+  border-bottom-right-radius: 24px;
+}
+.da-act.tva-due .badge-tva {
+  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 5px 9px; border-radius: 999px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.85);
+}
+.da-act.tva-due .badge-tva .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--c-pink);
+  box-shadow: 0 0 0 3px rgba(238,67,121,0.18);
+}
+.da-act.tva-due .sum {
+  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-size: 26px; letter-spacing: -0.040em; line-height: 1; margin-top: 6px;
+  color: #fff; font-variant-numeric: tabular-nums;
+}
+.da-act.tva-due .sum sup {
+  font-size: 13px; font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  margin-left: 1px; top: -0.7em;
+}
+.da-act.tva-due .sum .ccy {
+  font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  margin-left: 6px; letter-spacing: 0.04em;
+}
+.da-act.tva-due .by {
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 400;
+  color: rgba(255,255,255,0.65);
+}
+.da-act.tva-due .by strong { color: #fff; font-weight: 500; }
+.da-act.tva-due .pay {
+  margin-top: auto;
+  width: 100%; height: 40px;
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  background: #FFFFFF; color: var(--c-ink);
+  border: 1px solid var(--c-rule-card); border-radius: var(--r-lg);
+  cursor: pointer; transition: all 140ms;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  z-index: 1; position: relative;
+}
+.da-act.tva-due .pay:hover {
+  background: #FFFFFF;
+  border-color: var(--c-ink);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(17,13,16,0.10);
+}
+.da-act.tva-due .pay svg { width: 12px; height: 12px; }
+
+/* Table card */
+.da-table-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 0 12px;
+}
+.da-table-topbar .da-tabs button.active {
+  background: var(--c-bej-1); color: var(--c-ink);
+}
+.da-table-card {
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.da-tabs { display: inline-flex; padding: 2px; background: var(--c-bej-1); border-radius: var(--r-pill); }
+.da-tabs button {
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  background: transparent; border: none; cursor: pointer;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  color: var(--c-fog); transition: all 140ms;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.da-tabs button.active { background: #FFFFFF; color: var(--c-ink); }
+.da-tabs button .count { font-size: 10px; color: var(--c-mist); font-variant-numeric: tabular-nums; }
+.da-tabs button.active .count { color: var(--c-fog); }
+.da-table-topbar .see-all {
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+  color: var(--c-ink); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.da-table-topbar .see-all:hover { color: var(--c-pink); }
+.da-table-topbar .see-all .arr { color: var(--c-mist); }
+
+.da-table { width: 100%; border-collapse: collapse; }
+.da-table thead th {
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.10em;
+  color: var(--c-fog); text-align: left;
+  padding: 10px 18px; background: var(--c-bej-1);
+  border-bottom: 1px solid var(--c-rule-soft);
+}
+.da-table thead th.right { text-align: right; }
+.da-table thead th:first-child { padding-left: 22px; }
+.da-table thead th:last-child { padding-right: 22px; }
+.da-table tbody td {
+  padding: 9px 18px;
+  font-size: 13px; color: var(--c-ink);
+  border-bottom: 1px solid var(--c-rule-soft);
+  font-variant-numeric: tabular-nums;
+  vertical-align: top;
+}
+.da-table tbody td:first-child { padding-left: 22px; }
+.da-table tbody td:last-child { padding-right: 22px; }
+.da-table tbody tr:last-child td { border-bottom: none; }
+.da-table tbody tr:hover { background: #FAF9F6; }
+.da-table .name { color: var(--c-ink); font-weight: 500; font-size: 14px; }
+.da-table .right { text-align: right; }
+.da-table .amount { color: var(--c-ink); font-weight: 500; }
+.da-table .date { color: var(--c-fog); font-size: 13px; }
+.da-table .tip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-fog);
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-soft);
+  padding: 2px 7px; border-radius: var(--r-pill);
+}
+.da-table .tip.efactura { color: var(--c-pink-deep); background: var(--c-pink-tint); border-color: transparent; }
+.da-table .tip.bon { color: var(--c-warn); background: var(--c-warn-bg); border-color: transparent; }
+.da-table .tip.factura { color: var(--c-success); background: var(--c-success-bg); border-color: transparent; }
+.da-table .desc { color: var(--c-fog); font-size: 13px; }
+.da-table .ded {
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 9px; border-radius: var(--r-pill);
+  display: inline-flex; align-items: center;
+}
+.da-table .ded.full { background: var(--c-success-bg); color: var(--c-success); }
+.da-table .ded.half { background: var(--c-warn-bg); color: var(--c-warn); }
+.da-table .ded.no   { background: var(--c-bej-1); color: var(--c-fog); }
+.da-table .status {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+  padding: 3px 9px; border-radius: var(--r-pill);
+  text-transform: uppercase;
+}
+.da-table .status.emis { background: var(--c-success-bg); color: var(--c-success); }
+.da-table .status.platit { background: var(--c-pink-tint); color: var(--c-pink-deep); }
+.da-table .status.in-revizie { background: var(--c-warn-bg); color: var(--c-warn); }
+.da-table-foot {
+  padding: 12px 22px;
+  display: flex; justify-content: flex-end; align-items: center;
+  background: var(--c-bej-1);
+  border-top: 1px solid var(--c-rule-soft);
+}
+.da-table-foot .meta { font-size: 12px; color: var(--c-fog); }
+
+/* Ticker column */
+.da-ticker { position: sticky; top: 28px; }
+.da-fixed {
+  background: var(--c-bej-1);
+  border-radius: var(--r-md);
+  padding: 12px 12px 8px;
+  margin-bottom: 22px;
+}
+.da-fixed h5 {
+  font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--c-fog); margin: 0 0 10px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 4px;
+}
+.da-fixed h5 em {
+  font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+  color: var(--c-pink); letter-spacing: -0.010em; text-transform: none; font-size: 13px;
+}
+.da-fixed h5 .count {
+  margin-left: auto;
+  background: var(--c-pink); color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 600;
+  padding: 2px 6px; border-radius: var(--r-pill);
+  min-width: 16px; text-align: center;
+}
+.da-fa {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 6px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 140ms;
+}
+.da-fa:hover { background: rgba(255,255,255,0.6); }
+.da-fa + .da-fa { border-top: 1px solid var(--c-rule-soft); }
+.da-fa:hover + .da-fa, .da-fa:hover { border-top-color: transparent; }
+.da-fa .ico {
+  width: 24px; height: 24px; border-radius: var(--r-sm);
+  background: #FFFFFF; border: 1px solid var(--c-rule);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-ink); flex-shrink: 0; margin-top: 1px;
+}
+.da-fa .ico svg { width: 12px; height: 12px; }
+.da-fa.urgent .ico { background: var(--c-pink); border-color: var(--c-pink); color: #fff; }
+.da-fa .body {
+  flex: 1; min-width: 0;
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  color: var(--c-ink); line-height: 1.35;
+}
+.da-fa .body strong { font-weight: 500; }
+.da-fa .body .meta {
+  display: block; font-size: 11px; color: var(--c-fog); margin-top: 2px;
+}
+.da-fa .actor {
+  font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+  color: var(--c-pink); font-size: 12px;
+}
+
+/* Live ticker */
+.da-ticker h4 {
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--c-mist); margin: 0 0 18px;
+  display: flex; align-items: center; gap: 9px;
+}
+.da-ticker h4 em {
+  font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
+  color: var(--c-pink); letter-spacing: -0.010em; text-transform: none; font-size: 13px;
+}
+.da-ticker h4::after { content: ''; flex: 1; height: 1px; background: var(--c-rule-soft); }
+.da-ticker .pulse-tiny {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--c-pink);
+  animation: tickPulse 2.6s ease-in-out infinite;
+}
+@keyframes tickPulse { 0%,100%{opacity:0.30;} 50%{opacity:1;} }
+.da-ticker-window {
+  height: calc(100vh - 380px);
+  min-height: 360px;
+  overflow: hidden; position: relative;
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 6%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 82%, rgba(0,0,0,0.4) 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 6%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 82%, rgba(0,0,0,0.4) 94%, transparent 100%);
+}
+.da-ticker-track {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; gap: 18px;
+  animation: tickerScroll 90s linear infinite;
+  padding-bottom: 50%; opacity: 0.78;
+}
+@keyframes tickerScroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.da-tk { display: flex; gap: 11px; align-items: flex-start; padding-right: 4px; }
+.da-tk .time {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  color: var(--c-mist); letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; padding-top: 1px;
+  min-width: 38px;
+}
+.da-tk .body {
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  color: var(--c-fog); line-height: 1.45;
+}
+.da-tk .body strong { color: var(--c-ink); font-weight: 500; }
+.da-tk .actor {
+  font-family: 'Fraunces', serif; font-style: italic;
+  color: var(--c-pink); font-size: 13px;
+}
+.da-tk.upcoming .body { color: var(--c-mist); }
+.da-tk.upcoming .actor { color: var(--c-fog); }
+.da-tk-divider {
+  text-align: center;
+  font-family: 'Inter', sans-serif; font-size: 9.5px;
+  color: var(--c-mist); letter-spacing: 0.18em; text-transform: uppercase;
+  padding: 4px 0; position: relative;
+}
+.da-tk-divider::before, .da-tk-divider::after {
+  content: ''; position: absolute; top: 50%; width: 36%; height: 1px; background: var(--c-rule-soft);
+}
+.da-tk-divider::before { left: 0; }
+.da-tk-divider::after { right: 0; }
+.da-ticker-window:hover .da-ticker-track { animation-play-state: paused; }
+
+/* ═══ FORMS section (jos pe pagină) ═══ */
+.da-forms {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin-top: 32px;
+}
+.form-card {
+  background: var(--c-bej-1);
+  border-radius: var(--r-xl);
+  padding: 28px;
+}
+.form-card .head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 22px; gap: 16px;
+}
+.form-card .head .title {
+  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-size: 20px; letter-spacing: -0.020em; line-height: 1.25;
+  color: var(--c-ink); margin: 0;
+}
+.form-card .head .title em {
+  font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
+  color: var(--c-pink);
+}
+.form-card .head .sub {
+  font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5;
+  color: var(--c-fog); margin: 4px 0 0;
+}
+.form-card .grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 12px;
+}
+.form-card .field-full { grid-column: 1 / -1; }
+.form-card .field-x { display: flex; flex-direction: column; gap: 4px; }
+.form-card label {
+  font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--c-fog); padding-left: 4px;
+}
+.form-card input,
+.form-card select,
+.form-card textarea {
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
+  color: var(--c-ink);
+  background: #FFFFFF;
+  border: 1px solid var(--c-rule-card);
+  border-radius: var(--r-lg);
+  padding: 10px 16px;
+  width: 100%;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+.form-card input::placeholder,
+.form-card textarea::placeholder { color: var(--c-mist); }
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none; border-color: var(--c-pink);
+  box-shadow: 0 0 0 3px rgba(238,67,121,0.10);
+}
+.form-card textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.form-card .actions {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--c-rule-soft);
+}
+.form-card .actions .hint {
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  color: var(--c-fog);
+}
+
+@media (max-width: 1100px) {
+  .da-main { grid-template-columns: 1fr; }
+  .da-ticker-col { display: none; }
+  .da-kpis { grid-template-columns: repeat(2, 1fr); }
+  .da-actions { grid-template-columns: 1fr; }
+  .da-forms { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .form-card .grid-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="dublin has-grid">
+
+<!-- Cross-version topnav -->
+<nav class="v3-topnav">
+  <a href="bono-ds-landing.html" title="Landing">L</a>
+  <a href="bono-ds-dublin.html" class="active" title="Dublin">D</a>
+  <a href="bono-ds-blog.html" title="Blog">B</a>
+  <a href="bono-ds-system.html" title="System">S</a>
+  <span class="sep">DS</span>
+</nav>
+
+<!-- Sidebar -->
+<aside class="da-side">
+  <div class="logo">B</div>
+  <nav>
+    <a href="#" class="active" title="Dashboard">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="6.5" height="8" rx="1.4"/><rect x="2.5" y="12" width="6.5" height="5.5" rx="1.4"/><rect x="11" y="2.5" width="6.5" height="5.5" rx="1.4"/><rect x="11" y="9.5" width="6.5" height="8" rx="1.4"/></svg>
+    </a>
+    <a href="#" title="Facturi">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2.5h7l3.5 3.5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z"/><path d="M11.5 2.5v3.5h3.5"/><path d="M7 11h6M7 14h4"/></svg>
+      <span class="badge-mini">7</span>
+    </a>
+    <a href="#" title="Cheltuieli">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="14" height="11" rx="1.5"/><path d="M3 9h14M7 13h2"/></svg>
+      <span class="badge-mini">3</span>
+    </a>
+    <a href="#" title="e-Factura">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5l7 4 7-4"/><rect x="3" y="4.5" width="14" height="11" rx="1.5"/></svg>
+    </a>
+    <a href="#" title="Taxe">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5L3.5 5v5.5c0 4 2.8 6.5 6.5 7.5 3.7-1 6.5-3.5 6.5-7.5V5L10 2.5z"/></svg>
+    </a>
+    <a href="#" title="Clienți">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7.5" r="3"/><path d="M3.5 16.5c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/></svg>
+    </a>
+    <a href="#" title="Documente">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2.5h6l4 4v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z"/></svg>
+    </a>
+  </nav>
+  <div class="avatar-self" title="Eduard">E</div>
+</aside>
+
+<!-- Main grid -->
+<main class="da-main">
+  <div class="da-content">
+
+    <!-- Topbar -->
+    <div class="da-topbar">
+      <div class="row-tb top-row">
+        <div class="firma">
+          <span class="pulse"></span>
+          Youngblood SRL <span class="cui">· CUI 47281930</span>
+        </div>
+        <div class="da-search">
+          <svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L13.5 13.5" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="Caută facturi, furnizori, documente, declarații…">
+          <span class="kbd">⌘K</span>
+        </div>
+        <span class="live-badge"><span class="dot"></span>Live · Joi 24 apr 2026</span>
+      </div>
+      <div class="row-tb">
+        <h1 class="t48">Salut, <em>Eduard.</em> Totul e ok azi.</h1>
+        <div class="da-period" role="tablist">
+          <button>Lună</button>
+          <button>Trimestru</button>
+          <button class="active">An</button>
+          <span class="yr"><em>2026</em></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <section class="da-kpis">
+      <div class="da-kpi income">
+        <div class="label"><span class="dot"></span>Venituri</div>
+        <div class="value">387.420<span class="unit">lei</span></div>
+        <div class="delta up">↑ 23,4% vs 2025</div>
+      </div>
+      <div class="da-kpi expense">
+        <div class="label"><span class="dot"></span>Cheltuieli deductibile</div>
+        <div class="value">142.880<span class="unit">lei</span></div>
+        <div class="delta neutral">— stabil vs 2025</div>
+      </div>
+      <div class="da-kpi profit">
+        <div class="label"><span class="dot"></span>Profit</div>
+        <div class="value">244.540<span class="unit">lei</span></div>
+        <div class="delta up">↑ 31,8%</div>
+      </div>
+    </section>
+
+    <!-- Action cards -->
+    <section class="da-actions">
+      <div class="da-act invoice">
+        <div class="da-form">
+          <input type="text" placeholder="Client…">
+          <div class="amount-wrap">
+            <input type="text" class="amount" placeholder="0,00">
+            <span class="ron">LEI</span>
+          </div>
+          <button class="da-btn-emit" onclick="openInvoiceModal()">
+            Emite factura
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="da-act tva-due">
+        <span class="badge-tva"><span class="dot"></span>TVA · Scadent 25 aprilie</span>
+        <div class="sum">2.184<sup>50</sup><span class="ccy">RON</span></div>
+        <div class="by"><strong>Alina M.</strong> · pregătit pentru declarație</div>
+        <button class="pay">
+          Plătește
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+        </button>
+      </div>
+
+      <div class="da-act upload">
+        <h3>Încarcă bon sau factură <span class="tag-ai">AI extrage</span></h3>
+        <div class="da-drop">
+          <svg class="icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M16 22V8M11 13l5-5 5 5"/>
+            <path d="M5 22v3a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-3"/>
+          </svg>
+          <div class="label-main">Trage o poză sau un PDF</div>
+          <div class="actions">
+            <button>
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3.5" width="10" height="8" rx="1"/><circle cx="7" cy="7.5" r="2"/><path d="M5 3.5l1-1.5h2l1 1.5"/></svg>
+              Foto
+            </button>
+            <button>
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h5l2 2v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>
+              Fișier
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <div class="da-table-topbar">
+      <div class="da-tabs">
+        <button id="tab-venituri" onclick="switchTab('venituri')">Venituri <span class="count">42</span></button>
+        <button id="tab-cheltuieli" class="active" onclick="switchTab('cheltuieli')">Cheltuieli <span class="count">87</span></button>
+      </div>
+      <a href="#" class="see-all" id="see-all-link">Vezi toate cheltuielile <span class="arr">→</span></a>
+    </div>
+    <section class="da-table-card">
+      <div id="table-cheltuieli">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th>Furnizor</th><th>Tip</th><th>Descriere</th>
+              <th class="right">Sumă</th><th class="right">Deductibilă</th><th class="right">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="name">OMV Petrom</span></td><td><span class="tip bon">Bon fiscal</span></td><td class="desc">Combustibil · Dacia Spring</td><td class="right amount">347,80 lei</td><td class="right"><span class="ded half">50%</span></td><td class="right date">23 apr 2026</td></tr>
+            <tr><td><span class="name">Regus România SRL</span></td><td><span class="tip efactura">e-Factură</span></td><td class="desc">Chirie birou · aprilie</td><td class="right amount">4.200,00 lei</td><td class="right"><span class="ded full">100%</span></td><td class="right date">21 apr 2026</td></tr>
+            <tr><td><span class="name">Apple Distribution Intl.</span></td><td><span class="tip factura">Factură</span></td><td class="desc">MacBook Pro 14" · echipament</td><td class="right amount">12.890,00 lei</td><td class="right"><span class="ded full">100%</span></td><td class="right date">18 apr 2026</td></tr>
+            <tr><td><span class="name">Mega Image SA</span></td><td><span class="tip bon">Bon fiscal</span></td><td class="desc">Cazare personală · weekend</td><td class="right amount">186,40 lei</td><td class="right"><span class="ded no">Nu</span></td><td class="right date">15 apr 2026</td></tr>
+            <tr><td><span class="name">Orange România SA</span></td><td><span class="tip efactura">e-Factură</span></td><td class="desc">Abonament telefonie · martie</td><td class="right amount">218,00 lei</td><td class="right"><span class="ded full">100%</span></td><td class="right date">11 apr 2026</td></tr>
+            <tr><td><span class="name">DHL Express RO</span></td><td><span class="tip factura">Factură</span></td><td class="desc">Curierat internațional · client UK</td><td class="right amount">412,30 lei</td><td class="right"><span class="ded full">100%</span></td><td class="right date">9 apr 2026</td></tr>
+          </tbody>
+        </table>
+        <div class="da-table-foot">
+          <span class="meta">87 cheltuieli · total 142.880 lei · deductibile 100%: 124.640 · 50%: 12.450 · 0%: 5.790 · 2026</span>
+        </div>
+      </div>
+
+      <div id="table-venituri" style="display:none">
+        <table class="da-table">
+          <thead>
+            <tr><th>Client</th><th>Descriere</th><th class="right">Sumă</th><th class="right">Status</th><th class="right">Data</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="name">Hartmann Consulting GmbH</span></td><td class="desc">Servicii consultanță · Q1 2026</td><td class="right amount">48.500,00 lei</td><td class="right"><span class="status platit">Plătit</span></td><td class="right date">20 apr 2026</td></tr>
+            <tr><td><span class="name">Tech Ventures SRL</span></td><td class="desc">Dezvoltare software · sprint 8</td><td class="right amount">22.800,00 lei</td><td class="right"><span class="status emis">Emis</span></td><td class="right date">18 apr 2026</td></tr>
+            <tr><td><span class="name">Global Media SA</span></td><td class="desc">Campanie marketing digital</td><td class="right amount">15.200,00 lei</td><td class="right"><span class="status platit">Plătit</span></td><td class="right date">14 apr 2026</td></tr>
+            <tr><td><span class="name">StartUp Hub RO SRL</span></td><td class="desc">Abonament platformă · lunar</td><td class="right amount">3.400,00 lei</td><td class="right"><span class="status in-revizie">În revizie</span></td><td class="right date">11 apr 2026</td></tr>
+            <tr><td><span class="name">Neptun Logistics SRL</span></td><td class="desc">Proiect implementare ERP</td><td class="right amount">67.000,00 lei</td><td class="right"><span class="status emis">Emis</span></td><td class="right date">3 apr 2026</td></tr>
+          </tbody>
+        </table>
+        <div class="da-table-foot">
+          <span class="meta">42 facturi · total 387.420 lei · plătite: 312.840 · în așteptare: 74.580 · 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 2 FORMS at the bottom ═══ -->
+    <section class="da-forms">
+
+      <!-- Form 1 — Client nou -->
+      <div class="form-card">
+        <div class="head">
+          <div>
+            <h3 class="title">Adaugă <em>client nou</em></h3>
+            <p class="sub">Bono verifică automat CUI-ul în VIES și ANAF.</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field-x">
+            <label>Denumire</label>
+            <input type="text" value="Hartmann Consulting GmbH">
+          </div>
+          <div class="field-x">
+            <label>CUI / VAT</label>
+            <input type="text" value="DE328914025">
+          </div>
+          <div class="field-x">
+            <label>Email facturare</label>
+            <input type="email" placeholder="facturi@firma.com">
+          </div>
+          <div class="field-x">
+            <label>Țara</label>
+            <select>
+              <option>România</option>
+              <option selected>Germania</option>
+              <option>Austria</option>
+              <option>Olanda</option>
+            </select>
+          </div>
+          <div class="field-x field-full">
+            <label>Adresă (opțional)</label>
+            <input type="text" placeholder="Stradă, oraș, cod poștal">
+          </div>
+        </div>
+
+        <div class="actions">
+          <span class="hint">CUI verificat <strong style="color:var(--c-success);">VIES ✓</strong></span>
+          <button class="btn primary">Salvează clientul</button>
+        </div>
+      </div>
+
+      <!-- Form 2 — Cheltuială manuală -->
+      <div class="form-card">
+        <div class="head">
+          <div>
+            <h3 class="title">Adaugă <em>cheltuială manual</em></h3>
+            <p class="sub">Pentru bonurile pe care AI-ul nu le-a putut citi.</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field-x">
+            <label>Furnizor</label>
+            <input type="text" placeholder="Ex: Lukoil SA">
+          </div>
+          <div class="field-x">
+            <label>Categorie</label>
+            <select>
+              <option>Combustibil</option>
+              <option selected>Birou & utilități</option>
+              <option>Echipamente</option>
+              <option>Servicii profesionale</option>
+              <option>Marketing</option>
+            </select>
+          </div>
+          <div class="field-x">
+            <label>Sumă (LEI)</label>
+            <input type="text" placeholder="0,00">
+          </div>
+          <div class="field-x">
+            <label>Deductibilitate</label>
+            <select>
+              <option>100% — deductibilă integral</option>
+              <option>50% — auto/combustibil</option>
+              <option>0% — nedeductibilă</option>
+            </select>
+          </div>
+          <div class="field-x field-full">
+            <label>Descriere</label>
+            <textarea placeholder="Ex: Hârtie copiator A4, 5 topuri"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <span class="hint">Iris va sugera reîncadrarea dacă apare un pattern.</span>
+          <button class="btn primary">Salvează cheltuiala</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Ticker column -->
+  <aside class="da-ticker-col">
+    <div class="da-ticker">
+
+      <div class="da-fixed">
+        <h5>De făcut <em>· Bono</em><span class="count">5</span></h5>
+
+        <div class="da-fa urgent">
+          <span class="ico"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 2v6M7 11h.01"/><circle cx="7" cy="7" r="5.5"/></svg></span>
+          <div class="body">
+            <strong>Aprobă D394</strong> înainte de depunere
+            <span class="meta"><span class="actor">Vox</span> · scadent azi 17:00</span>
+          </div>
+        </div>
+
+        <div class="da-fa">
+          <span class="ico"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 7l3 3 7-7"/></svg></span>
+          <div class="body">
+            <strong>Confirmă</strong> 3 cheltuieli ca deductibile
+            <span class="meta"><span class="actor">Iris</span> · 1.247 lei</span>
+          </div>
+        </div>
+
+        <div class="da-fa">
+          <span class="ico"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h8M3 7h8M3 10h5"/></svg></span>
+          <div class="body">
+            <strong>Răspunde</strong> la solicitarea ANAF · TVA Q1
+            <span class="meta"><span class="actor">Mihai</span> · termen 28 apr</span>
+          </div>
+        </div>
+
+        <div class="da-fa">
+          <span class="ico"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="5" r="2.5"/><path d="M2.5 12c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4"/></svg></span>
+          <div class="body">
+            <strong>Verifică client nou</strong> Hartmann GmbH
+            <span class="meta"><span class="actor">Iris</span> · CUI verificat VIES</span>
+          </div>
+        </div>
+
+        <div class="da-fa">
+          <span class="ico"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h10v6H2zM5 7h4"/></svg></span>
+          <div class="body">
+            <strong>Reconciliere</strong> 2 plăți BCR fără factură
+            <span class="meta"><span class="actor">Vox</span> · 4.580 lei</span>
+          </div>
+        </div>
+      </div>
+
+      <h4><span class="pulse-tiny"></span>Live · <em>din motorul Bono</em></h4>
+      <div class="da-ticker-window">
+        <div class="da-ticker-track">
+          <div class="da-tk"><span class="time">07:42</span><div class="body"><span class="actor">Vox</span> a clasificat <strong>23 documente</strong> primite peste noapte.</div></div>
+          <div class="da-tk"><span class="time">07:18</span><div class="body"><span class="actor">Iris</span> a extras date din <strong>2 bonuri</strong> încărcate aseară.</div></div>
+          <div class="da-tk"><span class="time">06:55</span><div class="body"><span class="actor">Alina</span> a verificat <strong>D112</strong> · martie. Toate ok.</div></div>
+          <div class="da-tk"><span class="time">06:33</span><div class="body"><span class="actor">Vox</span> a sincronizat <strong>BCR · cont curent</strong> · 47 tranzacții.</div></div>
+          <div class="da-tk"><span class="time">23 apr</span><div class="body"><span class="actor">Vox</span> a depus <strong>D394</strong> la ANAF.</div></div>
+          <div class="da-tk"><span class="time">23 apr</span><div class="body"><span class="actor">Iris</span> a reconciliat <strong>14 plăți</strong> cu facturile emise.</div></div>
+          <div class="da-tk"><span class="time">22 apr</span><div class="body"><span class="actor">Mihai</span> a răspuns la o solicitare ANAF · TVA Q1.</div></div>
+          <div class="da-tk"><span class="time">22 apr</span><div class="body"><span class="actor">Vox</span> a emis <strong>fact #2026-041</strong> automat (recurent).</div></div>
+          <div class="da-tk"><span class="time">21 apr</span><div class="body"><span class="actor">Iris</span> a clasificat <strong>3 cheltuieli</strong> ca nedeductibile (motiv: cazare personală).</div></div>
+          <div class="da-tk"><span class="time">21 apr</span><div class="body"><span class="actor">Alina</span> a actualizat balanța de verificare · martie.</div></div>
+          <div class="da-tk"><span class="time">20 apr</span><div class="body"><span class="actor">Vox</span> a primit confirmare <strong>SPV</strong> pentru 12 e-facturi.</div></div>
+          <div class="da-tk"><span class="time">19 apr</span><div class="body"><span class="actor">Iris</span> a recunoscut <strong>furnizor nou</strong>: Hartmann Consulting GmbH.</div></div>
+
+          <div class="da-tk-divider">Ce urmează</div>
+
+          <div class="da-tk upcoming"><span class="time">mâine</span><div class="body"><span class="actor">Vox</span> rulează închiderea de aprilie · estimat 04:00.</div></div>
+          <div class="da-tk upcoming"><span class="time">28 apr</span><div class="body"><span class="actor">Alina</span> revizuiește <strong>D300</strong> înainte de depunere.</div></div>
+          <div class="da-tk upcoming"><span class="time">25 mai</span><div class="body">Plată impozit profit · estimat <strong>38.420 lei</strong>.</div></div>
+          <div class="da-tk upcoming"><span class="time">25 mai</span><div class="body"><span class="actor">Vox</span> depune <strong>D394</strong> · aprilie.</div></div>
+          <div class="da-tk upcoming"><span class="time">15 iun</span><div class="body">Termen <strong>D101</strong> · trimestrul II.</div></div>
+
+          <!-- Duplicate for loop -->
+          <div class="da-tk"><span class="time">07:42</span><div class="body"><span class="actor">Vox</span> a clasificat <strong>23 documente</strong> primite peste noapte.</div></div>
+          <div class="da-tk"><span class="time">07:18</span><div class="body"><span class="actor">Iris</span> a extras date din <strong>2 bonuri</strong> încărcate aseară.</div></div>
+          <div class="da-tk"><span class="time">06:55</span><div class="body"><span class="actor">Alina</span> a verificat <strong>D112</strong> · martie. Toate ok.</div></div>
+          <div class="da-tk"><span class="time">06:33</span><div class="body"><span class="actor">Vox</span> a sincronizat <strong>BCR · cont curent</strong> · 47 tranzacții.</div></div>
+          <div class="da-tk"><span class="time">23 apr</span><div class="body"><span class="actor">Vox</span> a depus <strong>D394</strong> la ANAF.</div></div>
+          <div class="da-tk"><span class="time">23 apr</span><div class="body"><span class="actor">Iris</span> a reconciliat <strong>14 plăți</strong> cu facturile emise.</div></div>
+          <div class="da-tk"><span class="time">22 apr</span><div class="body"><span class="actor">Mihai</span> a răspuns la o solicitare ANAF · TVA Q1.</div></div>
+          <div class="da-tk"><span class="time">22 apr</span><div class="body"><span class="actor">Vox</span> a emis <strong>fact #2026-041</strong> automat (recurent).</div></div>
+          <div class="da-tk-divider">Ce urmează</div>
+          <div class="da-tk upcoming"><span class="time">mâine</span><div class="body"><span class="actor">Vox</span> rulează închiderea de aprilie · estimat 04:00.</div></div>
+          <div class="da-tk upcoming"><span class="time">28 apr</span><div class="body"><span class="actor">Alina</span> revizuiește <strong>D300</strong> înainte de depunere.</div></div>
+          <div class="da-tk upcoming"><span class="time">25 mai</span><div class="body">Plată impozit profit · estimat <strong>38.420 lei</strong>.</div></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<script>
+  function switchTab(tab) {
+    const isCheltuieli = tab === 'cheltuieli';
+    document.getElementById('tab-cheltuieli').classList.toggle('active', isCheltuieli);
+    document.getElementById('tab-venituri').classList.toggle('active', !isCheltuieli);
+    document.getElementById('table-cheltuieli').style.display = isCheltuieli ? '' : 'none';
+    document.getElementById('table-venituri').style.display = isCheltuieli ? 'none' : '';
+    document.getElementById('see-all-link').firstChild.textContent = isCheltuieli
+      ? 'Vezi toate cheltuielile '
+      : 'Vezi toate veniturile ';
+  }
+
+  document.querySelectorAll('.da-period button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.da-period button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+
+<!-- ═══ Modal: Emite factură ═══ -->
+<style>
+  .du-modal-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(17,13,16,0.25);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    padding: 32px;
+    animation: duFadeIn 180ms ease-out;
+  }
+  .du-modal-backdrop.open { display: flex; }
+  @keyframes duFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .du-modal {
+    background: var(--c-bej-1);
+    border-radius: 24px;
+    padding: 32px 36px 28px;
+    width: 100%; max-width: 480px;
+    outline: 1px solid #FFFFFF; outline-offset: 16px;
+    position: relative;
+    animation: duModalIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes duModalIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .du-modal .eb {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--c-fog); margin-bottom: 18px;
+  }
+  .du-modal .eb .dt { width: 5px; height: 5px; border-radius: 50%; background: var(--c-pink); }
+  .du-modal h2 {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 28px; line-height: 1.15; letter-spacing: -0.022em;
+    color: var(--c-ink); margin: 0 0 8px;
+  }
+  .du-modal h2 em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; color: var(--c-pink);
+  }
+  .du-modal .lead {
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400;
+    line-height: 1.55; color: var(--c-fog); margin: 0 0 24px;
+  }
+  .du-modal .fields { display: flex; flex-direction: column; gap: 14px; }
+  .du-modal .fields .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .du-modal .fields .row input { min-width: 0; width: 100%; }
+  .du-modal input {
+    height: 44px; box-sizing: border-box;
+    font-family: 'Inter', sans-serif; font-size: 16px;
+    background: #FFFFFF;
+    border: 1px solid rgba(17,13,16,0.12);
+    border-radius: 20px;
+    padding: 0 20px;
+    color: var(--c-ink);
+    transition: border-color 140ms, box-shadow 140ms;
+  }
+  .du-modal input::placeholder { color: var(--c-mist); }
+  .du-modal input:focus {
+    outline: none;
+    border-color: var(--c-pink);
+    box-shadow: 0 0 0 4px rgba(238,67,121,0.10);
+  }
+  .du-modal .submit {
+    width: 100%; height: 44px;
+    margin-top: 22px;
+    font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600;
+    background: var(--c-pink); color: #fff;
+    border: none; border-radius: 24px;
+    cursor: pointer; transition: all 140ms;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .du-modal .submit:hover { background: var(--c-pink-deep); transform: translateY(-1px); box-shadow: var(--sh-pink); }
+  .du-modal .close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(17,13,16,0.06); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--c-fog); transition: all 140ms;
+  }
+  .du-modal .close:hover { background: rgba(17,13,16,0.12); color: var(--c-ink); }
+</style>
+
+<div class="du-modal-backdrop" id="invoice-modal" onclick="if(event.target===this) closeInvoiceModal()">
+  <div class="du-modal">
+    <button class="close" onclick="closeInvoiceModal()" aria-label="Închide">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+    </button>
+    <div class="eb"><span class="dt"></span>Factură nouă</div>
+    <h2>Către cine emitem <em>factura?</em></h2>
+    <p class="lead">Adaugă datele clientului. Le păstrăm pentru următoarele facturi.</p>
+    <div class="fields">
+      <input type="text" placeholder="CUI sau denumire client">
+      <input type="text" placeholder="Descriere serviciu / produs">
+      <div class="row">
+        <input type="text" placeholder="Sumă (RON)">
+        <input type="text" placeholder="Scadență">
+      </div>
+      <input type="text" placeholder="Cont bancar (opțional)">
+    </div>
+    <button class="submit">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7L6 10L11 4"/></svg>
+      Emite factura
+    </button>
+  </div>
+</div>
+
+<script>
+  function openInvoiceModal(){ document.getElementById('invoice-modal').classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeInvoiceModal(){ document.getElementById('invoice-modal').classList.remove('open'); document.body.style.overflow=''; }
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeInvoiceModal(); });
+</script>
+
+</body>
+</html>
