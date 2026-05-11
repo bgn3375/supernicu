@@ -113,8 +113,10 @@ Architect-ul produce un document structurat:
 
 ### Standarde Bono (citește înainte de a proiecta)
 
-- `standards/dotnet-api-blueprint/` — **4-layer API pattern** — definește structura proiectelor, separarea responsabilităților, naming conventions
-- `standards/nhibernate-cqrs/` — **Entity mappings + Query/Command patterns** — definește cum se accesează datele
+**⚠️ Reguli de adaptare**: Vezi `CLAUDE.md > Reguli de adaptare standarde`. SuperNicu folosește FluentNH (nu hbm.xml), 6-step direct-DB (nu 4-layer gateway), record DTOs, Load*/Find* query naming.
+
+- `standards/dotnet-api-blueprint/` — **4-layer API pattern** — citește pt principii de separare responsabilități și naming. **SuperNicu folosește 6-step direct-DB**, nu gateway pattern
+- `standards/nhibernate-cqrs/` — **Entity mappings + Query/Command patterns**. **Adaptare**: mappings cu FluentNH `ClassMap<T>`, nu `.hbm.xml`. Naming: `Load*Query`/`Find*Query`
 - `standards/dotnet-quartz-jobs/` — **Scheduled tasks** — definește cum se structurează job-urile periodice
 
 ### Documentația proiectului

@@ -62,6 +62,75 @@ Skill-uri de referință din `bono-ro/bono-skills` — standardele canonice pent
 | `internal-email-template` | Email templates branded Bono, template pipeline | nicu-backend |
 | `react-19-vite-frontend` | React patterns, forms, API layer, hooks, Edge DS, templates | nicu-frontend, nicu-review |
 
+## Reguli de adaptare standarde (`standards/` → SuperNicu)
+
+Standardele din `standards/` sunt copiate 1:1 din `bono-ro/bono-skills`. Ele sunt scrise pentru un stack generic Bono. SuperNicu adaptează aceste standarde la stack-ul său specific. Când există conflict, **regulile din skills/ câștigă**. Standardele sunt **referință de principii**, skills/ sunt **instrucțiuni de execuție**.
+
+### Mapping-uri ORM
+- **Standard** (`nhibernate-cqrs/entity-mappings`): folosește XML `.hbm.xml`
+- **SuperNicu**: folosește **FluentNHibernate `ClassMap<T>`** — NU `.hbm.xml`
+- Principiile din standard (sibling placement, naming, lazy loading) se aplică. Sintaxa concretă e FluentNH
+
+### Arhitectură API
+- **Standard** (`dotnet-api-blueprint`): 4-layer pattern (ServiceInterface → HTTP Client → ServiceAdapter → Controller) cu `GlobalExceptionHandler`
+- **SuperNicu**: **6-step direct-DB pattern** (DomainModel → Mapping → ServiceInterface → CQRS → ServiceAdapter → Controller) cu `OperationResult<T>` + `.ToActionResult()`
+- Standard-ul `dotnet-api-blueprint` se citește pentru principii (separare responsabilități, naming, conventions). Pattern-ul concret de implementare e cel din `nicu-backend/SKILL.md`
+- `GlobalExceptionHandler` din standard coexistă cu `OperationResult<T>`: OperationResult gestionează business logic (validări, not found), GlobalExceptionHandler prinde excepții neașteptate (null ref, DB down)
+
+### Auth și multi-tenant
+- **Standard**: nu impune un model specific
+- **SuperNicu**: `TenantControllerBase` + JWT + `X-Team-Id` header + `FallbackPolicy` deny-by-default
+- Toate controller-ele customer extind `TenantControllerBase`. Admin controller-ele au `[Authorize(Roles = "Admin")]`
+
+### Query naming
+- **Standard** (`nhibernate-cqrs`): `Load*Query` (known key), `Find*Query` (search criteria)
+- **SuperNicu**: **adoptă aceeași convenție** — `Load*Query` pt ID lookup, `Find*Query` pt search/filter
+
+### DTOs
+- **Standard**: folosește `class` în exemple
+- **SuperNicu**: DTOs sunt **`record` types** cu `required` properties și colecții `= []`
+
+### Return types
+- **SuperNicu**: `ValueTask<OperationResult<T>>` pe **interfaces** de service, `Task<IActionResult>` pe **controllers**
+- Diferența: ValueTask pentru interfaces (optimizare când rezultatul e sincron), Task pentru controllers (ASP.NET Core convention)
+
+### Frontend
+- **Standard** (`react-19-vite-frontend`): Vite 7 + React Router 7 + Tailwind **4**
+- **SuperNicu**: **Next.js 15.5 App Router** + Tailwind **3.4**
+- Adaptări obligatorii:
+  - `src/pages/` → `app/dashboard/[teamId]/` (App Router file-based routing)
+  - `useSearchParams` (React Router) → `useSearchParams` (next/navigation)
+  - `src/router.tsx` → layout-uri `app/` cu `layout.tsx`
+  - Client Components doar cu `"use client"`, Server Components by default
+  - API calls prin server actions, nu direct din client
+  - Tailwind 4 syntax → Tailwind 3.4 syntax (ex: `@theme` nu se aplică)
+- Principiile se aplică identic: feature verticals, TanStack Query hooks, query keys, forms pattern, no-useEffect rules
+
+### Design System
+- **Sursa canonică**: `shared/bono-ds.css` din repo-ul frontend — acesta e fișierul real cu tokeni
+- **Referință informativă**: `standards/react-19-vite-frontend/references/edge-design-system.md` — documentație despre DS
+- Când diferă → `bono-ds.css` câștigă (e codul real)
+- `.field-label`: urmează valorile din `bono-ds.css` (nu cele din edge-design-system.md dacă diferă)
+
+### Structura proiect SuperNicu
+
+```
+Backend (SRV.Bono.{Project}):
+├── Api/Controllers/           — thin controllers
+├── Api.ServiceInterface/      — interfaces + DTOs (record types)
+├── DomainModel/               — entities + FluentNH mappings
+├── DomainServices/            — CQRS queries + commands + service adapters
+└── Infrastructure.NHibernate/ — NHibernate base classes, helpers
+
+Frontend (WEB.Bono.{Project}):
+├── app/                       — Next.js App Router pages
+├── components/                — React components
+├── hooks/                     — TanStack Query hooks
+├── lib/api/                   — API layer
+├── types/                     — TypeScript interfaces
+└── shared/bono-ds.css         — Design System tokens (canonical)
+```
+
 ## Input documents
 
 - PRD funcțional — documentul care descrie ce se construiește

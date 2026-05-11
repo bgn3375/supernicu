@@ -133,28 +133,47 @@ public class MyEntityMap : ClassMap<MyEntity>
 ### Pas 3: Service Interface + DTOs (`Api.ServiceInterface/`)
 
 ```csharp
-// Interface
+// Interface — ValueTask pe interfaces (optimizare pt rezultate sincrone)
 public interface IMyService
 {
-    Task<OperationResult<MyResponse>> GetById(string teamId, Guid id);
-    Task<OperationResult<PagedQueryResult<MyListItem>>> List(string teamId, MyFilterRequest filter);
-    Task<OperationResult<MyResponse>> Create(string teamId, string userId, CreateMyRequest request);
-    Task<OperationResult<MyResponse>> Update(string teamId, Guid id, UpdateMyRequest request);
-    Task<OperationResult<bool>> Delete(string teamId, Guid id);
+    ValueTask<OperationResult<MyResponse>> GetById(string teamId, Guid id);
+    ValueTask<OperationResult<PagedQueryResult<MyListItem>>> List(string teamId, MyFilterRequest filter);
+    ValueTask<OperationResult<MyResponse>> Create(string teamId, string userId, CreateMyRequest request);
+    ValueTask<OperationResult<MyResponse>> Update(string teamId, Guid id, UpdateMyRequest request);
+    ValueTask<OperationResult<bool>> Delete(string teamId, Guid id);
 }
 
-// DTOs
-public class CreateMyRequest { ... }
-public class UpdateMyRequest { ... }
-public class MyResponse { ... }
-public class MyFilterRequest : PagedRequest { ... }
+// DTOs — record types cu required properties
+public record CreateMyRequest(
+    required string Name,
+    string? Description = null,
+    IReadOnlyList<string> Tags = []
+);
+
+public record UpdateMyRequest(
+    required string Name,
+    string? Description = null
+);
+
+public record MyResponse(
+    required Guid Id,
+    required string Name,
+    string? Description,
+    DateTime CreatedAt
+);
+
+public record MyFilterRequest : PagedRequest
+{
+    public string? Search { get; init; }
+}
 ```
 
 ### Pas 4: CQRS Queries + Commands (`DomainServices/`)
 
-**Query** (citeste date, deschide propria sesiune, filtrează pe team_id):
+**Query** — naming: `Load*Query` (known key/ID), `Find*Query` (search/filter):
 ```csharp
-public class GetMyEntityQuery : NHibernateGenericQuery<MyEntity>
+// LoadMyEntityQuery — lookup by known ID
+public class LoadMyEntityQuery : NHibernateGenericQuery<MyEntity>
 {
     public async Task<MyEntity> Execute(string teamId, Guid id)
     {
@@ -184,10 +203,10 @@ Implementeaza interfata, coordoneaza queries + commands, business logic.
 ```csharp
 public class MyService : IMyService
 {
-    private readonly GetMyEntityQuery _getQuery;
+    private readonly LoadMyEntityQuery _loadQuery;
     private readonly SaveMyEntityCommand _saveCommand;
     
-    public async Task<OperationResult<MyResponse>> Create(string teamId, string userId, CreateMyRequest request)
+    public async ValueTask<OperationResult<MyResponse>> Create(string teamId, string userId, CreateMyRequest request)
     {
         // Validari
         if (string.IsNullOrEmpty(request.Name))
@@ -242,6 +261,11 @@ public class MyController : TenantControllerBase
 - `deleted_at` pt soft delete (nu DELETE fizic)
 - UUID (CHAR(36)) pt primary keys — **niciodată auto-increment secvențial pe ID-uri expuse în API**
 - `OperationResult<T>` pt TOATE return types din services
+- `ValueTask<OperationResult<T>>` pe interfaces, `Task<IActionResult>` pe controllers
+- **Record types** pt DTOs: `record` cu `required` properties, colecții `= []`. Nu `class`
+- **Query naming**: `Load*Query` (lookup by known key/ID), `Find*Query` (search/filter criteria)
+- **Command naming**: `Save*Command` (create/update), `[Verb]*Command` (acțiuni: Cancel, Approve, Archive)
+- **FluentNHibernate** `ClassMap<T>` pt mappings — NU `.hbm.xml`
 - Audit log pt actiuni importante
 - Customer controllers extind `TenantControllerBase`, admin controllers au `[Authorize(Roles = "Admin")]`
 - Fiecare `[AllowAnonymous]` are un comentariu cu motivul
@@ -262,8 +286,10 @@ public async Task Create_ValidRequest_ReturnsSuccess()
 
 ### Standarde Bono (OBLIGATORIU — citește înainte de a scrie cod)
 
-- `standards/dotnet-api-blueprint/` — **4-layer API pattern** (ServiceInterface → HTTP Client → ServiceAdapter → Controller). Citește SKILL.md + references/conventions.md + references/worked-example.md
-- `standards/nhibernate-cqrs/` — **Query/Command patterns** detaliate. Citește SKILL.md + references relevante per task (entity-mappings, query-patterns, command-patterns, execution-modes, queryover-reference)
+**⚠️ Reguli de adaptare**: Standardele sunt referință de principii. Când conflictul apare, acest SKILL.md câștigă. Vezi `CLAUDE.md > Reguli de adaptare standarde` pentru lista completă.
+
+- `standards/dotnet-api-blueprint/` — **4-layer API pattern** — citește pt principii (separare responsabilități, naming, conventions). **Adaptare**: SuperNicu folosește 6-step direct-DB pattern, nu 4-layer gateway. `GlobalExceptionHandler` coexistă cu `OperationResult<T>` (business errors vs unexpected exceptions)
+- `standards/nhibernate-cqrs/` — **Query/Command patterns** detaliate. Citește SKILL.md + references relevante per task. **Adaptare**: entity-mappings zice "no FluentNH" → SuperNicu folosește FluentNH `ClassMap<T>`. Principiile (sibling placement, naming Load*/Find*) se aplică
 - `standards/dotnet-quartz-jobs/` — **Scheduled tasks** pattern cu Quartz.NET. Citește SKILL.md + references/logging-patterns.md
 - `standards/internal-email-template/` — **Email templates** branded Bono. Citește SKILL.md + references/template-pipeline.md
 

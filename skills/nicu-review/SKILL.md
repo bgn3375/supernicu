@@ -12,11 +12,11 @@ Dupa ce nicu-qa confirma ca build-ul e ok si testele trec. Ultimul pas inainte d
 
 **Backend (6-step pattern):**
 - [ ] Entitate in `DomainModel/` — proprietati corecte, virtual
-- [ ] Mapping in `Infrastructure.NHibernate/Mappings/` — Table, Id, Map, tenantFilter
-- [ ] Interface + DTOs in `Api.ServiceInterface/` — OperationResult<T> return types
-- [ ] Query/Command in `DomainServices/` — Query deschide sesiune, Command primeste sesiune
+- [ ] Mapping in `Infrastructure.NHibernate/Mappings/` — FluentNH `ClassMap<T>`, Table, Id, Map, tenantFilter
+- [ ] Interface + DTOs in `Api.ServiceInterface/` — `ValueTask<OperationResult<T>>` pe interface, DTOs sunt `record` types cu `required`
+- [ ] Query/Command in `DomainServices/` — naming: `Load*Query` (ID), `Find*Query` (search), `Save*Command`, `[Verb]*Command`
 - [ ] Service adapter in `DomainServices/` — implementeaza interface, coordoneaza Q/C
-- [ ] Controller in `Api/Controllers/` — thin, delegheaza, ToActionResult()
+- [ ] Controller in `Api/Controllers/` — thin, `Task<IActionResult>`, `TenantControllerBase`, `.ToActionResult()`
 
 **Frontend (6-step pattern):**
 - [ ] Types in `types/` — interfaces concrete, no `any`

@@ -171,7 +171,7 @@ export default async function MyEntityPage({ params }: { params: { teamId: strin
 - `.card-tonal` — bej-1 bg, no border, r-md
 - `.card-hairline` — white bg, rule-card border, r-md
 - `.tbl` — 48px row height, 0 22px padding
-- `.field-label` — 11px, 600, fog, uppercase, 0.06em spacing
+- `.field-label` — 12px, 500, fog, sentence-case, 0.04em spacing (din `bono-ds.css` — sursa canonică)
 
 ### INTERZIS
 - Gradient-uri (linear-gradient, radial-gradient)
@@ -201,10 +201,20 @@ export default async function MyEntityPage({ params }: { params: { teamId: strin
 
 ### Standarde Bono (OBLIGATORIU — citește înainte de a scrie cod)
 
-- `standards/react-19-vite-frontend/` — **Pattern-uri React/frontend** (forms, api-layer, hooks, infinite-list, no-useEffect, worked-example, templates). Notă: standardul e pe Vite/React Router, SuperNicu e pe Next.js App Router — adaptează pattern-urile la Next.js dar respectă principiile
-- `standards/react-19-vite-frontend/references/edge-design-system.md` — **Design System The Edge** referință completă
+**⚠️ Reguli de adaptare**: Standardul e pe Vite/React Router/Tailwind 4. SuperNicu e pe Next.js App Router/Tailwind 3.4. Principiile se aplică identic, sintaxa se adaptează. Vezi `CLAUDE.md > Reguli de adaptare standarde` pentru lista completă.
+
+**Adaptări concrete (Vite → Next.js):**
+- `src/pages/` → `app/dashboard/[teamId]/` (file-based routing)
+- `useSearchParams` (React Router) → `useSearchParams` (next/navigation)
+- `src/router.tsx` → `layout.tsx` files
+- Client Components cu `"use client"`, Server Components by default
+- API calls prin server actions (`app/actions/`), nu direct din client
+- Tailwind 4 syntax (`@theme`, etc.) → Tailwind 3.4 syntax
+
+- `standards/react-19-vite-frontend/` — **Pattern-uri React/frontend** (forms, api-layer, hooks, infinite-list, no-useEffect, worked-example, templates)
+- `standards/react-19-vite-frontend/references/edge-design-system.md` — **Design System The Edge** referință informativă. **Sursa canonică pentru tokeni = `shared/bono-ds.css`**. Când diferă, bono-ds.css câștigă
 - `standards/react-19-vite-frontend/references/forms.md` — **Form patterns** cu validare
-- `standards/react-19-vite-frontend/references/api-layer.md` — **API layer** patterns
+- `standards/react-19-vite-frontend/references/api-layer.md` — **API layer** patterns (adaptează la server actions)
 - `standards/react-19-vite-frontend/references/no-use-effect.md` — **Anti-pattern useEffect** — când NU se folosește
 
 ### Documentația proiectului
