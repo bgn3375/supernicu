@@ -149,12 +149,12 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 - Instrucțiune obligatorie: „Înainte să scrii cod, citește ÎN ORDINE:
   1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu
   2. `GUARDRAILS.md` — pattern-uri de eroare cunoscute
-  3. `~/.claude/skills/bono-dotnet-api/SKILL.md` — pattern API 6-step (DomainModel → Mapping → Interface → CQRS → Adapter → Controller)
-  4. `~/.claude/skills/bono-nhibernate-cqrs/SKILL.md` — Load/Find/Save/Delete cu FluentNH + multi-tenant filter
-  5. Dacă feature-ul include scheduled jobs: `~/.claude/skills/bono-quartz-jobs/SKILL.md`
-  6. Dacă feature-ul trimite email: `~/.claude/skills/bono-email-template/SKILL.md`
+  3. `~/.claude/skills/dotnet-api-blueprint/SKILL.md` + `references/` (worked-example, conventions) — pattern API canonic Bono
+  4. `~/.claude/skills/nhibernate-cqrs/SKILL.md` + `references/` (query-patterns, command-patterns, queryover-reference, execution-modes, entity-mappings) — queries/commands NHibernate
+  5. Dacă feature-ul include scheduled jobs: `~/.claude/skills/dotnet-quartz-jobs/SKILL.md` + `references/logging-patterns.md`
+  6. Dacă feature-ul trimite email: `~/.claude/skills/internal-email-template/SKILL.md` + `references/template-pipeline.md` + exemplele din `assets/`
 
-  Aplică pattern-urile EXACT cum sunt descrise."
+  Aplică pattern-urile EXACT cum sunt descrise. Când CLAUDE.md contrazice un standard (ex: FluentNH în loc de .hbm.xml, 6-step în loc de 4-layer), CLAUDE.md câștigă — vezi 'Adaptări' din CLAUDE.md."
 
 **Pattern 6-step backend** (din CLAUDE.md):
 1. Domain Model → 2. FluentNH Mapping → 3. Service Interface + DTOs (record types) → 4. CQRS Queries (Load*/Find*) + Commands → 5. Service Adapter → 6. Controller (TenantControllerBase)
@@ -163,11 +163,10 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 - SPEC-urile aprobate (TOATE secțiunile — S1-S10 sunt pentru frontend)
 - API contracts din Faza 2
 - Instrucțiune obligatorie: „Înainte să scrii cod, citește ÎN ORDINE:
-  1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu
-  2. `~/.claude/skills/bono-design/bono-ds.css` — Design System (sursa canonică de tokeni)
-  3. `~/.claude/skills/bono-design-system/SKILL.md` — reguli enforcement DS (tokens-only, forbidden patterns)
-  4. `~/.claude/skills/react-19-vite-frontend/SKILL.md` — pattern frontend (Vite 7 + React Router 7 + Tailwind 4)
-  5. SPEC-ul paginii pe care o implementezi (toate secțiunile S1-S10)
+  1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu + adaptări
+  2. `~/.claude/skills/edge-33/SKILL.md` + `bono-ds.css` + `references/` (4 HTML pagini exemplu) + `BRAND.md` — Design System canonic Bono The Edge
+  3. `~/.claude/skills/react-19-vite-frontend/SKILL.md` + `references/` (api-layer, forms, hooks, router, infinite-list, no-use-effect, edge-design-system, worked-example) + `references/templates/` — pattern frontend canonic Bono
+  4. SPEC-ul paginii pe care o implementezi (toate secțiunile S1-S10)
 
   ⚠ ADAPTĂRI obligatorii pentru SuperNicu (react-19-vite-frontend e generic, SuperNicu folosește):
   - Next.js 15.5 App Router (NU Vite + React Router)

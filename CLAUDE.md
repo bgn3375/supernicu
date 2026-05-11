@@ -96,19 +96,18 @@ Codul sigur e calea implicită. Codul nesigur cere acțiune explicită.
 - X-Team-Id al altui tenant → zero date returnate
 - Grep logs: password, token, apikey, secret, authorization → zero matches
 
-## Skill-uri Bono auto-activabile
+## Skill-uri Bono canonice (de la Prodan)
 
-Skill-urile Bono sunt instalate ca user-level skills în `~/.claude/skills/` și se auto-activează când Claude întâlnește cod relevant. Sunt deja adaptate la stack-ul SuperNicu.
+Skill-urile canonice Bono sunt instalate ca user-level skills în `~/.claude/skills/`. Sunt scrise de Prodan (bono-ro/bono-skills) și se folosesc **în integralitatea lor** — SKILL.md + toate fișierele din `references/` și `assets/`.
 
-| Skill | Când se activează |
-|-------|-------------------|
-| `bono-dotnet-api` | Cod .NET API: Controllers, Services, DomainModel, Mappings — pattern 6-step |
-| `bono-nhibernate-cqrs` | Query/Command/Mapping în DomainServices sau Infrastructure.NHibernate |
-| `bono-quartz-jobs` | Job.cs sau JobRegistry — scheduled tasks |
-| `bono-email-template` | Email templates (.html în Emails/) sau *EmailBuilder.cs |
-| `bono-design` | Brand assets + DS canonic (CSS + 4 pagini HTML referință) |
-| `bono-design-system` | Frontend UI files — enforcement DS (tokens-only, no hex hardcoded) |
-| `react-19-vite-frontend` | Pattern frontend generic (SuperNicu adaptează la Next.js 15.5 — vezi mai jos) |
+| Skill | Conținut | Când se activează |
+|-------|----------|-------------------|
+| `dotnet-api-blueprint` | SKILL.md + references/ (worked-example, conventions) | Cod .NET API |
+| `nhibernate-cqrs` | SKILL.md + references/ (query-patterns, command-patterns, queryover-reference, execution-modes, entity-mappings) | Queries/Commands/Mappings NHibernate |
+| `dotnet-quartz-jobs` | SKILL.md + references/logging-patterns.md | Scheduled jobs |
+| `internal-email-template` | SKILL.md + references/template-pipeline.md + assets/ (2 HTML exemple) | Email templates |
+| `react-19-vite-frontend` | SKILL.md + evals/ + references/ (api-layer, forms, hooks, router, infinite-list, no-use-effect, edge-design-system, worked-example, templates/) | Frontend UI |
+| `edge-33` | SKILL.md + BRAND.md + bono-ds.css + references/ (4 HTML pagini) + assets/ + uploads/ | Design System Bono "The Edge" |
 
 În Faza 3, SuperNicu invocă explicit aceste skill-uri (defense in depth — chiar dacă auto-activation eșuează, pipeline-ul forțează citirea).
 
@@ -123,11 +122,19 @@ Skill-urile Bono sunt instalate ca user-level skills în `~/.claude/skills/` și
 - Server Components by default, `"use client"` doar când necesar
 - `@theme` (Tailwind 4) nu se aplică
 
+### Adaptări dotnet-api-blueprint + nhibernate-cqrs → SuperNicu stack
+
+Standardele Prodan sunt scrise pentru un Bono generic. SuperNicu folosește:
+- **ORM**: FluentNHibernate `ClassMap<T>` (NU XML `.hbm.xml`) — principiile entity-mappings se aplică, sintaxa e FluentNH
+- **API**: 6-step direct-DB (DomainModel → Mapping → ServiceInterface → CQRS → ServiceAdapter → Controller) — pattern-ul 4-layer din dotnet-api-blueprint se adaptează la 6-step
+- **DTOs**: `record` types cu `required` + colecții `= []` (NU class)
+- **Return types**: `ValueTask<OperationResult<T>>` pe interfaces, `Task<IActionResult>` pe controllers
+- **Auth**: `TenantControllerBase` + JWT + `X-Team-Id` + `FallbackPolicy` deny-by-default
+
 ### Design System
 
-- **Sursa canonică**: `~/.claude/skills/bono-design/bono-ds.css` (skill auto-activat)
-- **Mirror local**: `shared/bono-ds.css` (în repo-ul SuperNicu, pentru portabilitate)
-- **Enforcement**: `~/.claude/skills/bono-design-system/SKILL.md` — reguli forbidden/allowed
+- **Sursa canonică**: `~/.claude/skills/edge-33/` (skill auto-activat, conține bono-ds.css + brand + referințe)
+- **Mirror local în repo**: `shared/bono-ds.css` (pentru portabilitate când clonezi SuperNicu fără ~/.claude/)
 
 ## Structura proiect
 
