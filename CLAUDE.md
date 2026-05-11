@@ -96,32 +96,38 @@ Codul sigur e calea implicită. Codul nesigur cere acțiune explicită.
 - X-Team-Id al altui tenant → zero date returnate
 - Grep logs: password, token, apikey, secret, authorization → zero matches
 
-## Adaptări bono-skills → SuperNicu
+## Skill-uri Bono auto-activabile
 
-Standardele canonice Bono sunt instalate ca user-level skills în `~/.claude/skills/` (dotnet-api-blueprint, nhibernate-cqrs, dotnet-quartz-jobs, internal-email-template, react-19-vite-frontend). Se auto-activează când Claude întâlnește cod relevant, ȘI sunt invocate explicit de SuperNicu în Faza 3 (vezi `skills/supernicu/SKILL.md`). Ele sunt scrise pentru un stack generic Bono. Când există conflict, **regulile din acest fișier câștigă**. Standardele sunt referință de principii, CLAUDE.md + SKILL.md sunt instrucțiuni de execuție.
+Skill-urile Bono sunt instalate ca user-level skills în `~/.claude/skills/` și se auto-activează când Claude întâlnește cod relevant. Sunt deja adaptate la stack-ul SuperNicu.
 
-### ORM: FluentNH, nu XML
-- **bono-skills**: `.hbm.xml`
-- **SuperNicu**: `ClassMap<T>` FluentNHibernate
-- Principiile (sibling placement, naming, lazy loading) se aplică. Sintaxa e FluentNH
+| Skill | Când se activează |
+|-------|-------------------|
+| `bono-dotnet-api` | Cod .NET API: Controllers, Services, DomainModel, Mappings — pattern 6-step |
+| `bono-nhibernate-cqrs` | Query/Command/Mapping în DomainServices sau Infrastructure.NHibernate |
+| `bono-quartz-jobs` | Job.cs sau JobRegistry — scheduled tasks |
+| `bono-email-template` | Email templates (.html în Emails/) sau *EmailBuilder.cs |
+| `bono-design` | Brand assets + DS canonic (CSS + 4 pagini HTML referință) |
+| `bono-design-system` | Frontend UI files — enforcement DS (tokens-only, no hex hardcoded) |
+| `react-19-vite-frontend` | Pattern frontend generic (SuperNicu adaptează la Next.js 15.5 — vezi mai jos) |
 
-### API: 6-step, nu 4-layer
-- **bono-skills**: 4-layer (ServiceInterface → HTTP Client → ServiceAdapter → Controller)
-- **SuperNicu**: 6-step direct-DB (DomainModel → Mapping → ServiceInterface → CQRS → ServiceAdapter → Controller)
-- `GlobalExceptionHandler` coexistă cu `OperationResult<T>`: OperationResult = business logic, GlobalExceptionHandler = excepții neașteptate
+În Faza 3, SuperNicu invocă explicit aceste skill-uri (defense in depth — chiar dacă auto-activation eșuează, pipeline-ul forțează citirea).
 
-### Frontend: Next.js 15.5, nu Vite
-- **bono-skills**: Vite 7 + React Router 7 + Tailwind 4
-- **SuperNicu**: Next.js 15.5 App Router + Tailwind 3.4
+### Adaptări react-19-vite-frontend → Next.js 15.5
+
+`react-19-vite-frontend` e scris pentru Vite 7 + React Router 7 + Tailwind 4. SuperNicu folosește Next.js 15.5 App Router + Tailwind 3.4. Aplică principiile (feature verticals, TanStack Query, query keys, forms, no-useEffect), dar adaptează:
+
 - `src/pages/` → `app/dashboard/[teamId]/`
 - `src/router.tsx` → `layout.tsx` în `app/`
+- React Router → `next/navigation`
+- API calls din client → server actions în `app/actions/`
+- Server Components by default, `"use client"` doar când necesar
 - `@theme` (Tailwind 4) nu se aplică
-- Principiile identice: feature verticals, TanStack Query, query keys, forms, no-useEffect
 
 ### Design System
-- **Sursa canonică**: `shared/bono-ds.css` (fișierul real cu tokeni)
-- **Referință informativă**: `bono-skills/react-19-vite-frontend/references/edge-design-system.md`
-- Când diferă → `bono-ds.css` câștigă
+
+- **Sursa canonică**: `~/.claude/skills/bono-design/bono-ds.css` (skill auto-activat)
+- **Mirror local**: `shared/bono-ds.css` (în repo-ul SuperNicu, pentru portabilitate)
+- **Enforcement**: `~/.claude/skills/bono-design-system/SKILL.md` — reguli forbidden/allowed
 
 ## Structura proiect
 

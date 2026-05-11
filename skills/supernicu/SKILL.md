@@ -149,12 +149,12 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 - Instrucțiune obligatorie: „Înainte să scrii cod, citește ÎN ORDINE:
   1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu
   2. `GUARDRAILS.md` — pattern-uri de eroare cunoscute
-  3. `~/.claude/skills/dotnet-api-blueprint/SKILL.md` — pattern API canonică Bono
-  4. `~/.claude/skills/nhibernate-cqrs/SKILL.md` — pattern queries/commands
-  5. Dacă feature-ul include scheduled jobs: `~/.claude/skills/dotnet-quartz-jobs/SKILL.md`
-  6. Dacă feature-ul trimite email: `~/.claude/skills/internal-email-template/SKILL.md`
+  3. `~/.claude/skills/bono-dotnet-api/SKILL.md` — pattern API 6-step (DomainModel → Mapping → Interface → CQRS → Adapter → Controller)
+  4. `~/.claude/skills/bono-nhibernate-cqrs/SKILL.md` — Load/Find/Save/Delete cu FluentNH + multi-tenant filter
+  5. Dacă feature-ul include scheduled jobs: `~/.claude/skills/bono-quartz-jobs/SKILL.md`
+  6. Dacă feature-ul trimite email: `~/.claude/skills/bono-email-template/SKILL.md`
 
-  Aplică pattern-urile EXACT cum sunt descrise. Când CLAUDE.md contrazice un standard bono-skills, CLAUDE.md câștigă (vezi secțiunea 'Adaptări bono-skills' din CLAUDE.md)."
+  Aplică pattern-urile EXACT cum sunt descrise."
 
 **Pattern 6-step backend** (din CLAUDE.md):
 1. Domain Model → 2. FluentNH Mapping → 3. Service Interface + DTOs (record types) → 4. CQRS Queries (Load*/Find*) + Commands → 5. Service Adapter → 6. Controller (TenantControllerBase)
@@ -164,11 +164,19 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 - API contracts din Faza 2
 - Instrucțiune obligatorie: „Înainte să scrii cod, citește ÎN ORDINE:
   1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu
-  2. `shared/bono-ds.css` — Design System (sursa canonică de tokeni)
-  3. `~/.claude/skills/react-19-vite-frontend/SKILL.md` — pattern frontend canonic Bono
-  4. SPEC-ul paginii pe care o implementezi (toate secțiunile S1-S10)
+  2. `~/.claude/skills/bono-design/bono-ds.css` — Design System (sursa canonică de tokeni)
+  3. `~/.claude/skills/bono-design-system/SKILL.md` — reguli enforcement DS (tokens-only, forbidden patterns)
+  4. `~/.claude/skills/react-19-vite-frontend/SKILL.md` — pattern frontend (Vite 7 + React Router 7 + Tailwind 4)
+  5. SPEC-ul paginii pe care o implementezi (toate secțiunile S1-S10)
 
-  Aplică pattern-urile EXACT. Când CLAUDE.md sau SPEC-ul contrazice react-19-vite-frontend (ex: Next.js 15.5 nu Vite, Tailwind 3.4 nu 4), CLAUDE.md/SPEC-ul câștigă (vezi 'Adaptări bono-skills' din CLAUDE.md). Implementează pixel-perfect, câmp cu câmp."
+  ⚠ ADAPTĂRI obligatorii pentru SuperNicu (react-19-vite-frontend e generic, SuperNicu folosește):
+  - Next.js 15.5 App Router (NU Vite + React Router)
+  - Tailwind 3.4 (NU 4 — `@theme` nu se aplică)
+  - `app/dashboard/[teamId]/` (NU `src/pages/`)
+  - Server actions în `app/actions/` (NU API calls din client)
+  - Server Components by default, `\"use client\"` doar când necesar
+
+  Implementează pixel-perfect, câmp cu câmp."
 
 **Pattern 6-step frontend** (din CLAUDE.md):
 1. Types → 2. API Layer → 3. TanStack Query Hooks → 4. Feature Components → 5. Pages → 6. Navigation
