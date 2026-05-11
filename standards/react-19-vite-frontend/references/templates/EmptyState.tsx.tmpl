@@ -1,0 +1,30 @@
+// src/components/{feature}/{Feature}EmptyState.tsx
+// Two variants: hasActiveFilters (suggest clearing) vs no-data (suggest creating).
+
+import { EmptyState } from '@/components/shared/EmptyState';
+import { FileText } from 'lucide-react';
+
+interface Props {
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
+}
+
+export function InvoiceEmptyState({ hasActiveFilters, onClearFilters }: Props) {
+  if (hasActiveFilters) {
+    return (
+      <EmptyState
+        icon={<FileText className="size-10 text-muted-foreground" />}
+        title="No invoices match your filters"
+        description="Try clearing filters to see the full list."
+        action={{ label: 'Clear filters', onClick: onClearFilters }}
+      />
+    );
+  }
+  return (
+    <EmptyState
+      icon={<FileText className="size-10 text-muted-foreground" />}
+      title="No invoices yet"
+      description="Invoices you create will appear here."
+    />
+  );
+}

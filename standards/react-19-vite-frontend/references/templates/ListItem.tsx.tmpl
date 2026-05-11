@@ -1,0 +1,44 @@
+// src/components/{feature}/{Feature}ListItem.tsx
+// Status badge idiom: static Record<{Feature}Status, string> of Tailwind class strings.
+// Tailwind palette (not semantic tokens) intentional for 4+-state spectrums.
+
+import type { Invoice, InvoiceStatus } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { INVOICE_STATUS_OPTIONS } from '@/lib/invoiceFilterOptions';
+import { formatDate, formatNumber } from '@/lib/utils';
+
+const STATUS_CLASS_MAP: Record<InvoiceStatus, string> = {
+  draft: 'border-gray-200 bg-gray-50 text-gray-700',
+  sent: 'border-blue-200 bg-blue-50 text-blue-700',
+  paid: 'border-green-200 bg-green-50 text-green-700',
+  overdue: 'border-red-200 bg-red-50 text-red-700',
+  cancelled: 'border-gray-200 bg-gray-50 text-gray-500',
+};
+
+function getStatusLabel(status: InvoiceStatus): string {
+  return INVOICE_STATUS_OPTIONS.find((o) => o.value === status)?.label ?? status;
+}
+
+interface InvoiceListItemProps {
+  invoice: Invoice;
+}
+
+export function InvoiceListItem({ invoice }: InvoiceListItemProps) {
+  return (
+    <div className="grid grid-cols-[2fr_1fr_1fr] md:grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center px-4 py-3">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-foreground">{invoice.Number}</p>
+      </div>
+      <span className="truncate text-sm text-foreground">{invoice.CustomerName}</span>
+      <Badge variant="outline" className={STATUS_CLASS_MAP[invoice.Status]}>
+        {getStatusLabel(invoice.Status)}
+      </Badge>
+      <span className="hidden text-sm text-foreground md:block">
+        {formatNumber(invoice.TotalAmount)} RON
+      </span>
+      <span className="hidden text-sm text-muted-foreground md:block">
+        {formatDate(invoice.IssuedAt)}
+      </span>
+    </div>
+  );
+}

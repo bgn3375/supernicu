@@ -1,0 +1,176 @@
+// src/pages/{Feature}s.tsx
+// Substitute: Invoice → {Feature}, invoices → {feature}s, invoice → {feature}.
+//
+// Contract:
+//   - Filters read from URL via useSearchParams(); enum params validated against options before coercing.
+//   - Search text: URL + local state; URL → local in useEffect; debounce local → URL at 400ms; cancel on unmount.
+//   - Scroll to top on filter change via useRef first-render flag + window.scrollTo({ top: 0, behavior: 'instant' }).
+//   - Render branches: isInitialLoading → skeleton; items.length === 0 → empty state; otherwise → InfiniteScrollList.
+//   - Header row sits OUTSIDE InfiniteScrollList.
+//   - Always render the filter bar, even while loading.
+//
+// Delete flow notes:
+//   - onConfirm is async; errors propagate from mutateAsync so ConfirmDialog keeps itself open.
+//   - Invalidation uses invoicesQueryKeys.all so every list filter permutation refetches.
+//   - onError re-throws after routing to errorService so the dialog catches it.
+//   - 'delete' must exist in the Operation union before compile — extend per api-layer.md § Extending errorService.
+
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useDebouncedCallback } from 'use-debounce';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useInvoicesInfiniteQuery, useDeleteInvoice } from '@/hooks';
+import type { InvoiceStatus } from '@/types';
+import { INVOICE_STATUS_OPTIONS } from '@/lib/invoiceFilterOptions';
+import { invoicesQueryKeys } from '@/api/invoices/invoicesQueryKeys';
+import { SearchInput } from '@/components/filters/SearchInput';
+import { SelectWithClear } from '@/components/ui/select-with-clear';
+import { InfiniteScrollList } from '@/components/list/InfiniteScrollList';
+import { ConfirmDialog } from '@/components/dialog/ConfirmDialog';
+import { InvoiceListItem } from '@/components/invoices/InvoiceListItem';
+import { InvoiceListHeader } from '@/components/invoices/InvoiceListHeader';
+import { InvoiceListSkeleton } from '@/components/invoices/InvoiceListSkeleton';
+import { InvoiceEmptyState } from '@/components/invoices/InvoiceEmptyState';
+import { errorService, normalizeError } from '@/services/errorService';
+import { formatNumber, setOrDelete } from '@/lib/utils';
+import { TOAST_DURATION_MS } from '@/lib/constants';
+
+export function Invoices() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
+
+  const searchText = searchParams.get('searchText') ?? '';
+  const rawStatus = searchParams.get('status');
+  const status = INVOICE_STATUS_OPTIONS.some((o) => o.value === rawStatus)
+    ? (rawStatus as InvoiceStatus)
+    : undefined;
+
+  const [inputValue, setInputValue] = useState(searchText);
+  const isFirstRender = useRef(true);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+
+  useEffect(() => {
+    setInputValue(searchText);
+  }, [searchText]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [searchText, status]);
+
+  const debouncedSetSearch = useDebouncedCallback((value: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      setOrDelete(next, 'searchText', value);
+      return next;
+    });
+  }, 400);
+
+  useEffect(() => {
+    return () => debouncedSetSearch.cancel();
+  }, [debouncedSetSearch]);
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+    debouncedSetSearch(value);
+  };
+
+  const handleStatusChange = (value: string | undefined) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      setOrDelete(next, 'status', value);
+      return next;
+    });
+  };
+
+  const handleClearFilters = () => {
+    debouncedSetSearch.cancel();
+    setSearchParams({});
+    setInputValue('');
+  };
+
+  const hasActiveFilters = !!(searchText || status);
+
+  const { items, totalCount, hasMore, isLoadingMore, isInitialLoading, fetchNextPage } =
+    useInvoicesInfiniteQuery({ searchText: searchText || undefined, status });
+
+  const deleteInvoice = useDeleteInvoice();
+
+  const handleConfirmDelete = async () => {
+    if (deleteTargetId === null) return;
+    await deleteInvoice.mutateAsync(deleteTargetId, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: invoicesQueryKeys.all });
+        toast.success('Invoice deleted', { duration: TOAST_DURATION_MS });
+      },
+      onError: (err) => {
+        errorService.handleApiError(normalizeError(err), { operation: 'delete' });
+        throw err;
+      },
+    });
+    setDeleteTargetId(null);
+  };
+
+  return (
+    <div className="flex flex-col">
+      <div className="px-6 pt-6 pb-4">
+        <h1 className="text-2xl font-semibold text-foreground">Invoices</h1>
+        {!isInitialLoading && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            {formatNumber(totalCount)} {totalCount === 1 ? 'invoice' : 'invoices'}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 px-6 pb-4">
+        <SearchInput
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder="Search invoices..."
+          className="w-full sm:w-[300px]"
+        />
+        <SelectWithClear
+          value={status}
+          onValueChange={handleStatusChange}
+          placeholder="Status"
+          options={INVOICE_STATUS_OPTIONS}
+        />
+      </div>
+
+      {isInitialLoading ? (
+        <>
+          <InvoiceListHeader />
+          <InvoiceListSkeleton />
+        </>
+      ) : items.length === 0 ? (
+        <InvoiceEmptyState hasActiveFilters={hasActiveFilters} onClearFilters={handleClearFilters} />
+      ) : (
+        <>
+          <InvoiceListHeader />
+          <InfiniteScrollList
+            items={items}
+            hasMore={hasMore}
+            isLoading={isLoadingMore}
+            onLoadMore={fetchNextPage}
+            renderItem={(invoice) => <InvoiceListItem invoice={invoice} />}
+            keyExtractor={(invoice) => invoice.Id}
+          />
+        </>
+      )}
+
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+        title="Delete invoice"
+        description="This permanently deletes the invoice. This action cannot be undone."
+        variant="destructive"
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
+      />
+    </div>
+  );
+}

@@ -1,0 +1,27 @@
+// src/router.tsx — add ONE entry inside the '/' (AppLayout) children, alphabetical by path.
+// Parent route attaches protectedLoader + RouteErrorBoundary — do not duplicate.
+
+// Import at top (alphabetical):
+import { Invoices } from './pages/Invoices';
+
+// Route entries (feature + optional detail + create, alphabetical):
+{ path: 'invoices', element: <Invoices /> },
+{ path: 'invoices/:id', element: <InvoiceDetail /> },
+{ path: 'invoices/new', element: <InvoiceCreate /> },
+
+
+// src/components/layout/Header.tsx — add matching nav entry next to existing Items/Settings.
+// Match active-state styling. Route without nav link is effectively hidden.
+
+<Link to="/invoices" className={linkClass('/invoices')}>
+  Invoices
+</Link>
+
+
+// src/hooks/index.ts — re-export every new hook:
+export { useInvoicesInfiniteQuery } from './useInvoicesInfiniteQuery';
+export { useDeleteInvoice } from './useDeleteInvoice';
+
+
+// src/types/index.ts — re-export every new type module:
+export * from './invoice';

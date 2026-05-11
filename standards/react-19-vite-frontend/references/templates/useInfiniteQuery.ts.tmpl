@@ -1,0 +1,53 @@
+// src/hooks/use{Feature}sInfiniteQuery.ts
+// Substitute: invoices → {feature}, Invoice → {Feature}, InvoiceStatus → {Feature}Status.
+// Re-export from src/hooks/index.ts.
+//
+// Fixed choices — do not bikeshed:
+//   PAGE_SIZE = 20
+//   refetchOnWindowFocus: false  (infinite lists would flash the first page)
+//   gcTime: 0                    (filter change → clean slate; no stale pages)
+
+import { useInfiniteQuery, type InfiniteData } from '@tanstack/react-query';
+import { invoicesService } from '@/api/invoices/invoicesService';
+import { invoicesQueryKeys } from '@/api/invoices/invoicesQueryKeys';
+import type { InvoicePagedResult, InvoiceStatus } from '@/types';
+
+const PAGE_SIZE = 20;
+
+interface Params {
+  searchText?: string;
+  status?: InvoiceStatus;
+}
+
+export function useInvoicesInfiniteQuery({ searchText, status }: Params) {
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useInfiniteQuery<
+    InvoicePagedResult,
+    Error,
+    InfiniteData<InvoicePagedResult>,
+    ReturnType<typeof invoicesQueryKeys.list>,
+    number
+  >({
+    queryKey: invoicesQueryKeys.list({ searchText, status }),
+    queryFn: ({ pageParam }) =>
+      invoicesService.getInvoices({
+        StartIndex: pageParam,
+        MaxResults: PAGE_SIZE,
+        SearchText: searchText,
+        Status: status,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _all, lastPageParam) =>
+      lastPage.HasMoreRecords ? lastPageParam + PAGE_SIZE : undefined,
+    refetchOnWindowFocus: false,
+    gcTime: 0,
+  });
+
+  return {
+    items: data?.pages.flatMap((p) => p.Items) ?? [],
+    totalCount: data?.pages[0]?.TotalRecords ?? 0,
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+    isInitialLoading: isLoading,
+    fetchNextPage,
+  };
+}

@@ -199,6 +199,16 @@ export default async function MyEntityPage({ params }: { params: { teamId: strin
 
 ## Referinte
 
+### Standarde Bono (OBLIGATORIU — citește înainte de a scrie cod)
+
+- `standards/react-19-vite-frontend/` — **Pattern-uri React/frontend** (forms, api-layer, hooks, infinite-list, no-useEffect, worked-example, templates). Notă: standardul e pe Vite/React Router, SuperNicu e pe Next.js App Router — adaptează pattern-urile la Next.js dar respectă principiile
+- `standards/react-19-vite-frontend/references/edge-design-system.md` — **Design System The Edge** referință completă
+- `standards/react-19-vite-frontend/references/forms.md` — **Form patterns** cu validare
+- `standards/react-19-vite-frontend/references/api-layer.md` — **API layer** patterns
+- `standards/react-19-vite-frontend/references/no-use-effect.md` — **Anti-pattern useEffect** — când NU se folosește
+
+### Documentația proiectului
+
 - Prototip UI: `docs/prototype-reference/` din repo frontend
 - Design System: `shared/bono-ds.css` (OBLIGATORIU — citește înainte de a scrie orice componentă)
 - API Contracts: `docs/API_CONTRACTS.md` din repo backend

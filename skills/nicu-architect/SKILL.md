@@ -111,6 +111,14 @@ Architect-ul produce un document structurat:
 
 ## Referinte
 
+### Standarde Bono (citește înainte de a proiecta)
+
+- `standards/dotnet-api-blueprint/` — **4-layer API pattern** — definește structura proiectelor, separarea responsabilităților, naming conventions
+- `standards/nhibernate-cqrs/` — **Entity mappings + Query/Command patterns** — definește cum se accesează datele
+- `standards/dotnet-quartz-jobs/` — **Scheduled tasks** — definește cum se structurează job-urile periodice
+
+### Documentația proiectului
+
 - `docs/ARCHITECTURE.md` din repo backend
 - `docs/API_CONTRACTS.md` din repo backend
 - `schema.sql` din repo backend

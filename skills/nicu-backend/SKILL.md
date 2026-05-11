@@ -260,6 +260,15 @@ public async Task Create_ValidRequest_ReturnsSuccess()
 
 ## Referinte
 
+### Standarde Bono (OBLIGATORIU — citește înainte de a scrie cod)
+
+- `standards/dotnet-api-blueprint/` — **4-layer API pattern** (ServiceInterface → HTTP Client → ServiceAdapter → Controller). Citește SKILL.md + references/conventions.md + references/worked-example.md
+- `standards/nhibernate-cqrs/` — **Query/Command patterns** detaliate. Citește SKILL.md + references relevante per task (entity-mappings, query-patterns, command-patterns, execution-modes, queryover-reference)
+- `standards/dotnet-quartz-jobs/` — **Scheduled tasks** pattern cu Quartz.NET. Citește SKILL.md + references/logging-patterns.md
+- `standards/internal-email-template/` — **Email templates** branded Bono. Citește SKILL.md + references/template-pipeline.md
+
+### Documentația proiectului
+
 - `docs/ARCHITECTURE.md` din repo backend — patterns si structura
 - `docs/API_CONTRACTS.md` din repo backend — toate endpoint-urile existente
 - `schema.sql` din repo backend — schema si relatii

@@ -50,6 +50,18 @@ PRD + Prototip → nicu-specs → User aprobă SPEC → nicu-orchestrator → ni
 Nicu-specs e BLOCKER — implementarea nu incepe fara SPEC aprobat de utilizator.
 Nicu-backend si nicu-frontend pot rula in paralel (worktrees separate). Restul sunt secventiale.
 
+## Standarde Bono (`standards/`)
+
+Skill-uri de referință din `bono-ro/bono-skills` — standardele canonice pentru codul Bono. Fiecare agent citește standardele relevante ÎNAINTE de a produce cod.
+
+| Standard | Ce acoperă | Cine citește |
+|----------|-----------|--------------|
+| `dotnet-api-blueprint` | 4-layer API pattern, ServiceAdapters, conventions | nicu-architect, nicu-backend, nicu-review |
+| `nhibernate-cqrs` | Entity mappings, Query/Command patterns, QueryOver, session composition | nicu-architect, nicu-backend, nicu-review |
+| `dotnet-quartz-jobs` | Scheduled tasks cu Quartz.NET, SafeJobAsync, JobRegistry | nicu-backend |
+| `internal-email-template` | Email templates branded Bono, template pipeline | nicu-backend |
+| `react-19-vite-frontend` | React patterns, forms, API layer, hooks, Edge DS, templates | nicu-frontend, nicu-review |
+
 ## Input documents
 
 - PRD funcțional — documentul care descrie ce se construiește

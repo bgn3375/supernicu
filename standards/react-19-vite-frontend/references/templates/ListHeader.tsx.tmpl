@@ -1,0 +1,15 @@
+// src/components/{feature}/{Feature}ListHeader.tsx
+// Column labels — grid template must match {Feature}ListItem.tsx exactly.
+// Lives OUTSIDE InfiniteScrollList (header should not be per-item error-bounded or divide-y striped).
+
+export function InvoiceListHeader() {
+  return (
+    <div className="grid grid-cols-[2fr_1fr_1fr] md:grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center border-b border-border bg-muted/30 px-4 py-2 text-xs font-medium text-muted-foreground">
+      <span>Invoice</span>
+      <span>Customer</span>
+      <span>Status</span>
+      <span className="hidden md:block">Amount</span>
+      <span className="hidden md:block">Issued</span>
+    </div>
+  );
+}
