@@ -28,30 +28,16 @@ Dupa ce nicu-qa confirma ca build-ul e ok si testele trec. Ultimul pas inainte d
 
 ### 2. Security Review
 
-**Authorization:**
-- [ ] **Auth**: `[Authorize]` pe toate controllere (excepție: auth endpoints)
-- [ ] **Role-based access**: dacă există funcții admin, endpoint-urile admin au `[Authorize(Roles = "Admin")]` sau echivalent — nu doar `[Authorize]`
-- [ ] **No [AllowAnonymous] nejustificat**: fiecare `[AllowAnonymous]` are un motiv documentat. Inventar explicit: câte sunt, pe ce endpoint-uri, de ce
-- [ ] **No security theater**: nu există headere custom (ex: `RequestBy`, `X-Admin`) folosite ca verificare de securitate fără validare server-side reală
-
-**Data access:**
 - [ ] **Multi-tenant isolation** (dacă produsul e multi-tenant): tenantFilter pe entitățile cu team_id
-- [ ] **Ownership validation (IDOR)**: endpoint-urile care accesează o entitate prin ID verifică că entitatea aparține utilizatorului/tenant-ului curent — nu doar că ID-ul există. Un user nu poate accesa entitățile altui user prin ghicirea ID-ului
-- [ ] **No sequential/guessable IDs expuse**: ID-urile expuse în URL-uri sunt UUID, nu auto-increment secvențial
-- [ ] **SQL injection**: NHibernate parametrized queries (no string concatenation)
-
-**Input/Output:**
+- [ ] **Auth**: [Authorize] pe toate controllere (exceptie: auth endpoints)
 - [ ] **Input validation**: Data Annotations pe DTOs, null checks in services
+- [ ] **SQL injection**: NHibernate parametrized queries (no string concatenation)
 - [ ] **XSS**: React escapeaza by default, no dangerouslySetInnerHTML
 - [ ] **File upload**: content-type validation, max size, no path traversal
-- [ ] **No sensitive data in logs**: nicio parolă, token, API key, PII în console.log, Logger, sau orice output vizibil. Include server-side logging, nu doar frontend
-
-**Infrastructure:**
 - [ ] **Secrets**: env vars, no hardcoded credentials
 - [ ] **CORS**: restrictiv, doar frontend domain
 - [ ] **Rate limiting**: pe auth endpoints
 - [ ] **Soft delete**: deleted_at, no fizic DELETE pe entitati importante
-- [ ] **Admin separation**: dacă există funcții admin, acestea sunt pe controller-e separate cu prefix `/admin/` sau area dedicată — nu amestecate cu endpoint-urile customer
 
 ### 3. Multi-tenant Verification (dacă produsul e multi-tenant)
 
