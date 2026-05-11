@@ -68,7 +68,7 @@ supernicu/
     └── pre-commit-spec.sh     # Avertizează dacă pagini modificate n-au SPEC
 ```
 
-**bono-skills** (plugin separat în `~/.claude/plugins/bono-skills/`) conține standardele canonice Bono — se auto-activează când Claude Code întâlnește cod relevant.
+**bono-skills** (user skills în `~/.claude/skills/`) conține standardele canonice Bono — se auto-activează când Claude Code întâlnește cod relevant, ȘI sunt invocate explicit de SuperNicu în Faza 3.
 
 ## Principii
 

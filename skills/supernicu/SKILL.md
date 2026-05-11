@@ -146,7 +146,15 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 - SPEC-urile aprobate (secțiunile relevante: S5, S6 — logică, calcule)
 - Schema DB + API contracts din Faza 2
 - Authorization matrix
-- Instrucțiune: „Citește CLAUDE.md pentru pattern-ul 6-step backend. Citește GUARDRAILS.md. Implementează conform planului architect."
+- Instrucțiune obligatorie: „Înainte să scrii cod, citește ÎN ORDINE:
+  1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu
+  2. `GUARDRAILS.md` — pattern-uri de eroare cunoscute
+  3. `~/.claude/skills/dotnet-api-blueprint/SKILL.md` — pattern API canonică Bono
+  4. `~/.claude/skills/nhibernate-cqrs/SKILL.md` — pattern queries/commands
+  5. Dacă feature-ul include scheduled jobs: `~/.claude/skills/dotnet-quartz-jobs/SKILL.md`
+  6. Dacă feature-ul trimite email: `~/.claude/skills/internal-email-template/SKILL.md`
+
+  Aplică pattern-urile EXACT cum sunt descrise. Când CLAUDE.md contrazice un standard bono-skills, CLAUDE.md câștigă (vezi secțiunea 'Adaptări bono-skills' din CLAUDE.md)."
 
 **Pattern 6-step backend** (din CLAUDE.md):
 1. Domain Model → 2. FluentNH Mapping → 3. Service Interface + DTOs (record types) → 4. CQRS Queries (Load*/Find*) + Commands → 5. Service Adapter → 6. Controller (TenantControllerBase)
@@ -154,7 +162,13 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 **Ce primește agentul FRONTEND:**
 - SPEC-urile aprobate (TOATE secțiunile — S1-S10 sunt pentru frontend)
 - API contracts din Faza 2
-- Instrucțiune: „Citește CLAUDE.md pentru pattern-ul 6-step frontend. Citește shared/bono-ds.css. Implementează pixel-perfect conform SPEC-ului, câmp cu câmp."
+- Instrucțiune obligatorie: „Înainte să scrii cod, citește ÎN ORDINE:
+  1. `CLAUDE.md` (rădăcina proiectului) — convenții SuperNicu
+  2. `shared/bono-ds.css` — Design System (sursa canonică de tokeni)
+  3. `~/.claude/skills/react-19-vite-frontend/SKILL.md` — pattern frontend canonic Bono
+  4. SPEC-ul paginii pe care o implementezi (toate secțiunile S1-S10)
+
+  Aplică pattern-urile EXACT. Când CLAUDE.md sau SPEC-ul contrazice react-19-vite-frontend (ex: Next.js 15.5 nu Vite, Tailwind 3.4 nu 4), CLAUDE.md/SPEC-ul câștigă (vezi 'Adaptări bono-skills' din CLAUDE.md). Implementează pixel-perfect, câmp cu câmp."
 
 **Pattern 6-step frontend** (din CLAUDE.md):
 1. Types → 2. API Layer → 3. TanStack Query Hooks → 4. Feature Components → 5. Pages → 6. Navigation

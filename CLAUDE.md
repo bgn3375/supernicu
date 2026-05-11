@@ -98,7 +98,7 @@ Codul sigur e calea implicită. Codul nesigur cere acțiune explicită.
 
 ## Adaptări bono-skills → SuperNicu
 
-Standardele canonice Bono sunt în plugin-ul `bono-skills` (`~/.claude/plugins/bono-skills/`). Ele sunt scrise pentru un stack generic. Când există conflict, **regulile din acest fișier câștigă**. Standardele sunt referință de principii, CLAUDE.md + SKILL.md sunt instrucțiuni de execuție.
+Standardele canonice Bono sunt instalate ca user-level skills în `~/.claude/skills/` (dotnet-api-blueprint, nhibernate-cqrs, dotnet-quartz-jobs, internal-email-template, react-19-vite-frontend). Se auto-activează când Claude întâlnește cod relevant, ȘI sunt invocate explicit de SuperNicu în Faza 3 (vezi `skills/supernicu/SKILL.md`). Ele sunt scrise pentru un stack generic Bono. Când există conflict, **regulile din acest fișier câștigă**. Standardele sunt referință de principii, CLAUDE.md + SKILL.md sunt instrucțiuni de execuție.
 
 ### ORM: FluentNH, nu XML
 - **bono-skills**: `.hbm.xml`
