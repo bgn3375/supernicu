@@ -410,6 +410,50 @@ Imediat după spec, checklist-ul:
 - [ ] Plată = center aligned
 ```
 
+### Secțiunea 10: Raport Prototip vs Design System (OBLIGATORIU)
+
+Secțiune separată, prezentată utilizatorului pentru confirmare expresă ÎNAINTE de implementare.
+
+```markdown
+## 10. Raport Prototip vs Design System
+
+### A. Diferențe Prototip vs DS
+Elemente din prototip care diferă de Design System. Implementarea urmează prototipul (prioritar), dar diferențele sunt documentate pentru decizie.
+
+| # | Element | Prototip | Design System | Diferență |
+|---|---------|----------|---------------|-----------|
+| 1 | Buton "Salvează" | bg=#3B82F6, r=8px | .btn.primary: bg=pink, r=pill | Culoare și radius diferite |
+| 2 | Card header | shadow: 0 2px 8px | .card-hairline: no shadow | Shadow custom |
+
+### B. Elemente lipsă din prototip
+Stări și componente necesare care nu apar în prototip. Se vor construi din Design System.
+
+| # | Element lipsă | Unde apare | Propunere DS |
+|---|---------------|------------|--------------|
+| 1 | Empty state tabel | Pagina tranzacții, tabel gol | card-tonal + text fog centered |
+| 2 | Loading skeleton | Toate componentele cu date | bg=bej-1 animate pulse |
+| 3 | Error toast | După submit eșuat | error-bg + error text |
+
+### ⚠️ NECESITĂ CONFIRMARE UTILIZATOR
+
+Înainte de implementare, utilizatorul trebuie să confirme:
+- [ ] **Diferențele (A)**: "Implementez conform prototipului" SAU "Corectez elementul X conform DS"
+- [ ] **Completările (B)**: "Adaug aceste elemente din DS" SAU "Modifică/elimină elementul X"
+
+**BLOCKER** — implementarea NU începe până utilizatorul nu confirmă ambele secțiuni.
+```
+
+Imediat după spec, checklist-ul:
+
+```markdown
+### ✓ CHECKLIST S10: Prototip vs DS
+- [ ] Toate diferențele Prototip vs DS documentate
+- [ ] Toate elementele lipsă identificate cu propunere DS
+- [ ] Confirmare expresă utilizator pe diferențe (A)
+- [ ] Confirmare expresă utilizator pe completări (B)
+- [ ] BLOCKER respectat — implementare pornește doar după confirmare
+```
+
 ---
 
 ## MOMENT 2: Retrospectivă post-implementare
@@ -424,6 +468,7 @@ După ce implementarea e completă și nicu-qa confirmă build ok.
 2. **Identifică discrepanțe** — ce a fost greșit, ce a lipsit din spec
 3. **Analizează cauza** — de ce spec-ul nu a prevenit problema (spec incomplet? ambiguu? ignorat?)
 4. **Propune reguli noi** — organizate pe categorie
+5. **Sugerează completări DS** — elemente recurente care lipsesc din Design System și ar trebui adăugate
 
 ### Output: RETROSPECTIVE-[proiect].md
 
@@ -446,15 +491,25 @@ După ce implementarea e completă și nicu-qa confirmă build ok.
 #### Logică/Calcul
 - R3: ...
 
+### Sugestii completare Design System
+
+Elemente care au lipsit din DS și au fost construite ad-hoc. Dacă sunt recurente, merită adăugate în `shared/bono-ds.css`.
+
+| # | Element | Folosit în | Propunere token/clasă | Prioritate |
+|---|---------|------------|----------------------|------------|
+| 1 | Empty state ilustrație | Tabel tranzacții, Tabel facturi | `.empty-state` — centered, fog text, icon 48px | High — apare în orice pagină cu tabel |
+| 2 | Loading skeleton | Formular, Tabel | `.skeleton` — bej-1 bg, pulse animation | High — necesar peste tot |
+
 ### Status: PROPUS → așteaptă aprobare utilizator
 ```
 
 ### Ciclul de aprobare
 
-1. Nicu prezintă regulile propuse utilizatorului
-2. Utilizatorul aprobă, modifică sau respinge fiecare regulă
+1. Nicu prezintă regulile propuse + sugestiile DS utilizatorului
+2. Utilizatorul aprobă, modifică sau respinge fiecare regulă și sugestie DS
 3. Regulile aprobate se adaugă în `nicu-specs/RULES.md`
-4. La următorul proiect, Nicu aplică regulile acumulate
+4. Sugestiile DS aprobate se adaugă în `shared/bono-ds.css` (tokeni/clase noi)
+5. La următorul proiect, Nicu aplică regulile acumulate și DS-ul completat
 
 ---
 
@@ -491,24 +546,28 @@ Bruce livrează PRD + Prototip
    - Mapează la DS
    - Identifică ambiguități
    - Produce SPEC-[pagina].md (spec detaliat + checklist per secțiune)
+   - Produce Raport Prototip vs DS (S10): diferențe + elemente lipsă
    - Cere clarificări utilizatorului
         ↓
-   Utilizatorul aprobă SPEC-ul
+   Utilizatorul aprobă SPEC-ul + confirmă S10 (BLOCKER)
+   - Diferențe: "implementez ca prototipul" sau "corectez conform DS"
+   - Completări: "adaug din DS" sau "modific/elimin"
         ↓
-   BRAIN (nicu-frontend) implementează
+   nicu-frontend implementează
    - Primește SPEC-ul + checklist-urile ca ToDo
    - Implementează și bifează fiecare item din checklist
    - La final: toate checklist-urile bifate = gata de review
         ↓
    nicu-qa verifică build
         ↓
-   HANDS (nicu-review) verifică
+   nicu-review verifică
    - Primește aceleași checklist-uri (copie nebifată)
    - Bifează independent fiecare item
-   - Discrepanță Brain ✓ vs Hands ✗ = fix necesar
+   - Discrepanță = fix necesar
         ↓
    NICU SPECS (Moment 2)
    - Retrospectivă: ce items au fost ratate și de ce
    - Reguli noi → aprobare utilizator
+   - Sugestii completare DS → aprobare utilizator → update bono-ds.css
    - Update RULES.md
 ```
