@@ -80,7 +80,10 @@ public class GetMyEntityQuery : NHibernateGenericQuery<MyEntity>
     public async Task<MyEntity> Execute(string teamId, Guid id)
     {
         using var session = OpenSession(teamId);
-        return await session.GetAsync<MyEntity>(id);
+        // Filtrează pe team_id + id — previne IDOR
+        return await session.Query<MyEntity>()
+            .Where(e => e.Id == id && e.TeamId == teamId)
+            .SingleOrDefaultAsync();
     }
 }
 ```
@@ -154,13 +157,59 @@ public class MyController : ControllerBase
 }
 ```
 
+## Security by default
+
+### Ownership validation (anti-IDOR)
+Fiecare query care accesează o entitate prin ID verifică și `team_id`:
+```csharp
+// CORECT — filtrează pe team_id + entity id
+var entity = await session.Query<MyEntity>()
+    .Where(e => e.Id == id && e.TeamId == teamId)
+    .SingleOrDefaultAsync();
+if (entity == null)
+    return OperationResult<MyResponse>.Failure("Not found");
+
+// GREȘIT — doar pe id, permite IDOR
+var entity = await session.GetAsync<MyEntity>(id);
+```
+
+### Role-based authorization
+Dacă aplicația are roluri diferite (admin, user), controller-ele admin au atribut explicit:
+```csharp
+[Authorize(Roles = "Admin")]
+[Route("api/v1/admin/[controller]")]
+public class AdminMyController : ControllerBase { ... }
+```
+
+### No sensitive data in logs
+Nu se loghează parole, tokens, API keys, sau PII:
+```csharp
+// CORECT
+_logger.LogInformation("User {UserId} logged in", userId);
+
+// GREȘIT
+_logger.LogInformation("User {Email} logged in with password {Password}", email, password);
+```
+
+### No security theater
+Nu se folosesc headere custom ca mecanism de autorizare:
+```csharp
+// GREȘIT — oricine poate seta headerul
+var requestBy = Request.Headers["RequestBy"].ToString();
+if (requestBy != "admin-app") return Unauthorized();
+
+// CORECT — verificare reală prin JWT claims
+var role = User.FindFirst(ClaimTypes.Role)?.Value;
+if (role != "Admin") return Forbid();
+```
+
 ## Conventii
 
 - snake_case pt DB columns si table names
 - PascalCase pt C# types
 - `team_id` pe tabelele cu date tenant (când produsul e multi-tenant)
 - `deleted_at` pt soft delete (nu DELETE fizic)
-- UUID (CHAR(36)) pt primary keys
+- UUID (CHAR(36)) pt primary keys — **niciodată auto-increment secvențial pe ID-uri expuse în API**
 - `OperationResult<T>` pt TOATE return types din services
 - Audit log pt actiuni importante
 
