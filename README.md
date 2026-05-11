@@ -141,7 +141,29 @@ supernicu/
     └── pre-commit-spec.sh     # Avertizează dacă pagini modificate n-au SPEC
 ```
 
-**bono-skills** (user skills în `~/.claude/skills/`) conține standardele canonice Bono — se auto-activează când Claude Code întâlnește cod relevant, ȘI sunt invocate explicit de SuperNicu în Faza 3.
+## Bono skills
+
+Standardele canonice Bono (scrise de Prodan, din `bono-ro/bono-skills`) sunt instalate ca user-level skills în `~/.claude/skills/` și se folosesc **în integralitatea lor** — SKILL.md + toate fișierele din `references/` și `assets/`.
+
+| Skill | Conținut |
+|-------|----------|
+| `dotnet-api-blueprint` | Pattern API .NET — SKILL.md + worked-example.md + conventions.md |
+| `nhibernate-cqrs` | NHibernate queries/commands — SKILL.md + 5 references (query-patterns, command-patterns, queryover-reference, execution-modes, entity-mappings) |
+| `dotnet-quartz-jobs` | Scheduled jobs — SKILL.md + logging-patterns.md |
+| `internal-email-template` | Email templates — SKILL.md + template-pipeline.md + 2 HTML exemple |
+| `react-19-vite-frontend` | Pattern frontend — SKILL.md + 8 references + 11 templates + evals |
+| `edge-33` | Design System Bono "The Edge" — SKILL.md + BRAND.md + bono-ds.css + 4 HTML pagini + assets |
+
+**Două căi de activare:**
+1. **Auto-activation** — Claude le citește când description-ul se potrivește cu task-ul (orice proiect, oricând)
+2. **Invocare explicită prin SuperNicu** — Faza 3 instruiește subagenții să citească standardele relevante cu toate `references/`-urile
+
+**Adaptări pentru stack-ul SuperNicu** (documentate în CLAUDE.md):
+- ORM: FluentNHibernate `ClassMap<T>` în loc de XML `.hbm.xml`
+- API: 6-step direct-DB în loc de 4-layer
+- Frontend: Next.js 15.5 App Router + Tailwind 3.4 în loc de Vite 7 + React Router 7 + Tailwind 4
+- DTOs: `record` types cu `required`
+- Return types: `ValueTask<OperationResult<T>>` pe interfaces, `Task<IActionResult>` pe controllers
 
 ## Principii
 
