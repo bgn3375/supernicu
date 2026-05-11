@@ -31,7 +31,7 @@ PRD + Prototip
      │
      ▼
 ┌───────────────────┐
-│  FAZA 4: VERIFY   │ ← build, security, SPEC compliance, code quality
+│  FAZA 4: VERIFY   │ ← Swiss Cheese: 5 straturi (Build, Security, SPEC, Quality, DS)
 └───────────────────┘
      │  ▶ STOP — utilizatorul confirmă commit
      ▼
@@ -88,11 +88,13 @@ SuperNicu: [Faza 3] Lansez subagenți paraleli:
            ✓ Backend done (12 fișiere, build verde)
            ✓ Frontend done (8 fișiere, build verde, TypeScript clean)
 
-           [Faza 4] Verificare:
-           ✓ Build: pass
-           ✓ Security: 7/7 (toate endpoint-urile require auth)
-           ✓ SPEC compliance: 47/49 items bifate
-           ⚠ 2 items lipsesc: tooltip pe coloana "Sold", error state pe form
+           [Faza 4] Swiss Cheese — 5 straturi:
+           ✓ Stratul A — Build: pass
+           ✓ Stratul B — Security: 7/7 (toate endpoint-urile require auth)
+           ⚠ Stratul C — SPEC compliance: 47/49 items bifate
+             (lipsesc: tooltip pe coloana "Sold", error state pe form)
+           ✓ Stratul D — Code Quality: zero TODO, zero `any`
+           ✓ Stratul E — DS Compliance: zero hex hardcoded
 
            Fix și re-verificare? sau commit așa?
 
@@ -145,6 +147,7 @@ supernicu/
 
 - **Specs-first** — Fiecare pagină primește un SPEC cu 10 secțiuni înainte de orice cod. SPEC-ul = criteriile de acceptare
 - **Security pit of success** — Codul sigur e calea implicită. `FallbackPolicy` deny-by-default, `TenantControllerBase`, anti-IDOR
+- **Swiss Cheese verification** — 5 straturi independente de verificare. Găurile unui strat nu se aliniază cu ale altuia. Toate trebuie să treacă pentru commit
 - **Calitate > Viteza** — Pixel-perfect cu SPEC complet. Nu oferim "rapid dar inconsistent"
 - **Self-improving** — Fiecare retrospectivă adaugă reguli în GUARDRAILS.md
 - **Parallel execution** — Backend + frontend rulează simultan în worktrees separate

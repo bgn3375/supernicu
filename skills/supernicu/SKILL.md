@@ -183,12 +183,24 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 ---
 
 ### ═══════════════════════════════════════
-### FAZA 4: VERIFICARE
+### FAZA 4: VERIFICARE — Swiss Cheese (5 straturi)
 ### ═══════════════════════════════════════
 
 **Scop:** Verifică tot ce s-a construit. Build, teste, securitate, conformitate SPEC.
 
-**A. Build Verification:**
+**Modelul Swiss Cheese:** fiecare strat de verificare are găurile lui (lucruri pe care nu le poate prinde), dar găurile nu se aliniază. Un bug care trece de Build e prins de Security; unul care trece de Security e prins de SPEC; și așa mai departe. **Un singur strat nu e suficient. Toate cele 5 trebuie să treacă.**
+
+| Strat | Ce prinde | Ce nu prinde (găurile) |
+|-------|-----------|------------------------|
+| A. Build | Erori compilare, TypeScript, lint | Logică, IDOR, drift de spec |
+| B. Security | 401/403, IDOR, secrete în log, API separation | Bug-uri de business, vizual |
+| C. SPEC Compliance | Câmp lipsă, ordine greșită, micro-spec ignorată | Crash runtime, security |
+| D. Code Quality | TODO, `any`, console.log, duplicare | Bug-uri vizuale, logică |
+| E. DS Compliance | Hex hardcoded, gradient, shadow custom | Funcționalitate |
+
+Verifică ÎN ORDINE. Dacă un strat fail → fix → reia verificarea de la stratul A.
+
+**STRATUL A — Build Verification:**
 ```bash
 # Backend
 dotnet build *.sln --no-restore
@@ -199,7 +211,7 @@ npm ci && npx tsc --noEmit && npm run build && npm run lint
 ```
 Zero errors. Dacă fail → fix + retry.
 
-**B. Security Tests:**
+**STRATUL B — Security Tests:**
 - [ ] Fiecare endpoint fără token → 401
 - [ ] Token expirat → 401
 - [ ] Customer pe endpoint admin → 403
@@ -208,14 +220,14 @@ Zero errors. Dacă fail → fix + retry.
 - [ ] Grep logs pentru: password, token, apikey, secret, authorization → zero matches
 - [ ] Customer endpoints pe `/api/v1/`, admin pe `/api/admin/v1/`
 
-**C. SPEC Checklist — bifează punct cu punct:**
+**STRATUL C — SPEC Checklist (bifează punct cu punct):**
 - Ia fiecare SPEC-[pagina].md
 - Parcurge FIECARE checklist item (S1-S10)
 - Bifează ce e implementat corect
 - Marchează ce lipsește sau diferă
 - Orice item nebifat = fix necesar
 
-**D. Code Quality:**
+**STRATUL D — Code Quality:**
 - [ ] No TODO/FIXME fără referință
 - [ ] No console.log în production
 - [ ] No unused imports
@@ -225,7 +237,7 @@ Zero errors. Dacă fail → fix + retry.
 - [ ] FluentNH mappings cu tenantFilter
 - [ ] Record types pe DTOs
 
-**E. Design System Compliance:**
+**STRATUL E — Design System Compliance:**
 - [ ] Elemente din prototip → implementate identic
 - [ ] Elemente lipsă → tokeni DS, nu hex hardcoded
 - [ ] Zero gradienturi, zero culori teal/cyan/blue
