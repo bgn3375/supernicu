@@ -63,12 +63,13 @@ Dupa ce nicu-qa confirma ca build-ul e ok si testele trec. Ultimul pas inainte d
 
 ### 5. Design System Compliance (referință: `shared/bono-ds.css`)
 
-- [ ] Doar token-uri CSS din Bono DS (nu hex hardcoded)
-- [ ] Nu gradient-uri (linear-gradient, radial-gradient)
+**Prioritate: Prototip > Design System.** Elementele din prototip se implementează exact, chiar dacă diferă de DS. DS se aplică doar pentru elemente care lipsesc din prototip.
+
+- [ ] Elementele prezente în prototip — implementate identic cu prototipul (nu „corectate" după DS)
+- [ ] Elementele care lipsesc din prototip — folosesc tokeni din Bono DS (nu hex hardcoded)
+- [ ] Nu gradient-uri (linear-gradient, radial-gradient) — nici în prototip, nici în elemente noi
 - [ ] Nu culori teal/cyan/blue
-- [ ] Surface-uri corecte: bej-0 (page), bej-1 (card-tonal), white (card-hairline)
-- [ ] Tipografie corecta: N1=16px/600, N2=14px/500, N3=13px/400
-- [ ] Componente corecte: .btn.primary, .input, .card-tonal etc.
+- [ ] Elemente noi (empty/error/loading states): surface-uri corecte, tipografie corectă, componente DS
 - [ ] No box-shadow custom (doar --sh-sm si --sh-pink)
 
 ### 6. Code Quality

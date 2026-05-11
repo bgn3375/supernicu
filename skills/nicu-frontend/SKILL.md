@@ -33,11 +33,13 @@ app/
     settings/page.tsx               — setari companie
 ```
 
-## Regula #1: Prototipul se preia 1:1
+## Regula #1: Prototipul e sursa primară, Design System e fallback
 
-Interfața frontend trebuie să fie 100% identică cu prototipul. Nu "inspirată de", nu "similară cu" — identică.
+**Prioritate clară:** Prototip > Design System > Inventează
 
-Ce se preia din prototip:
+### Ce e în prototip → implementează 100% identic
+Chiar dacă un element din prototip diferă de Design System, implementează exact ce e în prototip. Nu "corecta" prototipul ca să fie conform DS-ului.
+
 1. **Ordinea câmpurilor** — dacă prototipul are Descriere → Tags → Cont → Subcont, implementarea are exact aceeași ordine
 2. **Tipul componentei** — pill toggle rămâne pill toggle, nu devine select nativ sau checkbox
 3. **Placeholder-uri și label-uri** — text identic cu prototipul
@@ -45,16 +47,20 @@ Ce se preia din prototip:
 5. **Coloane tabel** — număr, ordine, conținut, width-uri
 6. **Stiluri componente** — card-tonal, card-hairline, btn primary — exact ca în prototip
 
-Ce NU se preia din prototip:
+### Ce lipsește din prototip → folosește Design System
+Stări și elemente pe care prototipul nu le acoperă (empty states, error states, loading skeletons, toast notifications, validation messages, etc.) se construiesc folosind tokeni și componente din `shared/bono-ds.css`.
+
+### Ce NU se preia din prototip
 - Logica de business (calcule, validări, API calls) — vine din PRD + backend
 - State management, hooks, data fetching — se implementează conform stack-ului
 - Mock data — se înlocuiește cu date reale din API
 
-Când implementezi o pagină:
+### Când implementezi o pagină
 1. Deschide fișierul prototip corespunzător
 2. Citește-l de sus în jos, câmp cu câmp
-3. Implementează fiecare element vizual identic
-4. Conectează logica de business la elementele vizuale
+3. Implementează fiecare element vizual identic cu prototipul
+4. Identifică ce stări/elemente lipsesc din prototip → completează din DS
+5. Conectează logica de business la elementele vizuale
 
 Dacă prototipul și PRD-ul se contrazic pe un aspect vizual → urmează prototipul și notează conflictul.
 

@@ -30,13 +30,14 @@ SuperNicu este agentul de engineering BONO. Primeste PRD + prototip UI si constr
 
 ## Reguli non-negociabile
 
-1. **Multi-tenant ready** — pattern standard: NHibernate `tenantFilter` pe `team_id`, `X-Team-Id` header — aplicat când produsul cere
-2. **CQRS pattern** — Query classes pt read, Command classes pt write (sub `DomainServices/`)
-3. **OperationResult<T>** — toate service methods returneaza `OperationResult<T>`, controllers apeleaza `.ToActionResult()`
-4. **Bono DS tokens only** — nu hex hardcoded, nu gradient-uri, nu culori in afara token-urilor
-5. **No secrets in code** — env vars pentru toate credentials
-6. **Soft delete** — `deleted_at` column, nu DELETE fizic
-7. **Audit log** — actiuni importante logate
+1. **Prototip > Design System** — Implementează 100% ce e în prototip, chiar dacă diferă de DS. Folosește DS doar pentru elemente care lipsesc din prototip (empty states, error states, loading, etc.)
+2. **Multi-tenant ready** — pattern standard: NHibernate `tenantFilter` pe `team_id`, `X-Team-Id` header — aplicat când produsul cere
+3. **CQRS pattern** — Query classes pt read, Command classes pt write (sub `DomainServices/`)
+4. **OperationResult<T>** — toate service methods returneaza `OperationResult<T>`, controllers apeleaza `.ToActionResult()`
+5. **DS tokens for new elements** — elementele care nu sunt în prototip folosesc tokeni din Design System, nu hex hardcoded
+6. **No secrets in code** — env vars pentru toate credentials
+7. **Soft delete** — `deleted_at` column, nu DELETE fizic
+8. **Audit log** — actiuni importante logate
 
 ## Lifecycle obligatoriu
 

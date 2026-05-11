@@ -23,7 +23,7 @@ Owner-ul contractului dintre Bruce (PRD + prototip) și SuperNicu (implementare)
 
 1. **Citește prototipul** — fișier cu fișier, componentă cu componentă
 2. **Măsoară totul** — ca un plan tehnic de arhitectură cu cote
-3. **Mapează la Design System** — fiecare element primește referința DS sau notarea "non-standard"
+3. **Mapează la Design System** — fiecare element primește referința DS sau notarea "non-standard". Dacă prototipul diferă de DS, SPEC-ul documentează ce e în prototip (prioritar) și notează diferența
 4. **Identifică ambiguități** — ce nu e clar din PRD sau prototip
 5. **Produce SPEC per pagină** — document structurat, fiecare linie verificabilă
 6. **Cere clarificări** — prezintă lista de întrebări utilizatorului ÎNAINTE de implementare
@@ -261,16 +261,18 @@ Imediat după spec, checklist-ul:
 
 ### Secțiunea 7: Culori și tipografie (mapare DS)
 
+**Prioritate: Prototip > Design System.** Dacă prototipul folosește o culoare/dimensiune diferită de DS, SPEC-ul documentează valoarea din prototip și notează diferența. Implementarea urmează prototipul.
+
 ```markdown
 ## 7. Culori și tipografie
 
-### Culori suprafețe:
+### Culori suprafețe (din prototip — diferențele față de DS sunt notate):
 - [ ] Pagină bg: bej-0 (#FBFAF7)
 - [ ] Card hairline: white bg + 1px rule-card
 - [ ] Card tonal: bej-1 bg, fără border
 - [ ] Input bg: white
 - [ ] Input border: rule-card (ink @ 12%)
-- [ ] Nicio culoare hardcoded în afara tokenilor
+- [ ] Elementele care lipsesc din prototip folosesc tokeni DS
 - [ ] Niciun gradient
 
 ### Tipografie:
@@ -472,7 +474,7 @@ Se stochează în `nicu-specs/RULES.md`. Se încarcă la fiecare activare.
 
 **R5-CALCUL**: Orice auto-calcul se documentează cu: trigger (ce eveniment), condiție (câte câmpuri trebuie), formulă exactă, câmpuri afectate.
 
-**R6-DS-MAP**: Fiecare element vizual primește referința DS (.input, .btn.primary, .field-label) sau notarea "NON-STANDARD: [detalii]". Nu se acceptă "similar cu" — ori e tokenul exact, ori e specificat complet.
+**R6-DS-MAP**: Fiecare element vizual primește referința DS (.input, .btn.primary, .field-label) sau notarea "NON-STANDARD: [detalii]". Dacă prototipul diferă de DS, se documentează valoarea din prototip (prioritară) cu nota "PROTOTIP ≠ DS: [detalii]". Implementarea urmează prototipul.
 
 **R7-TABEL**: Coloanele se numerotează, aliniamentul se notează (left/right/center), lățimile se specifică, truncarea se marchează.
 
