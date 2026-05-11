@@ -32,15 +32,15 @@ Owner-ul contractului dintre Bruce (PRD + prototip) și SuperNicu (implementare)
 
 Fiecare SPEC are secțiunile de mai jos. Documentul poate fi lung — de aceea are **structură duală**:
 
-1. **Spec detaliat** — explicații complete, context, referințe DS, micro-specs. Brain (nicu-frontend) citește asta ca să înțeleagă ce construiește.
-2. **CHECKLIST per secțiune** — extras scurt, concret, bifabil. Imediat după fiecare secțiune de spec. Brain bifează pe măsură ce implementează. Hands (nicu-review) bifează independent la verificare.
+1. **Spec detaliat** — explicații complete, context, referințe DS, micro-specs. nicu-frontend citește asta ca să înțeleagă ce construiește.
+2. **CHECKLIST per secțiune** — extras scurt, concret, bifabil. Imediat după fiecare secțiune de spec. nicu-frontend bifează pe măsură ce implementează. nicu-review bifează independent la verificare.
 
 ### Regula output-ului dual
 
 La SFÂRȘITUL fiecărei secțiuni din spec, Nicu produce un bloc `### ✓ CHECKLIST S[N]` cu items scurte (max 1 linie fiecare). Acest checklist:
-- **Brain** îl primește ca ToDo — implementează și bifează fiecare item
-- **Hands** îl primește ca verificare — bifează independent, fără să vadă ce a bifat Brain
-- Dacă Brain bifează 10/10 dar Hands găsește un item nebifat → discrepanță = fix necesar
+- **nicu-frontend** îl primește ca ToDo — implementează și bifează fiecare item
+- **nicu-review** îl primește ca verificare — bifează independent, fără să vadă ce a bifat nicu-frontend
+- Dacă nicu-frontend bifează 10/10 dar nicu-review găsește un item nebifat → discrepanță = fix necesar
 
 Format checklist:
 ```markdown

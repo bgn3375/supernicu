@@ -1,6 +1,6 @@
 # nicu-orchestrator
 
-Dispecerul SuperNicu. Citeste PRD + prototip, creeaza planul tehnic, delegheaza la sub-agenti.
+Dispecerul SuperNicu. Citeste PRD + prototip, creeaza planul tehnic, coordoneaza skills-urile.
 
 ## Cand se activeaza
 
