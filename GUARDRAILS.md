@@ -41,3 +41,9 @@ Format per entry: **Trigger** (ce context precede eroarea) → **Instrucțiune**
 **Trigger:** Endpoint de upload sau download fișiere.
 **Instrucțiune:** Path-urile de stocare includ `team_id` ca prefix. Download-ul verifică că fișierul aparține tenant-ului curent. Nu permite path traversal (`../`).
 **Motiv:** Fără ownership check, un utilizator poate descărca fișierele altui tenant dacă ghicește path-ul.
+
+## G7: Background opac șterge tăcut grid-dot pattern-ul
+
+**Trigger:** Pagină din dashboard care setează `background` / `backgroundColor` opac pe containerul rădăcină al paginii (ex: `<div style={{ backgroundColor: 'var(--c-bej-0)' }}>...`).
+**Instrucțiune:** Paginile dashboard (copil direct al wrapper-ului `.has-grid`) NU setează background opac propriu. Pattern-ul DS Bono pictează grid-dot via `::before` pe părinte cu `z-index: 0`, iar `.has-grid > * { z-index: 1 }` ridică copiii deasupra — dacă copilul are background opac, acoperă overlay-ul tăcut. Lasă `background: transparent` sau omite proprietatea. Excepție: pagini fără SidebarLayout (ex: `login`) pot seta bej-0 ca background propriu.
+**Motiv:** Bug invizibil la inspecție rapidă — culoarea pare identică (bej peste bej-cu-puncte), nu sparge teste, nu apare în screenshot-uri. Diferența vizuală e doar pattern-ul de puncte la `rgba(17,13,16,0.15)` care dispare. Detectabil doar prin comparație side-by-side cu prototipul.
