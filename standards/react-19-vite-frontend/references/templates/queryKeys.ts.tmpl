@@ -1,8 +1,0 @@
-// src/api/{feature}/{feature}QueryKeys.ts
-// Substitute: invoices → {feature} (camelCase/plural), Invoice → {Feature}.
-
-export const invoicesQueryKeys = {
-  all: ['invoices'] as const,
-  list: (filters: Record<string, unknown>) => ['invoices', 'list', filters] as const,
-  detail: (id: number) => ['invoices', 'detail', id] as const,
-} as const;
