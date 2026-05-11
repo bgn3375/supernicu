@@ -245,10 +245,34 @@ Zero errors. Dacă fail → fix + retry.
 - [ ] Record types pe DTOs
 
 **STRATUL E — Design System Compliance:**
+
+E.1 — Verificări automate (grep/scan cod):
 - [ ] Elemente din prototip → implementate identic
 - [ ] Elemente lipsă → tokeni DS, nu hex hardcoded
 - [ ] Zero gradienturi, zero culori teal/cyan/blue
 - [ ] Zero box-shadow custom (doar --sh-sm și --sh-pink)
+- [ ] Pagini dashboard → NU au `backgroundColor` opac pe containerul rădăcină (G7 — sabotează grid-dot din `.has-grid`)
+- [ ] Pagini fără SidebarLayout (login, etc.) → POT seta `--c-bej-0` ca background propriu
+
+E.2 — Verificare vizuală side-by-side (OBLIGATORIE):
+
+Bug-uri precum G7 sunt invizibile la inspecția codului — culoarea pare aceeași. Trebuie verificare vizuală pe ecran.
+
+Pentru fiecare pagină implementată:
+1. Pornește dev server-ul (frontend) — `npm run dev`
+2. Deschide pagina în browser
+3. Capturează screenshot la rezoluție 1440×900
+4. Deschide prototipul echivalent în paralel
+5. Compară:
+   - [ ] Background pattern (grid-dot prezent dacă prototipul îl are?)
+   - [ ] Spacing între secțiuni (cote din S8 al SPEC-ului)
+   - [ ] Aliniere coloane tabel (cote din S9)
+   - [ ] Stările de focus/hover pe inputs (culoare pink, ring vizibil)
+   - [ ] Tipografie (font, weight, line-height din S7)
+6. Salvează ambele screenshots în `verification/[pagina]-prototip.png` și `verification/[pagina]-prod.png`
+7. Dacă există diferență → marchează în raport ca fix necesar
+
+Browser-uri de testat: Chrome (default). Pentru G7 specific, deschide DevTools → Inspector → verifică că `::before` cu `background-image: radial-gradient(...)` e activ pe `.has-grid` și nu e acoperit de un copil cu background opac.
 
 ### ▶ STOP — Prezintă raportul de verificare
 
