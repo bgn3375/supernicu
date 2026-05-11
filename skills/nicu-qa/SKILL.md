@@ -52,15 +52,37 @@ Porneste dev server si verifica fiecare pagina din PRD:
 - [ ] Loading states: skeleton/spinner pe fiecare pagină
 - [ ] Design System aplicat corect (verificat vizual)
 
-### 4. Edge Cases
+### 4. Security Tests
+
+**Auth tests (fiecare endpoint):**
+- [ ] Request fără auth token → 401 Unauthorized
+- [ ] Request cu token expirat → 401 Unauthorized
+- [ ] Request customer pe endpoint admin → 403 Forbidden
+- [ ] Request cu `X-Team-Id` al altui tenant → nu returnează date (IDOR check)
+
+**Inventory `[AllowAnonymous]`:**
+- [ ] Listează TOATE endpoint-urile cu `[AllowAnonymous]`
+- [ ] Verifică că fiecare are motiv documentat (login, health, webhook)
+- [ ] Semnalează orice `[AllowAnonymous]` nejustificat ca BUG Critical
+
+**Log scanning:**
+- [ ] Grep log output pentru pattern-uri sensibile: `password`, `token`, `apikey`, `secret`, `authorization`
+- [ ] Nicio valoare sensibilă în output-ul consolei sau log-urilor
+
+**API separation:**
+- [ ] Customer endpoints pe `/api/v1/`, admin endpoints pe `/api/admin/v1/`
+- [ ] Admin controller-ele au `[Authorize(Roles = "Admin")]`
+- [ ] Nu există funcții admin pe customer controllers
+
+### 5. Edge Cases
 
 - Form validation: campuri goale, valori negative, date invalide
 - Multi-tenant (dacă produsul cere): verifică că team_id se aplică pe query-uri
-- Responsive: verificar la 1280px, 1024px, 768px
+- Responsive: verificare la 1280px, 1024px, 768px
 - Empty states: ce se afiseaza cand nu sunt date
 - Loading states: skeleton/spinner pe fiecare pagina
 
-### 5. Bug Report Format
+### 6. Bug Report Format
 
 ```markdown
 ## BUG-001: [titlu scurt]
@@ -79,16 +101,18 @@ Porneste dev server si verifica fiecare pagina din PRD:
 
 1. Ruleaza build verification (backend + frontend)
 2. Ruleaza unit tests
-3. Porneste dev server
-4. Verifica fiecare pagina din checklist
-5. Testeaza edge cases
-6. Raporteaza buguri la orchestrator
-7. Re-verifica dupa fix-uri
+3. Ruleaza security tests (auth, IDOR, log scan, API separation)
+4. Porneste dev server
+5. Verifica fiecare pagina din checklist
+6. Testeaza edge cases
+7. Raporteaza buguri la orchestrator
+8. Re-verifica dupa fix-uri
 
 ## Criterii de acceptare
 
 - Zero build errors
 - Toate testele existente trec
+- Security tests: toate endpoint-urile returnează 401/403 corect, zero sensitive data in logs
 - Toate paginile din PRD se incarca si sunt functionale
 - Design System aplicat corect (verificat vizual)
 - No console errors in browser

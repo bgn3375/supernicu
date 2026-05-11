@@ -28,16 +28,47 @@ Dupa ce nicu-qa confirma ca build-ul e ok si testele trec. Ultimul pas inainte d
 
 ### 2. Security Review
 
-- [ ] **Multi-tenant isolation** (dacă produsul e multi-tenant): tenantFilter pe entitățile cu team_id
-- [ ] **Auth**: [Authorize] pe toate controllere (exceptie: auth endpoints)
-- [ ] **Input validation**: Data Annotations pe DTOs, null checks in services
-- [ ] **SQL injection**: NHibernate parametrized queries (no string concatenation)
-- [ ] **XSS**: React escapeaza by default, no dangerouslySetInnerHTML
-- [ ] **File upload**: content-type validation, max size, no path traversal
-- [ ] **Secrets**: env vars, no hardcoded credentials
-- [ ] **CORS**: restrictiv, doar frontend domain
-- [ ] **Rate limiting**: pe auth endpoints
-- [ ] **Soft delete**: deleted_at, no fizic DELETE pe entitati importante
+Verifică GUARDRAILS.md pentru pattern-uri de eroare cunoscute. Fiecare guardrail nerespectat = CHANGES REQUESTED.
+
+**A. Authorization (deny-by-default):**
+- [ ] `FallbackPolicy` cu `RequireAuthenticatedUser` în Program.cs — ORICE endpoint cere auth by default
+- [ ] Fiecare `[AllowAnonymous]` are comentariu cu motiv. Whitelist completă, verificată contra architect output
+- [ ] Role-based auth pe admin endpoints: `[Authorize(Roles = "Admin")]` sau policy echivalent
+- [ ] Nu există headere custom folosite ca mecanism de autorizare (ex: `RequestBy`, `X-Admin`)
+
+**B. API Separation:**
+- [ ] Customer API (`/api/v1/`) separat de Admin API (`/api/admin/v1/`)
+- [ ] Controller-e separate pentru customer și admin — nu amestecate
+- [ ] Admin controllers nu sunt expuse public
+
+**C. Data Access (anti-IDOR, multi-tenant):**
+- [ ] Query-uri filtrează pe `team_id` + `entity_id` — ownership validation pe fiecare acces
+- [ ] `team_id` derivat din JWT/sesiune, NICIODATĂ din request params
+- [ ] ID-uri expuse în API sunt UUID, nu auto-increment secvențial
+- [ ] NHibernate `tenantFilter` pe sesiune (dacă produsul e multi-tenant)
+- [ ] Nu există query care returnează date cross-tenant
+- [ ] Cache keys includ `team_id`
+- [ ] Storage paths includ `team_id` prefix
+
+**D. Input/Output:**
+- [ ] Input validation: Data Annotations pe DTOs, null checks in services
+- [ ] NHibernate parametrized queries — no string concatenation în queries
+- [ ] No `dangerouslySetInnerHTML` în frontend
+- [ ] File upload: content-type validation, max size, no path traversal
+- [ ] Error responses nu expun stack traces sau detalii interne
+
+**E. Secrets & Logging:**
+- [ ] Env vars pentru credentials — no hardcoded secrets
+- [ ] No sensitive data in logs: parole, tokens, API keys, PII — nici server-side, nici client-side
+- [ ] No `console.log` cu date sensibile în production
+- [ ] Source maps disabled în production build (`productionBrowserSourceMaps: false`)
+- [ ] No tokens în localStorage — doar httpOnly cookies
+
+**F. Infrastructure:**
+- [ ] CORS restrictiv — doar frontend domain
+- [ ] Rate limiting pe auth endpoints
+- [ ] Soft delete — `deleted_at`, nu DELETE fizic pe entități importante
+- [ ] Security headers reale: CSP (fără unsafe-inline), HSTS, X-Content-Type-Options. No X-XSS-Protection
 
 ### 3. Multi-tenant Verification (dacă produsul e multi-tenant)
 

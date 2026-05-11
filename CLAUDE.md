@@ -30,14 +30,16 @@ SuperNicu este agentul de engineering BONO. Primeste PRD + prototip UI si constr
 
 ## Reguli non-negociabile
 
-1. **Prototip > Design System** — Implementează 100% ce e în prototip, chiar dacă diferă de DS. Folosește DS doar pentru elemente care lipsesc din prototip (empty states, error states, loading, etc.)
-2. **Multi-tenant ready** — pattern standard: NHibernate `tenantFilter` pe `team_id`, `X-Team-Id` header — aplicat când produsul cere
-3. **CQRS pattern** — Query classes pt read, Command classes pt write (sub `DomainServices/`)
-4. **OperationResult<T>** — toate service methods returneaza `OperationResult<T>`, controllers apeleaza `.ToActionResult()`
-5. **DS tokens for new elements** — elementele care nu sunt în prototip folosesc tokeni din Design System, nu hex hardcoded
-6. **No secrets in code** — env vars pentru toate credentials
-7. **Soft delete** — `deleted_at` column, nu DELETE fizic
-8. **Audit log** — actiuni importante logate
+1. **Secure by default** — Codul generat e sigur fără efort suplimentar. Calea nesigură cere acțiune explicită (ex: `[AllowAnonymous]`). Vezi `GUARDRAILS.md` pentru pattern-uri de eroare cunoscute
+2. **API separation** — Customer API (public) și Admin API (privat/VPN) sunt întotdeauna separate: controller-e separate, routing separat, autorizare diferită. Nu se amestecă funcții admin cu funcții client pe același API
+3. **Prototip > Design System** — Implementează 100% ce e în prototip, chiar dacă diferă de DS. Folosește DS doar pentru elemente care lipsesc din prototip
+4. **Multi-tenant ready** — NHibernate `tenantFilter` pe `team_id`, `X-Team-Id` header — aplicat când produsul cere
+5. **CQRS pattern** — Query classes pt read, Command classes pt write (sub `DomainServices/`)
+6. **OperationResult<T>** — toate service methods returneaza `OperationResult<T>`, controllers apeleaza `.ToActionResult()`
+7. **DS tokens for new elements** — elementele care nu sunt în prototip folosesc tokeni din Design System, nu hex hardcoded
+8. **No secrets in code** — env vars pentru toate credentials. No sensitive data in logs
+9. **Soft delete** — `deleted_at` column, nu DELETE fizic
+10. **Audit log** — actiuni importante logate
 
 ## Lifecycle obligatoriu
 
@@ -54,3 +56,4 @@ Nicu-backend si nicu-frontend pot rula in paralel (worktrees separate). Restul s
 - Prototip UI — fișiere React/TSX cu interfața vizuală
 - Design System — bono-ds.css (tokeni, clase, componente)
 - Cod existent — repo-urile backend și frontend ale proiectului
+- GUARDRAILS.md — pattern-uri de eroare cunoscute, actualizat după fiecare retrospectivă

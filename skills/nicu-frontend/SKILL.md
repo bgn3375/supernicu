@@ -179,6 +179,14 @@ export default async function MyEntityPage({ params }: { params: { teamId: strin
 - Elemente teal/cyan/blue
 - Box-shadow custom (doar --sh-sm si --sh-pink)
 
+## Security — client-side
+
+- **No secrets in client code** — API keys, tokens, connection strings nu ajung niciodată în componente client. Totul trece prin server actions
+- **No dangerouslySetInnerHTML** — React escapeaza by default. Dacă e absolut necesar, sanitizează cu DOMPurify și documentează motivul
+- **No tokens in localStorage** — JWT se stochează în httpOnly cookies, nu în localStorage/sessionStorage
+- **Source maps disabled in production** — `productionBrowserSourceMaps: false` în `next.config.js`
+- **Admin routes protejate server-side** — `middleware.ts` verifică rolul înainte de a randa pagina. Ascunderea linkului din UI NU e securitate
+
 ## Conventii
 
 - kebab-case pt fisiere: `my-entity-form.tsx`, `use-my-entities.ts`

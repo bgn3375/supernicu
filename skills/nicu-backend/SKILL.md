@@ -15,6 +15,85 @@ Cand orchestratorul asigneaza task-uri backend: noi endpoints, modificari schema
 - OperationResult<T> pattern
 - xUnit 2.5.3 + Moq 4.20 + SQLite in-memory pentru teste
 
+## Secure by default — "pit of success"
+
+Codul generat de nicu-backend e sigur by default. Calea nesigură cere acțiune explicită.
+
+### Deny-by-default auth (FallbackPolicy)
+Fiecare proiect are în `Program.cs`:
+```csharp
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+```
+Efectul: ORICE endpoint cere auth. `[AllowAnonymous]` e excepția explicită, nu regula.
+
+### API Separation — Customer vs Admin
+Controller-ele customer și admin sunt ÎNTOTDEAUNA separate:
+```csharp
+// Customer API — public
+[Route("api/v1/[controller]")]
+public class EntitiesController : TenantControllerBase { ... }
+
+// Admin API — privat, role-based
+[Authorize(Roles = "Admin")]
+[Route("api/admin/v1/[controller]")]
+public class AdminEntitiesController : ControllerBase { ... }
+```
+Nu se amestecă funcții admin cu funcții customer în același controller.
+
+### Base controller cu tenant extraction
+Toate controller-ele customer extind `TenantControllerBase`:
+```csharp
+public abstract class TenantControllerBase : ControllerBase
+{
+    protected string TeamId => Request.Headers["X-Team-Id"].FirstOrDefault()
+        ?? throw new UnauthorizedAccessException("Missing X-Team-Id");
+    
+    protected string UserId => User.FindFirst("sub")?.Value
+        ?? throw new UnauthorizedAccessException("Missing user claim");
+}
+```
+Agentul nu poate uita tenant extraction — vine din base class.
+
+### Ownership validation (anti-IDOR)
+Query-urile filtrează ÎNTOTDEAUNA pe `team_id` + `entity_id`:
+```csharp
+// CORECT — filtrează pe team_id + id
+var entity = await session.Query<MyEntity>()
+    .Where(e => e.Id == id && e.TeamId == teamId)
+    .SingleOrDefaultAsync();
+
+// GREȘIT — permite IDOR
+var entity = await session.GetAsync<MyEntity>(id);
+```
+
+### No sensitive data in logs
+```csharp
+// CORECT — loghează eveniment, nu date
+_logger.LogInformation("User {UserId} logged in from {IP}", userId, ip);
+
+// GREȘIT — expune parola în logs
+_logger.LogInformation("Login: {Email} / {Password}", email, password);
+```
+
+### No security theater
+Autorizarea prin JWT claims, NICIODATĂ prin headere custom:
+```csharp
+// GREȘIT — oricine poate seta headerul
+var source = Request.Headers["RequestBy"].ToString();
+if (source != "admin-app") return Unauthorized();
+
+// CORECT — JWT claim validat server-side
+var role = User.FindFirst(ClaimTypes.Role)?.Value;
+if (role != "Admin") return Forbid();
+```
+
+---
+
 ## Pattern de implementare (6 pasi)
 
 ### Pas 1: Domain Model (`DomainModel/`)
@@ -73,14 +152,17 @@ public class MyFilterRequest : PagedRequest { ... }
 
 ### Pas 4: CQRS Queries + Commands (`DomainServices/`)
 
-**Query** (citeste date, deschide propria sesiune):
+**Query** (citeste date, deschide propria sesiune, filtrează pe team_id):
 ```csharp
 public class GetMyEntityQuery : NHibernateGenericQuery<MyEntity>
 {
     public async Task<MyEntity> Execute(string teamId, Guid id)
     {
         using var session = OpenSession(teamId);
-        return await session.GetAsync<MyEntity>(id);
+        // Filtrează pe team_id + id — previne IDOR
+        return await session.Query<MyEntity>()
+            .Where(e => e.Id == id && e.TeamId == teamId)
+            .SingleOrDefaultAsync();
     }
 }
 ```
@@ -125,34 +207,32 @@ public class MyService : IMyService
 ```
 
 ### Pas 6: Controller (`Api/Controllers/`)
-Thin controller, delegheaza la service.
+Thin controller, extinde `TenantControllerBase`, delegheaza la service.
 
 ```csharp
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize]
-public class MyController : ControllerBase
+public class MyController : TenantControllerBase
 {
     private readonly IMyService _service;
     
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var teamId = Request.Headers["X-Team-Id"].ToString();
-        var result = await _service.GetById(teamId, id);
+        var result = await _service.GetById(TeamId, id);
         return result.ToActionResult();
     }
     
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateMyRequest request)
     {
-        var teamId = Request.Headers["X-Team-Id"].ToString();
-        var userId = User.FindFirst("sub")?.Value;
-        var result = await _service.Create(teamId, userId, request);
+        var result = await _service.Create(TeamId, UserId, request);
         return result.ToActionResult();
     }
 }
 ```
+
+**Notă:** Nu mai e nevoie de `[Authorize]` explicit — FallbackPolicy îl aplică by default. `TeamId` și `UserId` vin din `TenantControllerBase`.
 
 ## Conventii
 
@@ -160,9 +240,11 @@ public class MyController : ControllerBase
 - PascalCase pt C# types
 - `team_id` pe tabelele cu date tenant (când produsul e multi-tenant)
 - `deleted_at` pt soft delete (nu DELETE fizic)
-- UUID (CHAR(36)) pt primary keys
+- UUID (CHAR(36)) pt primary keys — **niciodată auto-increment secvențial pe ID-uri expuse în API**
 - `OperationResult<T>` pt TOATE return types din services
 - Audit log pt actiuni importante
+- Customer controllers extind `TenantControllerBase`, admin controllers au `[Authorize(Roles = "Admin")]`
+- Fiecare `[AllowAnonymous]` are un comentariu cu motivul
 
 ## Teste
 
