@@ -15,13 +15,38 @@
 set +e
 
 PROJECT_ROOT="${1:-$(pwd)}"
-MAPPINGS_DIR="$PROJECT_ROOT/PnL.Infrastructure.NHibernate/Mappings"
-QUERIES_DIR="$PROJECT_ROOT/PnL.DomainServices"
+
+# Detect project prefix from .sln name (ex: "SRV.Bono.PnL.sln" → "PnL")
+# Fallback: directory name with .Infrastructure.NHibernate suffix
+detect_project_prefix() {
+    local sln=$(find "$PROJECT_ROOT" -maxdepth 2 -name "*.sln" -type f 2>/dev/null | head -1)
+    if [ -n "$sln" ]; then
+        # SRV.Bono.PnL.sln → PnL
+        basename "$sln" .sln | sed 's/.*\.//'
+        return
+    fi
+    local infra_dir=$(find "$PROJECT_ROOT" -maxdepth 3 -type d -name "*.Infrastructure.NHibernate" 2>/dev/null | head -1)
+    if [ -n "$infra_dir" ]; then
+        basename "$infra_dir" | sed 's/\.Infrastructure\.NHibernate$//' | sed 's/.*\.//'
+        return
+    fi
+    echo ""
+}
+
+PROJECT_PREFIX="${PROJECT_PREFIX:-$(detect_project_prefix)}"
+
+if [ -n "$PROJECT_PREFIX" ]; then
+    MAPPINGS_DIR="$PROJECT_ROOT/${PROJECT_PREFIX}.Infrastructure.NHibernate/Mappings"
+    QUERIES_DIR="$PROJECT_ROOT/${PROJECT_PREFIX}.DomainServices"
+else
+    MAPPINGS_DIR=""
+    QUERIES_DIR=""
+fi
 SCHEMA_FILE="$PROJECT_ROOT/schema.sql"
 OUTPUT_DIR="${OUTPUT_DIR_OVERRIDE:-$PROJECT_ROOT/docs/architect}"
 OUTPUT_FILE="$OUTPUT_DIR/query-safety-matrix.md"
 
-# Fallback paths
+# Fallback paths via find (când prefix detection eșuează)
 if [ ! -d "$MAPPINGS_DIR" ]; then
     MAPPINGS_DIR=$(find "$PROJECT_ROOT" -maxdepth 4 -type d -name "Mappings" 2>/dev/null | head -1)
 fi
@@ -31,8 +56,13 @@ fi
 
 if [ ! -d "$MAPPINGS_DIR" ]; then
     echo "ERROR: Cannot find Mappings directory under $PROJECT_ROOT"
+    echo "Hint: set PROJECT_PREFIX env var (ex: PROJECT_PREFIX=Forex) or place hook in project root with .sln file"
     exit 1
 fi
+
+# Compute relative paths for output (project-agnostic)
+QUERIES_DIR_REL=$(echo "$QUERIES_DIR" | sed "s|^$PROJECT_ROOT/||")
+MAPPINGS_DIR_REL=$(echo "$MAPPINGS_DIR" | sed "s|^$PROJECT_ROOT/||")
 
 mkdir -p "$OUTPUT_DIR"
 

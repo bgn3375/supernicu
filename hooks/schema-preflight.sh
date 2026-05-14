@@ -16,7 +16,31 @@ set +e
 
 PROJECT_ROOT="${1:-$(pwd)}"
 MIGRATION_FILE="${2:-}"
-MAPPINGS_DIR="$PROJECT_ROOT/PnL.Infrastructure.NHibernate/Mappings"
+
+# Detect project prefix from .sln name (ex: "SRV.Bono.PnL.sln" → "PnL")
+detect_project_prefix() {
+    local sln=$(find "$PROJECT_ROOT" -maxdepth 2 -name "*.sln" -type f 2>/dev/null | head -1)
+    if [ -n "$sln" ]; then
+        basename "$sln" .sln | sed 's/.*\.//'
+        return
+    fi
+    local infra_dir=$(find "$PROJECT_ROOT" -maxdepth 3 -type d -name "*.Infrastructure.NHibernate" 2>/dev/null | head -1)
+    if [ -n "$infra_dir" ]; then
+        basename "$infra_dir" | sed 's/\.Infrastructure\.NHibernate$//' | sed 's/.*\.//'
+        return
+    fi
+    echo ""
+}
+
+PROJECT_PREFIX="${PROJECT_PREFIX:-$(detect_project_prefix)}"
+
+if [ -n "$PROJECT_PREFIX" ]; then
+    MAPPINGS_DIR="$PROJECT_ROOT/${PROJECT_PREFIX}.Infrastructure.NHibernate/Mappings"
+    QUERIES_DIR_REL="${PROJECT_PREFIX}.DomainServices"
+else
+    MAPPINGS_DIR=""
+    QUERIES_DIR_REL="DomainServices"
+fi
 SCHEMA_FILE="$PROJECT_ROOT/schema.sql"
 OUTPUT_DIR="${OUTPUT_DIR_OVERRIDE:-$PROJECT_ROOT/docs/architect}"
 
@@ -26,6 +50,13 @@ if [ ! -d "$MAPPINGS_DIR" ]; then
 fi
 if [ ! -f "$SCHEMA_FILE" ]; then
     SCHEMA_FILE=$(find "$PROJECT_ROOT" -maxdepth 3 -name "schema.sql" 2>/dev/null | head -1)
+fi
+# Re-compute QUERIES_DIR_REL if prefix detection failed
+if [ -z "$PROJECT_PREFIX" ]; then
+    queries_dir=$(find "$PROJECT_ROOT" -maxdepth 4 -type d -name "DomainServices" 2>/dev/null | head -1)
+    if [ -n "$queries_dir" ]; then
+        QUERIES_DIR_REL=$(echo "$queries_dir" | sed "s|^$PROJECT_ROOT/||")
+    fi
 fi
 
 mkdir -p "$OUTPUT_DIR"
@@ -233,7 +264,7 @@ if [ -n "$MIGRATION_FILE" ] && [ -f "$MIGRATION_FILE" ]; then
         emit ""
         emit '```bash'
         emit "# Audit caller-uri DELETE pentru entitate <Entity>"
-        emit "grep -rE 'Session\\.Delete.*$entity|Delete${entity}Command|new Cancel${entity}' PnL.DomainServices/"
+        emit "grep -rE 'Session\\.Delete.*$entity|Delete${entity}Command|new Cancel${entity}' $QUERIES_DIR_REL/"
         emit '```'
         emit ""
     fi
