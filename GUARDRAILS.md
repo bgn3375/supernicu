@@ -42,8 +42,63 @@ Format per entry: **Trigger** (ce context precede eroarea) → **Instrucțiune**
 **Instrucțiune:** Path-urile de stocare includ `team_id` ca prefix. Download-ul verifică că fișierul aparține tenant-ului curent. Nu permite path traversal (`../`).
 **Motiv:** Fără ownership check, un utilizator poate descărca fișierele altui tenant dacă ghicește path-ul.
 
-## G7: Background opac șterge tăcut grid-dot pattern-ul
+## G7: Background opac șterge tăcut grid-dot pattern-ul (BUG RECURENT)
 
-**Trigger:** Pagină din dashboard care setează `background` / `backgroundColor` opac pe containerul rădăcină al paginii (ex: `<div style={{ backgroundColor: 'var(--c-bej-0)' }}>...`).
-**Instrucțiune:** Paginile dashboard (copil direct al wrapper-ului `.has-grid`) NU setează background opac propriu. Pattern-ul DS Bono pictează grid-dot via `::before` pe părinte cu `z-index: 0`, iar `.has-grid > * { z-index: 1 }` ridică copiii deasupra — dacă copilul are background opac, acoperă overlay-ul tăcut. Lasă `background: transparent` sau omite proprietatea. Excepție: pagini fără SidebarLayout (ex: `login`) pot seta bej-0 ca background propriu.
-**Motiv:** Bug invizibil la inspecție rapidă — culoarea pare identică (bej peste bej-cu-puncte), nu sparge teste, nu apare în screenshot-uri. Diferența vizuală e doar pattern-ul de puncte la `rgba(17,13,16,0.15)` care dispare. Detectabil doar prin comparație side-by-side cu prototipul.
+**ISTORIC:** Bogdan a raportat acest bug în multiple sesiuni (2026-05-08, 2026-05-09, 2026-05-13). DEVENIT REGULĂ ABSOLUTĂ.
+
+**Trigger:** Pagină din dashboard care setează `background` / `backgroundColor` opac pe containerul rădăcină al paginii. Pattern-uri specifice care declanșează bug-ul:
+- `style={{ backgroundColor: 'var(--background)' }}` ❌
+- `style={{ background: 'var(--c-bej-0)' }}` ❌
+- `className="bg-[var(--background)]"` ❌
+- `className="bg-background"` ❌
+- `className="min-h-screen bg-[var(--c-bej-0)]"` ❌
+- Orice inline `bg-*` cu culoare opacă pe outermost element al paginii ❌
+
+**Instrucțiune:**
+1. **Paginile dashboard NU setează background.** Lasă transparent — pattern-ul vine din `.has-grid::before` la nivelul `SidebarLayout`.
+2. **Defense in depth la nivel CSS:** `globals.css` are `.has-grid > * { background: transparent !important }` ca safety net — dar acest CSS NU înlocuiește instrucțiunea, doar e backup pentru greșeli accidentale.
+3. **Excepții (background propriu permis):** doar pagini FĂRĂ `SidebarLayout` — `/login`, `/register`, `/request-access`, `/auth/*`. Aceste pagini sunt centrate, full-viewport, fără sidebar. Și acolo: doar dacă designul cere bg explicit.
+4. **Pre-commit check OBLIGATORIU:** grep pattern-urile interzise de mai sus în fișierele modificate. Dacă găsești → fix imediat + verifică vizual în browser.
+
+**Detection automată:**
+```bash
+# Pre-commit hook recomandat (în .husky/pre-commit sau equivalent):
+grep -rn "min-h-screen bg-\[var(--background)\]\|min-h-screen bg-\[var(--c-bej-0)\]\|backgroundColor.*['\"]var(--background)['\"]\|backgroundColor.*['\"]var(--c-bej-0)['\"]" \
+  app/dashboard/ components/ 2>/dev/null && echo "G7 VIOLATION DETECTED" && exit 1
+```
+
+**Motiv:** Bug invizibil la inspecție rapidă — culoarea pare identică (bej peste bej-cu-puncte), nu sparge teste, nu apare în screenshot-uri JPEG-comprimate. Diferența vizuală e doar pattern-ul de puncte la `rgba(17,13,16,0.15)` care dispare. Detectabil doar prin comparație side-by-side cu prototipul SAU prin atenție la screenshot pixel-perfect. Bogdan **îl prinde mereu** pentru că e mai atent la brand decât majoritatea — repetarea acestui bug erodează încrederea.
+
+**Pattern de raportare în SPEC-uri:** Orice SPEC pentru o pagină dashboard nouă trebuie să includă explicit în S7 (Culori): "Page bg: TRANSPARENT (NU setezi — grid-dot vine din SidebarLayout)."
+
+## G8: Indirect tenant-scoped entities — query fără JOIN pe parent.team_id
+
+**Trigger:** Query pe entitate care NU are coloană `team_id` directă, dar e logic legată de un tenant prin parent (ex: `ExpenseAttachment` → `Expense.TeamId`, `ExpenseAuditLog` → `Expense.TeamId`, `InvoiceLine` → `Invoice.TeamId`).
+
+Pattern tipic eșuat:
+```csharp
+return Session.QueryOver<ExpenseAttachment>()
+    .Where(a => a.Id == attachmentId)   // ❌ doar PK, fără tenant scope
+    .SingleOrDefault();
+```
+
+**Instrucțiune:**
+Queries pe entități indirect tenant-scoped TREBUIE să facă JOIN explicit pe parent + filtru `parent.team_id`:
+
+```csharp
+ExpenseAttachment att = null;
+TeamExpense expense = null;
+return Session.QueryOver(() => att)
+    .JoinAlias(() => att.Expense, () => expense)
+    .Where(() => att.Id == attachmentId && expense.TeamId == teamId)
+    .SingleOrDefault();
+```
+
+Service-layer check (`if (expense.TeamId != teamId) throw`) NU e suficient — e single line of defense. Defense-in-depth cere ca **query-ul însuși să refuze să returneze datele altui tenant**, indiferent de cine îl apelează.
+
+**Clasificare obligatorie în Faza 2 (ARCHITECT):** fiecare entitate primește verdict explicit (vezi „Query Safety Matrix" în SKILL.md Faza 2):
+- `Direct tenant-scoped` — are `team_id` → `TenantFilter` în mapping
+- `Indirect tenant-scoped` — fără `team_id`, are parent cu `team_id` → query MUST JOIN
+- `Global by design` — nu e tenant data (currency rates, user whitelist) → comentariu în mapping
+
+**Motiv:** Service-layer check e fragil — orice cod nou care apelează query-ul direct (skipping service) leak-uiește datele altui tenant. Defense-in-depth la query layer înseamnă că entitatea e protejată prin construcție, nu prin convenție de apelare. Bug-ul nu apare în testele de behavior la endpoint (HTTP-ul răspunde corect pentru cazurile testate), dar e o suprafață de atac latentă pe care nimeni nu o vede.

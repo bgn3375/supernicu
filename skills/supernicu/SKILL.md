@@ -95,6 +95,22 @@ Dacă utilizatorul cere modificări → modifică SPEC-ul → prezintă din nou.
 2. **Authorization Matrix** — tabel: endpoint group → auth method → role → tenant scoped
 3. **Tenant Isolation Points** — ce tabele au `team_id`, ce queries necesită filter, ce cache keys includ `team_id`, ce storage paths includ prefix
 4. **[AllowAnonymous] Whitelist** — lista COMPLETĂ de endpoint-uri publice cu motiv. Doar: login, register, health, webhooks
+5. **Query Safety Matrix** (OBLIGATORIU — vezi G8 în GUARDRAILS.md):
+
+Tabel cu **o linie per entitate** persistată în feature-ul curent. Output literal în SPEC, verificat la review:
+
+| Entitate | `team_id` direct? | Clasificare | Mecanism de protecție |
+|----------|-------------------|-------------|----------------------|
+| `Expense` | Da | Direct tenant-scoped | `TenantFilter` în `ExpenseMap` |
+| `ExpenseAttachment` | Nu | Indirect tenant-scoped | Query MUST JOIN `Expense` + `expense.TeamId == teamId` |
+| `ExchangeRate` | N/A | Global by design | Comentariu în mapping „shared cross-tenant" |
+
+Reguli:
+- Fiecare entitate primește verdict explicit. Nu lăsa „N/A" fără justificare.
+- Pentru fiecare entitate `Indirect tenant-scoped`, listează queries care o accesează și confirmă pattern-ul JOIN.
+- Pentru fiecare entitate `Global by design`, justifică (currency rates, user whitelist, pre-auth tokens, etc.).
+
+Această matrice e **contractul** pentru Faza 3 (implementare) și Faza 4 (verify). Subagentul backend o citește înainte să scrie query-uri. Faza 4 STRATUL B o folosește ca referință de audit.
 
 **B. Gap Analysis:**
 - Compară SPEC-urile aprobate cu codul existent
@@ -190,22 +206,25 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 ---
 
 ### ═══════════════════════════════════════
-### FAZA 4: VERIFICARE — Swiss Cheese (5 straturi)
+### FAZA 4: VERIFICARE — Swiss Cheese (6 straturi)
 ### ═══════════════════════════════════════
 
 **Scop:** Verifică tot ce s-a construit. Build, teste, securitate, conformitate SPEC.
 
-**Modelul Swiss Cheese:** fiecare strat de verificare are găurile lui (lucruri pe care nu le poate prinde), dar găurile nu se aliniază. Un bug care trece de Build e prins de Security; unul care trece de Security e prins de SPEC; și așa mai departe. **Un singur strat nu e suficient. Toate cele 5 trebuie să treacă.**
+**Modelul Swiss Cheese:** fiecare strat de verificare are găurile lui (lucruri pe care nu le poate prinde), dar găurile nu se aliniază. Un bug care trece de Build e prins de Security; unul care trece de Security e prins de SPEC; și așa mai departe. **Un singur strat nu e suficient. Toate cele 6 trebuie să treacă.**
 
 | Strat | Ce prinde | Ce nu prinde (găurile) |
 |-------|-----------|------------------------|
 | A. Build | Erori compilare, TypeScript, lint | Logică, IDOR, drift de spec |
-| B. Security | 401/403, IDOR, secrete în log, API separation | Bug-uri de business, vizual |
+| B. Security (Behavior + Structure) | 401/403, IDOR la endpoint + tenant scoping la query | Bug-uri de business, vizual |
 | C. SPEC Compliance | Câmp lipsă, ordine greșită, micro-spec ignorată | Crash runtime, security |
 | D. Code Quality | TODO, `any`, console.log, duplicare | Bug-uri vizuale, logică |
-| E. DS Compliance | Hex hardcoded, gradient, shadow custom | Funcționalitate |
+| E. DS Compliance | Hex hardcoded, gradient, shadow custom + vizual side-by-side | Funcționalitate, depth |
+| F. Independent Review | Adâncime structurală pe fișierele flag-uite | Doar ce s-a flag-uit |
 
 Verifică ÎN ORDINE. Dacă un strat fail → fix → reia verificarea de la stratul A.
+
+**Principiu (vezi CLAUDE.md):** Straturile A-E detectează **prezența** de tipare. Stratul F (review-bono independent) validează **adâncimea structurală**. Hook-urile rămân WARN-only până când pattern-ul s-a stabilizat pe 2-3 proiecte reale.
 
 **STRATUL A — Build Verification:**
 ```bash
@@ -218,7 +237,9 @@ npm ci && npx tsc --noEmit && npm run build && npm run lint
 ```
 Zero errors. Dacă fail → fix + retry.
 
-**STRATUL B — Security Tests:**
+**STRATUL B — Security Tests (Behavior + Structure):**
+
+B.1 — Behavior tests (HTTP-layer):
 - [ ] Fiecare endpoint fără token → 401
 - [ ] Token expirat → 401
 - [ ] Customer pe endpoint admin → 403
@@ -226,6 +247,24 @@ Zero errors. Dacă fail → fix + retry.
 - [ ] Listează TOATE `[AllowAnonymous]` — fiecare are motiv documentat
 - [ ] Grep logs pentru: password, token, apikey, secret, authorization → zero matches
 - [ ] Customer endpoints pe `/api/v1/`, admin pe `/api/admin/v1/`
+
+B.2 — Structure tests (data-layer invariants — vezi G8):
+
+**De ce e necesar:** B.1 testează că „aplicația face ce trebuie azi" — endpoint-ul răspunde corect pentru cazurile testate. NU detectează că query-ul însuși poate fi apelat direct (skipping service) și leak-ui datele altui tenant. Defense-in-depth cere verificare la layer-ul de query.
+
+Pentru fiecare entitate clasificată `Indirect tenant-scoped` în Query Safety Matrix (Faza 2):
+- [ ] Listează toate `*Query.cs` care accesează entitatea
+- [ ] Pentru fiecare query: verifică prezența JOIN explicit pe parent + filtru `parent.team_id` în expresia WHERE/Where
+- [ ] Service-layer check (`if (entity.TeamId != teamId)`) NU contează ca al doilea strat — e backup, nu primary
+- [ ] Rulează hook-ul `hooks/query-tenant-check.sh` — output e lista fișierelor flag-uite, routează la review-bono
+
+Hook-ul **NU validează**, doar **flag-ează tipare suspecte**. Verdictul final îl dă review-bono care citește fișierele flag-uite și judecă structural.
+
+Pentru entitățile clasificate `Direct tenant-scoped`:
+- [ ] Mapping conține `ApplyFilter<TenantFilterDefinition>("team_id = :teamId")`
+
+Pentru entitățile clasificate `Global by design`:
+- [ ] Mapping conține comentariu explicit „global by design — [motiv]"
 
 **STRATUL C — SPEC Checklist (bifează punct cu punct):**
 - Ia fiecare SPEC-[pagina].md
@@ -273,6 +312,29 @@ Pentru fiecare pagină implementată:
 7. Dacă există diferență → marchează în raport ca fix necesar
 
 Browser-uri de testat: Chrome (default). Pentru G7 specific, deschide DevTools → Inspector → verifică că `::before` cu `background-image: radial-gradient(...)` e activ pe `.has-grid` și nu e acoperit de un copil cu background opac.
+
+**STRATUL F — Independent Review (OBLIGATORIU, targeted):**
+
+Hook-urile și grep-urile din straturile A-E detectează **prezența** de tipare. Adâncimea structurală o validează un subagent independent (`review-bono` din `~/.claude/skills/` sau plugin similar) care nu a scris codul.
+
+Lansează `review-bono` cu brief focalizat — NU pe tot PR-ul (atenția se diluează), ci pe fișierele flag-uite de straturile anterioare:
+
+```
+Agent(
+  description: "Independent review — tenant scoping + DS compliance",
+  prompt: "Citește următoarele fișiere și verifică:
+    1. Pentru fiecare *Query.cs flagged de hooks/query-tenant-check.sh:
+       - Există JOIN explicit pe parent + parent.team_id în WHERE?
+       - NU acceptă răspunsul 'service-layer-ul prinde' — defense-in-depth la query.
+    2. Pentru fiecare pagină dashboard din lista de fișiere modificate:
+       - NU are background opac pe containerul rădăcină (G7)?
+    3. Raportează: PASS / FAIL per fișier + recomandare fix.
+    
+    Fișiere de revizuit: [listă din hook output]"
+)
+```
+
+Output review-bono → integrare în raportul Faza 4. Orice FAIL → fix + re-verificare. Nu există „accept FAIL ca low priority" — defense-in-depth gaps se fixează înainte de commit.
 
 ### ▶ STOP — Prezintă raportul de verificare
 

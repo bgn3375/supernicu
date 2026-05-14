@@ -89,12 +89,41 @@ Codul sigur e calea implicită. Codul nesigur cere acțiune explicită.
 - `X-Team-Id` header validat pe fiecare request
 - Anti-IDOR: ownership validation — user X nu vede datele user Y din același tenant
 
+**Defense-in-depth la data layer (G8):**
+
+Fiecare entitate persistată primește verdict explicit în Faza 2 (ARCHITECT) — vezi „Query Safety Matrix":
+
+| Clasificare | Mecanism de protecție | Ce înseamnă |
+|------------|----------------------|-------------|
+| Direct tenant-scoped | `TenantFilter` în mapping + `team_id` în query | Are coloană `team_id`. Filtrul automat e suficient |
+| Indirect tenant-scoped | Query MUST JOIN parent + `parent.team_id` în WHERE | Nu are `team_id` (atașament, audit log, line item). Service-layer check NU e suficient |
+| Global by design | Comentariu explicit în mapping | Nu e tenant data (currency rates, user whitelist, magic tokens) |
+
+**Regula G8 (cazul "indirect"):** Service-layer check (`if (parent.TeamId != teamId) throw`) e singular line of defense. Defense-in-depth cere ca **query-ul însuși** să refuze să returneze datele altui tenant. Cod nou care apelează query-ul direct (skipping service) NU TREBUIE să poată leak-ui.
+
 **Verificări obligatorii (Faza 4):**
 - Endpoint fără token → 401
 - Token expirat → 401
 - Customer pe admin endpoint → 403
 - X-Team-Id al altui tenant → zero date returnate
 - Grep logs: password, token, apikey, secret, authorization → zero matches
+- **Query Audit** (G8): pentru fiecare entitate Indirect tenant-scoped, fiecare `*Query.cs` conține JOIN explicit pe parent + filtru `team_id`
+
+## Verificarea automată detectează prezența, nu adâncimea
+
+Meta-principiu pentru orice hook, lint, grep pre-commit, sau check automat:
+
+> **Hook-urile flag-ează tipare suspecte. Subagenții (review-bono) verifică structura. Blocările hard pe grep se introduc DOAR după ce pattern-ul s-a stabilizat empiric (2-3 proiecte cu false positives ≈ 0).**
+
+Greșeala tipică: un grep care caută `team_id` într-un fișier de query pretinde că validează tenant scoping. Dar `team_id` poate apărea în comentariu, într-un alt where clause, sau într-un cast. Grep-ul detectează **prezența string-ului**, nu **structura logică**.
+
+Consecințe practice:
+1. Hook-uri noi pornesc ca **WARN-only**, nu BLOCK
+2. Output-ul lor e o **listă de fișiere suspecte**, nu un verdict pass/fail
+3. Lista e routată la **review-bono** care verifică structura manual
+4. Hook-ul promovat la BLOCK doar după validare pe 2-3 proiecte reale
+
+Aplicat la G7 (background opac) și G8 (query fără JOIN) — ambele au hook-uri WARN-only. Adâncimea o validează review-bono, nu grep-ul.
 
 ## Skill-uri Bono canonice (de la Prodan)
 
