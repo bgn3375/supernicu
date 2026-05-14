@@ -87,30 +87,90 @@ Dacă utilizatorul cere modificări → modifică SPEC-ul → prezintă din nou.
 **Scop:** Proiectează securitatea, schema DB, API contracts, component tree.
 
 **Regula #1: Securitatea e PRIMA decizie, nu ultima.**
+**Regula #2: Inventariază înainte să proiectezi (vezi A.0).**
 
 **Ce faci, în ordine:**
+
+**A.0. Existing Solutions Inventory (OBLIGATORIU înaintea Design-ului):**
+
+Pentru fiecare cross-cutting concern relevant pentru SPEC-ul curent, scan codebase și documentează variantele existente.
+
+**De ce contează:** dacă proiectezi un pattern nou fără să inventariezi cele existente, riști să forțezi convergența între semantici diferite. Ex pe P&L: "soft delete" există în 3 variante (DeletedAt timestamp, IsActive boolean, Status enum) cu semantici DIFERITE (delete final vs deactivare reversibilă vs business state machine). Convergența forțată DISTRUGE feature-uri.
+
+**Cross-cutting concerns de inventariat (selectează pe cele relevante):**
+
+1. **Soft delete / deactivation:**
+   ```bash
+   grep -rE "(DeletedAt|deleted_at|IsActive|is_active|deactivated_at|status\s*=\s*['\"]?(deleted|inactive|removed))" \
+       PnL.DomainModel/ PnL.Infrastructure.NHibernate/Mappings/ schema.sql
+   grep -rE "(Session\.Delete|Delete\*Command|Deactivate\*Command|Cancel\*Command)" PnL.DomainServices/
+   grep -rE "FilterDefinition" PnL.Infrastructure.NHibernate/
+   ```
+
+2. **Reactivation / restore:**
+   ```bash
+   grep -rEn "(Reactivate|Restore|Undelete|reactivate|restore)" \
+       PnL.Api/ PnL.DomainServices/ WEB.Bono.PnL/
+   ```
+
+3. **Audit logging:** `grep -rE "(AuditLog|audit_log|\*History|history)" PnL.DomainModel/ schema.sql`
+4. **Multi-tenant filtering:** auto-generat din Query Safety Matrix (vezi A.5)
+5. **Caching:** `grep -rE "(IMemoryCache|IDistributedCache|MemoryCache|RedisCache)" PnL.Api/ PnL.DomainServices/`
+6. **Authorization patterns:** `grep -rE "(\[Authorize|\[AllowAnonymous|RequireRole|HasPermission)" PnL.Api/`
+
+**Output: `docs/architect/existing-patterns-[feature].md`**
+
+Format obligatoriu:
+- Tabel cu variante găsite per concern (entitate, pattern, semantica, reversibil?)
+- Decizie per concern pentru fiecare entitate nouă/modificată: adopți DeletedAt? IsActive? Status?
+- Întrebări care necesită răspuns user/PM înainte de design (există UI reactivare? există business flow stări?)
+
+**Gate:** dacă găsești 2+ variante diferite pentru același concern și SPEC-ul cere modificare la una din ele, **STOP — cere user să confirme strategia** (converge, leave-alone, document distinction). Nu continua design-ul cu presupuneri.
 
 **A. Security Architecture:**
 1. **API Separation Plan** — Customer API (`/api/v1/`) vs Admin API (`/api/admin/v1/`). Dacă nu sunt funcții admin → documentează explicit
 2. **Authorization Matrix** — tabel: endpoint group → auth method → role → tenant scoped
 3. **Tenant Isolation Points** — ce tabele au `team_id`, ce queries necesită filter, ce cache keys includ `team_id`, ce storage paths includ prefix
 4. **[AllowAnonymous] Whitelist** — lista COMPLETĂ de endpoint-uri publice cu motiv. Doar: login, register, health, webhooks
-5. **Query Safety Matrix** (OBLIGATORIU — vezi G8 în GUARDRAILS.md):
+5. **Query Safety Matrix** (OBLIGATORIU, AUTO-GENERAT — vezi G8 în GUARDRAILS.md):
 
-Tabel cu **o linie per entitate** persistată în feature-ul curent. Output literal în SPEC, verificat la review:
+**Schimbare în v2:** matrix-ul e auto-generat din FluentNH mappings + queries scan, NU human-typed. Eliminăm clasa de bug-uri "uită o entitate" sau "clasifică greșit".
 
-| Entitate | `team_id` direct? | Clasificare | Mecanism de protecție |
-|----------|-------------------|-------------|----------------------|
-| `Expense` | Da | Direct tenant-scoped | `TenantFilter` în `ExpenseMap` |
-| `ExpenseAttachment` | Nu | Indirect tenant-scoped | Query MUST JOIN `Expense` + `expense.TeamId == teamId` |
-| `ExchangeRate` | N/A | Global by design | Comentariu în mapping „shared cross-tenant" |
+**Pas 1: Generează matrix-ul automat:**
+```bash
+bash hooks/build-query-safety-matrix.sh [project-root]
+# Output: docs/architect/query-safety-matrix.md
+# Exit code 0 = clean, 1 = issues found
+```
 
-Reguli:
-- Fiecare entitate primește verdict explicit. Nu lăsa „N/A" fără justificare.
-- Pentru fiecare entitate `Indirect tenant-scoped`, listează queries care o accesează și confirmă pattern-ul JOIN.
-- Pentru fiecare entitate `Global by design`, justifică (currency rates, user whitelist, pre-auth tokens, etc.).
+Scriptul detectează automat:
+- **Direct tenant-scoped:** entități cu `Map(x => x.TeamId)` → verifică prezența `ApplyFilter<TenantFilterDefinition>` (semnalează MISSING dacă lipsește)
+- **Indirect tenant-scoped:** entități fără team_id direct, dar cu `References()` la o entitate Direct → scanează toate `*Query.cs` pentru pattern `JoinAlias + parent.TeamId == teamId` (semnalează queries fără pattern)
+- **Global by design:** restul → verifică prezența comentariului explicativ în mapping (semnalează UNDOCUMENTED dacă lipsește)
 
-Această matrice e **contractul** pentru Faza 3 (implementare) și Faza 4 (verify). Subagentul backend o citește înainte să scrie query-uri. Faza 4 STRATUL B o folosește ca referință de audit.
+**Opt-out pentru queries intenționat cross-tenant** (cleanup jobs, admin reports, system maintenance):
+
+```csharp
+// CROSS-TENANT: cleanup job — runs across all tenants for expired files
+public class FindExpiredSoftDeletedAttachmentsQuery(...) : NHibernatePnlQuery<...>
+{
+    // ... no JOIN+parent.TeamId — intentional
+}
+```
+
+Format strict: `// CROSS-TENANT: <motiv>` (case-sensitive). Hook-ul recunoaște DOAR acest format. Auditabil: `grep -rn "CROSS-TENANT:" PnL.DomainServices/`.
+
+**Pas 2: Review uman al output-ului:**
+- Citește `docs/architect/query-safety-matrix.md`
+- Pentru fiecare issue automat (Missing TenantFilter, Undocumented Global, queries fără JOIN+parent.TeamId): confirmă că e adevărat issue, decide acțiunea (fix mapping/query sau adaugă marker `// CROSS-TENANT:`)
+
+**Pas 3: Iterează** până exit code = 0.
+
+**Pas 4:** Output-ul checked-in în repo. Subagentul backend o citește înainte de Phase 3. Faza 4 Layer B.1 o folosește ca contract.
+
+**Gate:** dacă scriptul exit cu 1, NU pornește Phase 3.
+
+**Anti-pattern:** scriptul detectează tipare, NU înțelege semantică. Pentru cazuri ambigue, human review e mandatory. Scriptul e screening, nu verdict final.
 
 **B. Gap Analysis:**
 - Compară SPEC-urile aprobate cu codul existent
@@ -122,6 +182,68 @@ Această matrice e **contractul** pentru Faza 3 (implementare) și Faza 4 (verif
 - UUID primary keys (CHAR(36)), `created_at` + `updated_at`, `deleted_at` (soft delete)
 - `team_id` pe tabelele cu date tenant
 - Indexes pe FK + câmpuri de filtrare, UNIQUE constraints, CHECK constraints
+
+**C.5. Cascade Impact Analysis** (OBLIGATORIU dacă schema afectează relații sau soft-delete):
+
+Pentru fiecare schimbare care implică DELETE, soft-delete sau modificare de relații:
+
+1. **NHibernate Cascade** — grep `Cascade.Delete`, `Cascade.AllDeleteOrphan` în mappings:
+   - Identifică toate relațiile cu cascade
+   - Pentru fiecare: documentează ce se întâmplă la noul tip de DELETE
+   - ATENȚIE: `Cascade.*` triggerează DOAR la `Session.Delete()`. Soft-delete (`SaveOrUpdate(entity)` cu `DeletedAt = NOW`) NU activează cascade
+
+2. **DB-level CASCADE** — grep `ON DELETE CASCADE`, `ON DELETE SET NULL` în schema.sql:
+   - Identifică toate FK-urile cu cascade comportament
+   - Pentru soft-delete: aceste cascade NU se activează (nu există DELETE fizic)
+   - Documentează ce trebuie făcut explicit în service-layer dacă pierzi cascade
+
+3. **Decizie per chain:**
+   - **Convert la business cascade:** loop în service care soft-delete fiecare copil
+   - **Păstrează hard cascade:** doar dacă copiii sunt append-only sau pure derivate
+   - **Documentează în mapping:** comentariu explicit despre comportamentul nou
+
+Output: tabel în doc-ul de architecture (Parent → Child | Tip cascade | După schimbare | Decizie).
+
+**Regula G9 din GUARDRAILS.md:** orice schimbare la DELETE semantics fără Cascade Impact Analysis = REJECT la review.
+
+**C.6. Schema Preflight** (OBLIGATORIU pentru orice schema change):
+
+Înainte de a aplica orice ALTER TABLE / CREATE TABLE / migration, rulează preflight automat:
+
+```bash
+# Scan general (cascade chains + UNIQUE compatibility)
+bash hooks/schema-preflight.sh [project-root]
+
+# Sau scan specific pe un fișier migration
+bash hooks/schema-preflight.sh [project-root] migrations/2026-05-15-foo.sql
+```
+
+**Output:** `docs/architect/schema-preflight-[name].md`
+
+Scriptul detectează automat și raportează:
+
+1. **Cascade chains** (NHibernate + DB-level) — listă pentru review C.5
+2. **UNIQUE compound + soft-delete compatibility:**
+   - Listează toate tabelele cu UNIQUE compound indexes
+   - Marchează cele care au DEJA `deleted_at` (necesită `deleted_marker` pattern)
+   - Furnizează template ALTER TABLE pentru `deleted_marker`
+3. **Migration-specific preflight queries** (când e dat fișier migration):
+   - ALTER MODIFY type → SQL pentru a verifica toate valorile încap în noul tip
+   - ADD UNIQUE constraint → SQL pentru a verifica zero duplicate
+   - ADD soft-delete column → checklist de audit `Session.Delete` + cascade chains
+
+**Pattern `deleted_marker` pentru UNIQUE compound + soft-delete:**
+```sql
+ALTER TABLE <tabel>
+  ADD COLUMN deleted_marker CHAR(36)
+    GENERATED ALWAYS AS (IFNULL(deleted_at, '0000-00-00')) VIRTUAL;
+DROP INDEX <existing_uk> ON <tabel>;
+CREATE UNIQUE INDEX <new_uk> ON <tabel> (<existing_cols>, deleted_marker);
+```
+
+**Exit codes:** 0 = clean sau warnings (cascade chains de documentat); 1 = issues blocante.
+
+**Gate:** dacă preflight raportează UNIQUE compound + soft-delete fără plan deleted_marker, **STOP** — adaugă `deleted_marker` în migration sau revizuiește decizia.
 
 **D. API Contracts:**
 - Noi endpoints: `METHOD /api/v1/resource` cu request/response DTO shapes
@@ -203,6 +325,58 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 
 **Așteptă ambii subagents să termine.**
 
+### Compounding Trigger (mid-implementation)
+
+În timpul Fazei 3, dacă observi una dintre următoarele:
+- **Pattern repetat:** același tip de bug/greșeală apare în 2+ fișiere consecutive
+- **Corecție repetată:** utilizatorul face aceeași corecție de 2+ ori în această sesiune
+- **Layer fail repetat:** o verificare Faza 4 eșuează pe 2+ fișiere similare în pre-check
+
+→ **PAUZĂ implementation imediat.** Nu continua restul fișierelor cu același pattern.
+
+**Acțiune:**
+
+1. Identifică pattern-ul (1-2 propoziții descriere)
+2. Decide unde aparține:
+   - **GUARDRAILS.md** (G10, G11, ...) — dacă e error pattern de securitate/data integrity
+   - **Query Safety Matrix** (Faza 2) — dacă e classification missing
+   - **SPEC template** (S1-S10) — dacă e UX/UI issue
+   - **CLAUDE.md Gotchas** — dacă e proiect-specific
+3. Propune draft text-ul pentru utilizator
+4. Așteaptă aprobare
+
+**Output către utilizator (format obligatoriu):**
+
+```
+## Compounding Trigger — pattern detectat
+
+**Observație:** [descriere 1-2 propoziții]
+**Apare în:** [listă fișiere unde s-a manifestat]
+
+**Propunere:** adaugă în [GUARDRAILS.md / Query Safety Matrix / SPEC / CLAUDE.md]:
+
+[draft text exact]
+
+**Impact pe restul sesiunii:**
+- Fișiere afectate de același pattern (NU încă atinse): [listă]
+- După aprobare, voi aplica regula la toate
+
+OK să continui după ce confirmi?
+```
+
+5. La aprobare:
+   - Persistă regula (write to file)
+   - Aplică retroactiv la fișierele deja modificate (fix cele identificate)
+   - Continuă restul fișierelor cu noua regulă activă
+
+**Reguli pentru Compounding Trigger:**
+- NU activa pentru pattern-uri văzute pentru prima dată (instinct neînvățat = false positive)
+- DA activa la al 2-lea sau ulterior — pattern stabilizat
+- NU propune reguli vagi gen "scrie cod mai bun" — doar reguli verificabile/testabile
+- DA include exemple concrete (din fișierele unde s-a manifestat)
+
+**Anti-pattern de evitat:** "acumulez observații până la Faza 5 retrospective". Asta înseamnă bug-uri repetate în 5+ fișiere în loc de 2. Compounding e cel mai eficient când e *imediat după primul fail*.
+
 ---
 
 ### ═══════════════════════════════════════
@@ -237,34 +411,75 @@ npm ci && npx tsc --noEmit && npm run build && npm run lint
 ```
 Zero errors. Dacă fail → fix + retry.
 
-**STRATUL B — Security Tests (Behavior + Structure):**
+**STRATUL B — Security (Data Layer FIRST, HTTP SECOND):**
 
-B.1 — Behavior tests (HTTP-layer):
+**Schimbare filosofică în v2:** Layer B verifică ÎNTÂI invarianții data layer, APOI behavior-ul HTTP. Motivul: testele HTTP confirmă că "aplicația face ce trebuie pentru cazurile testate". Testele data layer confirmă că "construcția e robustă chiar dacă cineva sare peste service". Defense-in-depth începe la query level, nu la endpoint level.
+
+---
+
+**B.1 — Data Layer Invariants (FIRST, mandatory) — vezi G8:**
+
+**De ce primul:** dacă data layer e fragil, niciun test HTTP nu poate compensa. Un query care leak-uie date la apel direct va leak-ui în orice context unde e apelat fără context guards.
+
+**Test mandatory pentru fiecare Query/Command nou sau modificat:**
+
+```csharp
+// Pattern obligatoriu: test care apelează Query/Command DIRECT, fără service
+[Fact]
+public async Task LoadInvoiceQuery_ForeignTenant_ReturnsNull()
+{
+    var invoiceA = await CreateInvoice(teamA);
+
+    // Act: query direct, bypassing service layer
+    var query = new LoadInvoiceQuery(invoiceA.Id, teamId: teamB);
+    var result = await query.Execute();
+
+    // Assert: nu se returnează date din alt tenant
+    Assert.Null(result);
+}
+```
+
+**Pentru fiecare entitate, conform Query Safety Matrix (Faza 2):**
+
+- **Direct tenant-scoped:**
+  - [ ] Mapping conține `ApplyFilter<TenantFilterDefinition>("team_id = :teamId")`
+  - [ ] Test: query direct cu teamId greșit → null/empty
+  - [ ] WHERE conține `team_id = :teamId` explicit (chiar dacă filter-ul e auto — defense in depth)
+
+- **Indirect tenant-scoped:**
+  - [ ] Listează toate `*Query.cs` care accesează entitatea
+  - [ ] Pentru fiecare query: verifică prezența JOIN explicit pe parent + `parent.team_id == :teamId` în WHERE
+  - [ ] SAU query are marker `// CROSS-TENANT: <motiv>` (intenționat cross-tenant pentru cleanup/admin/jobs)
+  - [ ] Service-layer check (`if (entity.TeamId != teamId)`) NU contează ca al doilea strat — e backup, nu primary
+  - [ ] Test: query direct cu teamId greșit → null/empty (chiar dacă entity-ul există)
+  - [ ] Rulează hook-ul `hooks/build-query-safety-matrix.sh` — output e listă entități + queries flag-uite
+
+- **Global by design:**
+  - [ ] Mapping conține comentariu explicit „global by design — [motiv]"
+  - [ ] Nu necesită test foreign-tenant
+
+**Soft-delete invariants (pentru entități cu DeletedAt + filter):**
+- [ ] Test: query după soft-delete → null/empty
+- [ ] Test: query direct (bypass service) pe entitate soft-deleted → null
+- [ ] Pentru entități indirect-scoped cu parent soft-deletable: WHERE include AND `parent.DeletedAt IS NULL`
+
+Hook-ul `hooks/build-query-safety-matrix.sh` flag-ează tipare suspecte; review-bono (Stratul F) validează structural.
+
+---
+
+**B.2 — HTTP Behavior (SECOND, presence check):**
+
+După ce data layer-ul e verificat robust, confirmă că API behavior-ul e corect:
+
 - [ ] Fiecare endpoint fără token → 401
 - [ ] Token expirat → 401
 - [ ] Customer pe endpoint admin → 403
-- [ ] X-Team-Id al altui tenant → nu returnează date (IDOR check)
+- [ ] X-Team-Id al altui tenant → nu returnează date (IDOR check at endpoint)
 - [ ] Listează TOATE `[AllowAnonymous]` — fiecare are motiv documentat
 - [ ] Grep logs pentru: password, token, apikey, secret, authorization → zero matches
 - [ ] Customer endpoints pe `/api/v1/`, admin pe `/api/admin/v1/`
 
-B.2 — Structure tests (data-layer invariants — vezi G8):
-
-**De ce e necesar:** B.1 testează că „aplicația face ce trebuie azi" — endpoint-ul răspunde corect pentru cazurile testate. NU detectează că query-ul însuși poate fi apelat direct (skipping service) și leak-ui datele altui tenant. Defense-in-depth cere verificare la layer-ul de query.
-
-Pentru fiecare entitate clasificată `Indirect tenant-scoped` în Query Safety Matrix (Faza 2):
-- [ ] Listează toate `*Query.cs` care accesează entitatea
-- [ ] Pentru fiecare query: verifică prezența JOIN explicit pe parent + filtru `parent.team_id` în expresia WHERE/Where
-- [ ] Service-layer check (`if (entity.TeamId != teamId)`) NU contează ca al doilea strat — e backup, nu primary
-- [ ] Rulează hook-ul `hooks/query-tenant-check.sh` — output e lista fișierelor flag-uite, routează la review-bono
-
-Hook-ul **NU validează**, doar **flag-ează tipare suspecte**. Verdictul final îl dă review-bono care citește fișierele flag-uite și judecă structural.
-
-Pentru entitățile clasificate `Direct tenant-scoped`:
-- [ ] Mapping conține `ApplyFilter<TenantFilterDefinition>("team_id = :teamId")`
-
-Pentru entitățile clasificate `Global by design`:
-- [ ] Mapping conține comentariu explicit „global by design — [motiv]"
+**Ordinea contează:** dacă B.1 fail, NU pierde timp pe B.2. Fixează data layer primul, apoi rerun ambele.
 
 **STRATUL C — SPEC Checklist (bifează punct cu punct):**
 - Ia fiecare SPEC-[pagina].md

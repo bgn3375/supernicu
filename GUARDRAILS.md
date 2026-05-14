@@ -102,3 +102,30 @@ Service-layer check (`if (expense.TeamId != teamId) throw`) NU e suficient — e
 - `Global by design` — nu e tenant data (currency rates, user whitelist) → comentariu în mapping
 
 **Motiv:** Service-layer check e fragil — orice cod nou care apelează query-ul direct (skipping service) leak-uiește datele altui tenant. Defense-in-depth la query layer înseamnă că entitatea e protejată prin construcție, nu prin convenție de apelare. Bug-ul nu apare în testele de behavior la endpoint (HTTP-ul răspunde corect pentru cazurile testate), dar e o suprafață de atac latentă pe care nimeni nu o vede.
+
+
+---
+
+## G9: Cascade behavior pierdut tăcut la conversie soft-delete
+
+### Simptom
+La conversia unei entități de la hard-delete la soft-delete, copiii rămân "orphan active" în loc să fie șterși împreună cu părintele. Bug-ul nu apare la build/lint/teste superficiale — apare doar când utilizatorul observă "părintele e șters dar copiii încă apar".
+
+### Cauză
+- `Cascade.AllDeleteOrphan`, `Cascade.Delete` în mappings NHibernate triggerează DOAR la `Session.Delete()`
+- `ON DELETE CASCADE` în schema SQL triggerează DOAR la DELETE fizic
+- Soft-delete (`entity.DeletedAt = NOW; Session.Update`) NU activează niciuna dintre acestea
+- Service layer "uită" să șteargă copiii pentru că cascade-ul "era automat"
+
+### Prevenire
+- Înainte de orice conversie hard-delete → soft-delete, Faza 2 ARCHITECT trebuie să producă **Cascade Impact Analysis** (vezi SKILL.md §C.5)
+- Pentru fiecare relație cu cascade: decide BUSINESS cascade (loop explicit în service) vs păstrează HARD pe copii (rar acceptabil)
+- Faza 2 §C.6 **Schema Preflight** rulează automat `hooks/schema-preflight.sh` care identifică toate `Cascade.*` în mappings și `ON DELETE CASCADE` în schema.sql
+
+### Detecție
+- Test automat: după soft-delete pe părinte, query pe copii returnează 0 rezultate
+- Code review: grep `Cascade.*` în mappings + `ON DELETE` în schema afectate
+- Hook automat: `hooks/schema-preflight.sh` flag-ează toate cascade chains la fiecare schimbare de schemă
+
+### Aplicare retroactivă
+Pentru fiecare entitate soft-delete existentă, verifică ce cascade chains era afectată anterior și asigură-te că comportamentul e replicat business-side.
