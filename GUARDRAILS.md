@@ -129,3 +129,155 @@ La conversia unei entități de la hard-delete la soft-delete, copiii rămân "o
 
 ### Aplicare retroactivă
 Pentru fiecare entitate soft-delete existentă, verifică ce cascade chains era afectată anterior și asigură-te că comportamentul e replicat business-side.
+
+
+---
+
+## G10: Secrets cu fallback hardcoded — "?? default" pattern
+
+**Trigger:** Cod care încarcă secret/cheie/parolă din config cu fallback hardcoded:
+```csharp
+var jwtKey = jwtOptions.SecretKey ?? "dev-secret-key-min-32-characters!!";  // ❌
+var dbPass = config["Db:Password"] ?? "changeme";                            // ❌
+var apiKey = Env.Get("STRIPE_KEY") ?? "sk_test_default";                     // ❌
+```
+
+**Instrucțiune:**
+Secrets sunt OBLIGATORII din config — nu există fallback. Dacă lipsesc, aplicația crashează la startup, NU continuă cu valoare default:
+
+```csharp
+var secretKey = jwtOptions.SecretKey;
+if (string.IsNullOrEmpty(secretKey))
+    throw new InvalidOperationException(
+        "Jwt:SecretKey MUST be set in env. No fallback.");
+var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+```
+
+Aplicabil pentru: JWT keys, DB passwords, third-party API keys (Stripe, Mandrill, Sentry), encryption keys, OAuth client secrets.
+
+**Excepție:** valori care NU sunt secrets (timeouts, max retries, feature flags) pot avea fallback. Regula se aplică DOAR la `*Secret*`, `*Key*`, `*Password*`, `*Token*`, `*Pass*` (case-insensitive).
+
+**Detecție:** hook `hooks/secrets-scan.sh` flag-ează pattern-ul `?? "..."` în Program.cs / Startup.cs / fișiere de configurare DI.
+
+**Motiv:** Dacă repo-ul devine public (accidental sau breach), atacatorul vede cheia default. Production care nu setează env var-ul folosește default-ul. JWT-uri pot fi forjate, DB poate fi accesat, third-party services pot fi abuzate. Fallback-ul nu e „defensive coding" — e backdoor permanent în production.
+
+## G11: Auth tokens în URL query string
+
+**Trigger:** Endpoint care primește token de auth (magic link, password reset, email verify, accept invitation) din URL query string:
+```csharp
+[HttpGet("accept")]
+public async Task<IActionResult> Accept([FromQuery] string token) { ... }  // ❌
+```
+
+Sau în frontend:
+```typescript
+apiFetch(`/api/admin/v1/whitelist/accept?token=${token}`)  // ❌
+```
+
+**Instrucțiune:**
+Tokens de auth se transmit ÎN BODY POST sau în header `Authorization`, niciodată în URL (query, path, fragment):
+
+```csharp
+[HttpPost("accept")]
+public async Task<IActionResult> Accept([FromBody] AcceptRequest req) { ... }  // ✓
+
+public record AcceptRequest(string Token);
+```
+
+```typescript
+apiFetch("/api/admin/v1/whitelist/accept", {
+    method: "POST",
+    body: JSON.stringify({ token })
+})  // ✓
+```
+
+**Detecție:** hook `hooks/secrets-scan.sh` flag-ează:
+- Backend: `[FromQuery]\s+string\s+(token|otp|code|magic|verify|reset)`
+- Frontend: `?token=`, `?otp=`, `?code=` în calls API
+
+**Motiv:** URL-urile sunt logate peste tot: access logs (server + reverse proxy + CDN), browser history, `Referer` header către third-party (analytics, fonts CDN), bookmarks, share buttons. Token one-time-use din magic link **e mortal dacă e capturat înainte de utilizare**. Plus: query strings ajung uneori în error tracking (Sentry) cu URL-ul complet.
+
+## G12: Public-auth endpoint fără rate limit + timing oracle
+
+**Trigger:** Endpoint cu `[AllowAnonymous]` care validează un secret/token/credentiale (login, magic-link validate, accept invitation, password reset request, email verify).
+
+**Instrucțiune:**
+Toate endpoint-urile public-auth necesită TREI elemente:
+
+1. **Rate limiting** — `[EnableRateLimiting("public-auth")]` cu policy comună (ex: 10 req/min per IP):
+```csharp
+[HttpPost("validate")]
+[AllowAnonymous]
+[EnableRateLimiting("public-auth")]
+public async Task<IActionResult> Validate([FromBody] ValidateRequest req) { ... }
+```
+
+2. **Răspuns unified** — toate cazurile invalide returnează același status + mesaj generic. NU distinge între „not found", „expired", „already used", „malformed":
+```csharp
+// ❌ leak info atacatorului
+if (token == null) return NotFound("Token not found");
+if (token.ExpiresAt < DateTime.UtcNow) return BadRequest("Token expired");
+if (token.UsedAt != null) return Conflict("Token already used");
+
+// ✓ unified
+if (token == null || token.IsInvalid())
+    return NotFound(new { error = "Invalid or expired token" });
+```
+
+3. **Audit log per attempt** — IP + timestamp + outcome (success/fail), pentru detection post-factum a brute-force attempts:
+```csharp
+await _audit.LogPublicAuthAttempt(ip: ctx.Connection.RemoteIpAddress,
+                                  endpoint: "whitelist/validate",
+                                  outcome: AuditOutcome.TokenInvalid);
+```
+
+**Detecție:** hook `hooks/secrets-scan.sh` listează endpoint-uri `[AllowAnonymous]` și verifică prezența `[EnableRateLimiting]` pe aceeași metodă.
+
+**Motiv:** Fără rate limit, atacator testează mii de tokens UUID/min — chiar dacă spațiul e mare, sample suficient + brute force paralel. Timing diferit între not-found/expired/used = enumeration oracle (atacatorul deduce care UUID-uri au existat vreodată). Lipsa audit log = nu detectezi atacul nici post-factum.
+
+## G13: Long-lived credentials externe în memorie
+
+**Trigger:** Inițializare de client pentru serviciu extern (AWS S3, Stripe, Mandrill, third-party API) cu chei permanent valide din config, fără rotation/expiry:
+
+```csharp
+var accessKey = config["Storage:AccessKey"] ?? "";
+var secretKey = config["Storage:SecretKey"] ?? "";
+return new AmazonS3Client(accessKey, secretKey, s3Config);  // ❌ keys live forever
+```
+
+**Instrucțiune:**
+Pentru fiecare serviciu extern, Faza 2 ARCHITECT documentează **explicit** alegerea:
+
+**Opțiune A — IAM Instance Role / Workload Identity (preferat):**
+```csharp
+return new AmazonS3Client(s3Config);  // SDK detectează automat din metadata
+```
+Credentials sunt injectate de Railway/AWS/GCP prin instance metadata. Rotație automată.
+
+**Opțiune B — STS Short-lived Tokens:**
+```csharp
+var sts = new AmazonSecurityTokenServiceClient(...);
+var creds = await sts.AssumeRoleAsync(new AssumeRoleRequest {
+    RoleArn = config["Storage:S3RoleArn"],
+    RoleSessionName = "pnl-api-session",
+    DurationSeconds = 3600  // 1h
+});
+return new AmazonS3Client(creds.Credentials, s3Config);
+```
+Token valid 15min-1h, regenerat la expirare.
+
+**Opțiune C — Long-lived keys (justificat scris):**
+Doar dacă A și B nu sunt suportate de platforma de deploy. Documentează:
+- De ce A/B nu funcționează
+- Politica de rotation (cât de des, automat sau manual)
+- Cum sunt revocate la breach
+
+**Faza 2 ARCHITECT — secțiune nouă „External Services Credentials":**
+Tabel obligatoriu cu o linie per serviciu extern:
+
+| Serviciu | Mecanism | Rotation | Justificare (dacă C) |
+|----------|----------|----------|---------------------|
+| AWS S3 | IAM Role | Automat | — |
+| Mandrill | API Key | Manual la 90 zile | Mandrill nu suportă STS |
+
+**Motiv:** RCE pe pod → heap dump → extragere keys. Long-lived keys = blast radius mare (atacatorul are credentials valide până la rotation manual). STS/IAM Role = blast radius mic (15min-1h valabilitate). În production fintech, asta e diferența între incident contained și breach raportat la ANSPDCP.

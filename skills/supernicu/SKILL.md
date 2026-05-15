@@ -131,7 +131,17 @@ Format obligatoriu:
 1. **API Separation Plan** — Customer API (`/api/v1/`) vs Admin API (`/api/admin/v1/`). Dacă nu sunt funcții admin → documentează explicit
 2. **Authorization Matrix** — tabel: endpoint group → auth method → role → tenant scoped
 3. **Tenant Isolation Points** — ce tabele au `team_id`, ce queries necesită filter, ce cache keys includ `team_id`, ce storage paths includ prefix
-4. **[AllowAnonymous] Whitelist** — lista COMPLETĂ de endpoint-uri publice cu motiv. Doar: login, register, health, webhooks
+4. **[AllowAnonymous] Whitelist** — lista COMPLETĂ de endpoint-uri publice cu motiv. Doar: login, register, health, webhooks. **Fiecare endpoint public-auth (validate/accept/verify) primește `[EnableRateLimiting]` + unified error + audit log** (G12).
+4.5. **Secrets Inventory** (G10) — listă explicită cu toate secrets încărcate la startup (JWT, DB, third-party API keys). Pentru fiecare: confirmă că NU există fallback hardcoded. Throw at startup dacă lipsesc.
+4.6. **External Services Credentials Matrix** (G13) — tabel obligatoriu cu o linie per serviciu extern:
+
+| Serviciu | Mecanism | Rotation | Justificare (dacă long-lived) |
+|----------|----------|----------|------------------------------|
+| AWS S3 | IAM Instance Role | Automat | — |
+| Mandrill | API Key | Manual la 90 zile | Mandrill nu suportă STS |
+| Stripe | Restricted Key | Manual la breach | — |
+
+Preferință: IAM Role > STS short-lived > Long-lived keys (justificat scris).
 5. **Query Safety Matrix** (OBLIGATORIU, AUTO-GENERAT — vezi G8 în GUARDRAILS.md):
 
 **Schimbare în v2:** matrix-ul e auto-generat din FluentNH mappings + queries scan, NU human-typed. Eliminăm clasa de bug-uri "uită o entitate" sau "clasifică greșit".
@@ -479,7 +489,37 @@ După ce data layer-ul e verificat robust, confirmă că API behavior-ul e corec
 - [ ] Grep logs pentru: password, token, apikey, secret, authorization → zero matches
 - [ ] Customer endpoints pe `/api/v1/`, admin pe `/api/admin/v1/`
 
-**Ordinea contează:** dacă B.1 fail, NU pierde timp pe B.2. Fixează data layer primul, apoi rerun ambele.
+**B.3 — Secrets, Tokens, Rate Limits (G10/G11/G12) — automat via hook:**
+
+Rulează:
+```bash
+bash hooks/secrets-scan.sh [project-root]
+```
+
+Hook-ul flag-ează 3 clase de bug-uri:
+
+- **G10 — Secrets fallback:** pattern `?? "..."` pe identificatori cu Key/Secret/Password/Token/Pass
+  - [ ] Pentru fiecare flag: e secret real? → fix cu throw at startup (NU fallback)
+  - [ ] False positive (ex: `MaxRetries ?? 3` pe câmp non-secret): ignoră
+
+- **G11 — Auth tokens în URL query:** backend `[FromQuery] string token`, frontend `?token=`
+  - [ ] Pentru fiecare flag: e token de auth (magic link, accept, reset, verify)? → mută la POST body sau header
+  - [ ] False positive (ex: filtre de search `?code=ABC` non-secret): ignoră
+
+- **G12 — Public-auth fără rate limit:** `[AllowAnonymous]` fără `[EnableRateLimiting]` în vecinătate
+  - [ ] Pentru fiecare flag: endpoint-ul validează un secret (login, validate, accept, reset)? → adaugă `[EnableRateLimiting("public-auth")]` + unified error response (404 generic) + audit log per attempt
+  - [ ] False positive (health, webhook semnat criptografic): ignoră
+
+Output-ul hook-ului → review-bono (Stratul F) confirmă structural fiecare flag.
+
+**B.4 — External Services Credentials (G13) — manual check:**
+
+Pentru fiecare serviciu extern din Faza 2 „External Services Credentials Matrix":
+- [ ] Serviciul folosește IAM Role sau STS short-lived? → ✓
+- [ ] Long-lived key cu justificare scrisă? → verifică prezența politicii de rotation în doc-ul de architecture
+- [ ] NICIODATĂ: keys hardcoded în Program.cs cu `?? ""` fallback (overlap G10)
+
+**Ordinea contează:** dacă B.1 fail, NU pierde timp pe B.2-B.4. Fixează data layer primul, apoi rerun toate.
 
 **STRATUL C — SPEC Checklist (bifează punct cu punct):**
 - Ia fiecare SPEC-[pagina].md
