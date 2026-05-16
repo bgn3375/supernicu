@@ -125,6 +125,49 @@ Consecințe practice:
 
 Aplicat la G7 (background opac) și G8 (query fără JOIN) — ambele au hook-uri WARN-only. Adâncimea o validează review-bono, nu grep-ul.
 
+## Guardrails active (G1-G18)
+
+Toate detaliile sunt în `GUARDRAILS.md` (format: Trigger / Instrucțiune / Motiv / Detecție). Lista de mai jos e pentru orientare rapidă:
+
+| ID | Pattern | Enforcement în pipeline |
+|----|---------|------------------------|
+| G1 | Auth bypass — endpoint fără autorizare | Faza 4 STRATUL B.2 (HTTP behavior) |
+| G2 | IDOR — acces date prin ghicirea ID-ului | Faza 4 STRATUL B.2 |
+| G3 | Admin + customer pe același API | Faza 2 ARCHITECT A.1 + Faza 4 B.2 |
+| G4 | Security theater — headere custom ca auth | Faza 2 ARCHITECT A.2 |
+| G5 | Sensitive data in logs | Faza 4 STRATUL B.2 (grep logs) |
+| G6 | File upload/download fără ownership check | Faza 2 ARCHITECT + Faza 4 B.2 |
+| G7 | Background opac șterge grid-dot | Faza 4 STRATUL E + STRATUL F |
+| G8 | Indirect tenant-scoped fără JOIN | Faza 2 ARCHITECT A.5 (Query Safety Matrix) + Faza 4 B.1 |
+| G9 | Cascade pierdut la conversie soft-delete | Faza 2 ARCHITECT C.5 + C.6 |
+| G10 | Secrets cu fallback hardcoded | Faza 2 ARCHITECT A.4.5 + Faza 4 B.3 |
+| G11 | Auth tokens în URL query | Faza 4 STRATUL B.3 |
+| G12 | Public-auth fără rate limit | Faza 2 ARCHITECT A.4 + Faza 4 B.3 |
+| G13 | Long-lived credentials externe | Faza 2 ARCHITECT A.4.6 + Faza 4 B.4 |
+| G14 | Fail-open negation pe gate logic | Faza 2 ARCHITECT (positive equality review) |
+| G15 | Benign default la category boundary | Faza 4 STRATUL F (review structural) |
+| G16 | Contract change fără call-site audit | Faza 3 — pre-edit grep workflow |
+| G17 | Overloaded flag inheritance | Faza 2 ARCHITECT (flag intent vs mechanism) |
+| G18 | Refactor care „simplifică" hides side effects | Faza 3 — audit înainte de simplificare |
+
+**Citește GUARDRAILS.md** la fiecare activare — subagentul backend, frontend, sau review se ghidează după aceste reguli.
+
+## Hook-uri SuperNicu
+
+7 scripturi în `hooks/` — discovery tools (flag-ează tipare), nu enforcement:
+
+| Hook | Când rulează | Scop |
+|------|-------------|------|
+| `pre-commit-build.sh` | Git pre-commit | Build verde înainte de commit |
+| `pre-commit-spec.sh` | Git pre-commit | Avertizează dacă pagini modificate n-au SPEC |
+| `sync-skill.sh` | Git post-commit | Propagă SKILL.md la `~/.claude/skills/` |
+| `build-query-safety-matrix.sh` | Faza 2 ARCHITECT (G8) | Auto-generează matrix entități |
+| `query-tenant-check.sh` | Faza 4 B.1 (G8) | Flag-ează queries fără tenant scope |
+| `schema-preflight.sh` | Faza 2 C.6 (G9) | Scan cascade chains + migration safety |
+| `secrets-scan.sh` | Faza 4 B.3 (G10/G11/G12) | Secrets/tokens/rate limit scan |
+
+Toate de tip „flag" sunt **WARN-only**. Vezi meta-principiul de mai sus.
+
 ## Skill-uri Bono canonice (de la Prodan)
 
 Skill-urile canonice Bono sunt instalate ca user-level skills în `~/.claude/skills/`. Sunt scrise de Prodan (bono-ro/bono-skills) și se folosesc **în integralitatea lor** — SKILL.md + toate fișierele din `references/` și `assets/`.

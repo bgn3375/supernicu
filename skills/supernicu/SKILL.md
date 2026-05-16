@@ -142,6 +142,20 @@ Format obligatoriu:
 | Stripe | Restricted Key | Manual la breach | — |
 
 Preferință: IAM Role > STS short-lived > Long-lived keys (justificat scris).
+
+4.7. **Gate Logic Review** (G14) — pentru fiecare decizie în Authorization Matrix sau Strategy Factory, confirm explicit:
+- Folosește **positive equality** pentru opt-ins/writes (`type == "PFI"`)?
+- SAU folosește negație CU justificare (`type != "Customer"` ca polymorphic fall-through cu default branch documentat)?
+
+Orice gate scris cu negație fără justificare = fail-open când business adaugă tip nou. Vezi G14.
+
+4.8. **Flag Inheritance Audit** (G17) — pentru fiecare flag boolean/enum/status pe care un flow nou îl setează automat:
+- Grep toate consumer-ele flag-ului (`grep -rn "flagName" .`)
+- Pentru fiecare consumer, marchează: vrea flow-ul nou acest comportament? (DA/NU)
+- Dacă vreun NU → refactor: split flag, add explicit opt-in, sau inverse-check pe noul flow
+
+Cel mai scump bug AI ships (PFI a costat 6h manual debug). Documentează decizia în architecture doc, vezi G17.
+
 5. **Query Safety Matrix** (OBLIGATORIU, AUTO-GENERAT — vezi G8 în GUARDRAILS.md):
 
 **Schimbare în v2:** matrix-ul e auto-generat din FluentNH mappings + queries scan, NU human-typed. Eliminăm clasa de bug-uri "uită o entitate" sau "clasifică greșit".
@@ -358,6 +372,21 @@ NICIODATĂ commit cu signature schimbat + 2 callers updated + 5 stale.
 
 Vezi G16 în GUARDRAILS.md.
 
+### Refactor Audit (pre-simplification, G18)
+
+**Înainte de a accepta** un refactor care „simplifică" cod existent (200-line switch → 20 lines, complex conditional → clean abstraction):
+
+1. Audit explicit ce protejează messiness-ul. Listează:
+   - **Injection points** — logging, marketing, telemetry inserate în branch-uri
+   - **Branching conditions** — decizii care nu apar în signature-ul abstracției propuse
+   - **Side-effect emit** — event raise, cache invalidate, audit log
+   - **Special-case fallback** — codul care prinde edge cases nedocumentate
+2. Pentru fiecare item: confirmă că abstracția propusă îl preserves.
+3. Dacă nu poate → **narrow abstraction-ul** (mai puține responsabilități), nu drop messiness-ul.
+4. Codul vechi rămâne **byte-for-byte** unde refactor-ul pierde semantică (PFA's 200-line switch a rămas intact pentru că marketing injection + payment gating + does_need_physical_address nu se puteau lifta clean).
+
+Vezi G18 în GUARDRAILS.md.
+
 ### Compounding Trigger (mid-implementation)
 
 În timpul Fazei 3, dacă observi una dintre următoarele:
@@ -560,6 +589,7 @@ Pentru fiecare serviciu extern din Faza 2 „External Services Credentials Matri
 - [ ] OperationResult<T> pe toate services
 - [ ] FluentNH mappings cu tenantFilter
 - [ ] Record types pe DTOs
+- [ ] **Fail loudly at category boundaries (G15):** metode care întorc `Array.Empty`, `null`, `0`, sau `false` la „shouldn't be reachable" → throw `NotSupportedException` sau domain exception. Same return value NU TREBUIE să însemne simultan „no data" + „operation not applicable" + „error".
 
 **STRATUL E — Design System Compliance:**
 
