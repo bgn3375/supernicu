@@ -281,3 +281,169 @@ Tabel obligatoriu cu o linie per serviciu extern:
 | Mandrill | API Key | Manual la 90 zile | Mandrill nu suportă STS |
 
 **Motiv:** RCE pe pod → heap dump → extragere keys. Long-lived keys = blast radius mare (atacatorul are credentials valide până la rotation manual). STS/IAM Role = blast radius mic (15min-1h valabilitate). În production fintech, asta e diferența între incident contained și breach raportat la ANSPDCP.
+
+
+---
+
+## G14: Match the gate to the decision — fail-open negation
+
+**Trigger:** Gate logic pentru feature opt-in sau write, scrisă cu negație:
+```csharp
+if (companyType != "PFA") { AssignDefaultLawyer(); }   // ❌ fail-open
+if (role != Role.Customer) { ApplyAdminPolicy(); }      // ❌ fail-open
+if (!entity.IsDeleted) { Process(entity); }             // contextual — vezi mai jos
+```
+
+**Instrucțiune:**
+Folosește **positive equality** pentru opt-ins, write, decisive actions:
+```csharp
+if (companyType == "PFI") { AssignDefaultLawyer(); }   // ✓ explicit opt-in
+if (role == Role.Admin) { ApplyAdminPolicy(); }         // ✓
+```
+
+Rezervă negația DOAR pentru polymorphic fall-through unde default branch trebuie să accepte orice tip nou (ex: serializare generică, switch-default care delegă la PFA „safety net").
+
+**Detecție pre-edit:**
+- În Faza 2 (ARCHITECT): pentru fiecare decizie nouă în Authorization Matrix și Strategy Factory, confirm explicit „positive equality?" sau „polymorphic fall-through cu motiv?".
+- Grep regex (post-edit, în Faza 4 Stratul B): `if\s*\([^)]+!=\s*["\w]+\)` în fișiere de business logic — fiecare match cere justificare.
+
+**Motiv:** Negația fail-opens silent. Când adaugi un tip nou (`companyType = "Microenterprise"`), branch-ul negat îl înghite tăcut — comportament schimbat fără modificare de cod. Bug-ul nu apare la teste pentru valorile cunoscute, apare doar când business-ul adaugă un caz nou peste 6 luni. „Behavior change without code change" e cel mai greu de debuggat — nu există commit care să dea direcția.
+
+## G15: Fail loudly at category boundaries — no benign default for misuse
+
+**Trigger:** Funcție/metodă care returnează benign default (empty list, null, zero, false, empty string) când e apelată într-un context unde NU se aplică logic:
+```csharp
+public class PfaRegistrationStrategy : IRegistrationFlowStrategy
+{
+    // PFI strategy implementează asta; PFA nu — n-are documente semnabile separate
+    public string[] GetSignableDocumentCodes() => Array.Empty<string>();  // ❌
+}
+```
+
+**Instrucțiune:**
+Aruncă `NotSupportedException` / `InvalidOperationException` / domain-specific exception la „shouldn't be reachable":
+```csharp
+public string[] GetSignableDocumentCodes()
+    => throw new NotSupportedException(
+        "PFA flow doesn't use separate signable documents — check strategy resolution");
+```
+
+Rezervă benign defaults DOAR pentru outcomes care sunt **răspunsuri valide de domeniu**:
+- ✓ `FindActiveExpenses()` → empty list (zero expense-uri active e răspuns valid)
+- ✓ `GetUserById(id)` → null (user not found e răspuns valid)
+- ❌ `GetSignableDocumentCodes()` pe strategy unde nu se aplică → empty (caller crede că nu are documente, dar de fapt era pe strategy greșită)
+
+**Test:** poate same return value să însemne SIMULTAN „no data", „operation not applicable" și „error happened"? Dacă da → throw, nu return.
+
+**Motiv:** Caller-ul nu poate distinge `Array.Empty` „nu sunt documente" de `Array.Empty` „strategy greșită" de `Array.Empty` „config missing". Bug-ul arată identic cu comportamentul așteptat. Silent corruption beats loud failure — debug-ul costă ore în loc de secunde.
+
+## G16: Contract change fără exhaustive call-site audit
+
+**Trigger:** Modifică signature/return type/contract semantics al unei metode publice sau response DTO. Exemple:
+- Adaugă param obligatoriu la metodă publică
+- Schimbă sursa lui `nextPageCode` din hardcoded în strategy-driven
+- Redenumește field în response DTO
+- Schimbă semantica unui flag (era nullable, devine non-null)
+
+**Instrucțiune (pre-edit, MANDATORY):**
+
+ÎNAINTE de a edita signature-ul:
+```bash
+grep -rn "MethodName\|FieldName\|nextPageCode" --include="*.cs" --include="*.ts" --include="*.tsx" .
+```
+
+1. Listează **toate** call sites în output.
+2. Editează signature + ALL call sites în **același commit**, sau split explicit:
+   - Commit 1: „Add new contract (backward compat)"
+   - Commit 2: „Migrate all callers"
+   - Commit 3: „Remove old contract"
+3. NICIODATĂ commit cu signature schimbat + 2 call sites updated + 5 stale.
+
+**Detecție post-hoc:** Compounding Trigger (Faza 3) prinde recurența — dar costul e mai mare (smoke testing surfaces gaps separat pe 3-4 tickete).
+
+**Motiv:** Primul call site găsit e rareori singurul. AI patch-uiește unul-două, ratează restul. Bug-urile apar separat în săptămâni — o oră de smoke test fiecare, plus context-switching. Pre-edit grep transformă „găsim bug-urile pe rând" în „edităm toate locațiile o dată". Diferența: 1h vs 8h pe aceeași schimbare.
+
+**Anti-pattern:** „edit incremental — repar fiecare loc când îl găsesc". Nu funcționează — pierderile se acumulează silent în smoke testing.
+
+## G17: Overloaded flag inheritance — intent vs mechanism
+
+**Trigger:** Flag existent (boolean / enum / status / nullable field) folosit de **multiple consumers cu intent diferit**. Flow nou auto-satisface flag-ul mecanic, dar nu intenționa să opt-in pe TOATE comportamentele.
+
+Exemplu real (PFI-FE-8):
+```csharp
+// PFA: lawyer-ul a verificat user-ul offline → skip Veriff KYC
+if (isCompanyLawyer && hasAcceptedCollaboration) {
+    SkipVeriffCheck();
+}
+
+// PFI: auto-assigned lawyer cu auto_approve=true setează AMÂNDOUĂ flag-urile by design
+// (motivul: skip „așteaptă lawyer să accepte" gate, NU skip Veriff KYC)
+// Rezultat: PFI users inherit Veriff skip silent → IdCard null → crash la BuildIdentityDocument
+```
+
+**Instrucțiune:**
+Când flow nou setează un flag existent, audit fiecare consumer pentru **INTENT** (de ce a fost adăugat flag-ul) vs **MECHANISM** (ce face setarea lui):
+
+1. Grep toate consumer-ele flag-ului:
+   ```bash
+   grep -rn "isCompanyLawyer\|hasAcceptedCollaboration" --include="*.cs"
+   ```
+2. Pentru fiecare consumer, întreabă: „flow-ul meu nou vrea explicit acest comportament?"
+3. Dacă răspunsul e NU pe vreun consumer → refactor:
+   - Split flag-ul în 2 (`lawyerVerifiedUserOffline` + `lawyerAcceptedCollaboration`), sau
+   - Add explicit opt-in (`skipVeriffOnLawyer=true`), sau
+   - Inverse-check pe noul flow (`if (companyType != "PFI" && isCompanyLawyer && ...)`)
+
+**Detecție:** nu se poate detecta cu hook generic — necesită human audit per flag. Faza 2 ARCHITECT include în Authorization Matrix coloana „Flags utilizate" cu trigger pentru reaudit la fiecare flow nou.
+
+**Motiv:** Cel mai scump bug pe care AI îl scrie — fast to introduce (one-line change în flow nou), slow to find (null ref în BuildIdentityDocument ore mai târziu, fără legătură aparentă cu flow-ul nou). Numele flag-ului reflectă intent-ul autorului, nu interpretarea fiecărui consumer. La PFI: 6h manual debug pentru un single-line fix.
+
+## G18: Refactor care „simplifică" hides side effects
+
+**Trigger:** Propunere de refactor care „simplifică" un switch / chain de conditionals / branch complex în abstracție clean. Reducere semnificativă de linii (200 → 20).
+
+Exemplu real (PFI-3.2):
+```csharp
+// PFA's existing 200-line switch în GetWorkflowPath
+switch (currentStep) {
+    case "BUSAC":
+        var marketing = InjectMarketingHints(...);  // side effect 1
+        next = "CMHQ"; break;
+    case "CMHQ":
+        if (does_need_physical_address) next = "LAWYR";  // branching
+        else next = "ABNM"; break;
+    case "PAYMT":
+        if (paymentState == "completed") next = "KYC";  // payment gating
+        else next = "PAYMT"; break;
+    // ... + 6 alte cazuri cu side effects subtile
+}
+
+// Refactor propus „simplifică":
+public StepCode GetNextStep(StepCode current) =>
+    _steps.SkipWhile(s => s != current).Skip(1).FirstOrDefault();  // ❌ DROPS toate side-effects
+```
+
+**Instrucțiune:**
+ÎNAINTE de a accepta refactor-ul, audit explicit ce protejează messiness-ul:
+
+1. Listează fiecare:
+   - Injection point (logging, marketing, telemetry inserate în branch)
+   - Branching condition (decizii care nu apar în signature)
+   - Side-effect emit (event raise, cache invalidate, audit log)
+   - Special-case fallback (codul care prinde edge case-uri nedocumentate)
+
+2. Pentru fiecare item: confirm că abstracția propusă îl preserves explicit.
+
+3. Dacă abstracția nu poate → **narrow abstraction-ul** (mai puține responsabilități), nu drop messiness-ul.
+
+Exemplu narrow:
+```csharp
+// Nu „GetNextStep" generic — prea ambitios.
+// Doar „GetStepNeighbors" pentru flow-uri liniare (PFI, viitoare).
+// PFA's 200-line switch RĂMÂNE intact pentru că are messiness real.
+public (StepCode? Prev, StepCode? Next) GetStepNeighbors(StepCode current);
+```
+
+**Motiv:** „A clean abstraction that hides side effects is worse than a messy switch that shows them." Codul mizerabil care funcționează > codul curat care silent regressses. Cele 180 linii „eliminate" conțin probabil 30 linii de logică reală pe care nimeni nu le va detecta lipsa până la production. „Simplification" e tentation, nu mereu îmbunătățire — întreabă „de ce a fost scris așa?" înainte să decizi că autorul a greșit.
+
+**Anti-pattern:** „codul vechi e urât, deci e greșit." Codul urât e adesea urât pentru că realitatea pe care o modelează e urâtă. Refactor-ul nu schimbă realitatea.

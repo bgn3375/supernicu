@@ -335,6 +335,29 @@ Agent(isolation: "worktree", prompt: "...frontend...")
 
 **Așteptă ambii subagents să termine.**
 
+### Contract Change Audit (pre-edit, G16)
+
+**Înainte de a modifica** signature/return type/contract semantics al unei metode publice sau response DTO:
+
+1. Identifică schimbarea ca „contract change":
+   - Adaugă param la metodă publică?
+   - Schimbă sursa unui field în response (hardcoded → strategy-driven)?
+   - Redenumește field DTO?
+   - Schimbă semantica unui flag?
+2. **Grep exhaustive ÎNAINTE de edit:**
+   ```bash
+   grep -rn "MethodName\|FieldName" --include="*.cs" --include="*.ts" --include="*.tsx" .
+   ```
+3. Listează toate call sites în output-ul subagentului.
+4. Editează signature + ALL call sites în același commit. SAU split:
+   - Commit 1: contract nou (backward compat)
+   - Commit 2: migrate callers
+   - Commit 3: remove old contract
+
+NICIODATĂ commit cu signature schimbat + 2 callers updated + 5 stale.
+
+Vezi G16 în GUARDRAILS.md.
+
 ### Compounding Trigger (mid-implementation)
 
 În timpul Fazei 3, dacă observi una dintre următoarele:
@@ -628,6 +651,48 @@ Arată:
 
 Regulile aprobate de utilizator se adaugă în GUARDRAILS.md.
 Sugestiile DS aprobate se adaugă în shared/bono-ds.css.
+
+**C.5. Conversion Rate — onestitate explicită:**
+
+Retrospectiva produce **N lecții identificate**, dar nu toate vor deveni reguli. Format obligatoriu de raport:
+
+```
+## Retrospective — Conversion Summary
+
+Lecții identificate total: N
+- Promovate la GUARDRAILS.md: M  (rate M/N)
+- Promovate la CLAUDE.md: K
+- Promovate la SPEC template (S1-S10): J
+- Parking lot (documentate, nepromovate): N - (M+K+J)
+
+Pentru fiecare parking lot item — motivul (NU „TODO ulterior"):
+- Lecția X — prea contextuală (apare doar pe entități cu N proprietăți)
+- Lecția Y — prea rară (1 caz singular, nu există pattern)
+- Lecția Z — necesită date din 2+ proiecte ca să generalizăm
+```
+
+**De ce contează:** dacă scrii „10 lecții învățate" fără să spui câte au devenit reguli, sugerezi implicit că toate sunt rezolvate. În realitate doar 2 din 10 devin reguli structurale — restul rămân în vigilența engineer-ului. Onestitatea acestui rate previne două capcane:
+- **Self-deception:** „învățăm rapid" când de fapt acumulăm parking lot
+- **Compounding teatru:** crezi că proiectul N+1 va fi mai bun, dar lecțiile nepromovate sunt invizibile
+
+Conversion rate < 30% e normal. Rate 100% e fie magic, fie codifici reguli inutile (overfitting pe lecții singulare). Target practic: 20-40%.
+
+**C.6. Distribution Checklist — artifactele care nu se distribuie nu compunează:**
+
+Pentru fiecare artifact nou produs în retrospectivă (guardrail, hook, skill, rule, SPEC update):
+
+```
+- [ ] File committed in repo SuperNicu
+- [ ] Synced la ~/.claude/plugins/supernicu/ (sau plugin-ul relevant)
+- [ ] User skill synced (~/.claude/skills/supernicu/) — pt sesiuni noi
+- [ ] Edge-33 sync (dacă a fost modificat — SuperBoris repo)
+- [ ] GitHub push complet (origin/main up-to-date)
+- [ ] Verificat: deschide sesiune NOUĂ în alt proiect → artifactul activ?
+```
+
+**De ce contează:** până când TOATE bifate, artifactul există DOAR pe mașina ta locală. Următorul „/supernicu" în alt proiect NU vede regula. „Am adăugat G14" = „G14 e activ doar aici" până la sync complet.
+
+**Anti-pattern:** „am adăugat regula, comitez mai târziu". Mai târziu = niciodată. Distribution e parte din retrospectivă, nu task separat.
 
 ---
 
