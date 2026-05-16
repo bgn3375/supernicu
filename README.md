@@ -31,7 +31,7 @@ PRD + Prototip
      │
      ▼
 ┌───────────────────┐
-│  FAZA 4: VERIFY   │ ← Swiss Cheese: 5 straturi (Build, Security, SPEC, Quality, DS)
+│  FAZA 4: VERIFY   │ ← Swiss Cheese: 6 straturi (Build, Security, SPEC, Quality, DS, Independent Review)
 └───────────────────┘
      │  ▶ STOP — utilizatorul confirmă commit
      ▼
@@ -88,13 +88,14 @@ SuperNicu: [Faza 3] Lansez subagenți paraleli:
            ✓ Backend done (12 fișiere, build verde)
            ✓ Frontend done (8 fișiere, build verde, TypeScript clean)
 
-           [Faza 4] Swiss Cheese — 5 straturi:
+           [Faza 4] Swiss Cheese — 6 straturi:
            ✓ Stratul A — Build: pass
-           ✓ Stratul B — Security: 7/7 (toate endpoint-urile require auth)
+           ✓ Stratul B — Security (Behavior + Structure): 7/7 endpoint, 12/12 query
            ⚠ Stratul C — SPEC compliance: 47/49 items bifate
              (lipsesc: tooltip pe coloana "Sold", error state pe form)
            ✓ Stratul D — Code Quality: zero TODO, zero `any`
-           ✓ Stratul E — DS Compliance: zero hex hardcoded
+           ✓ Stratul E — DS Compliance: zero hex hardcoded + verificare vizuală
+           ✓ Stratul F — Independent Review (review-bono): pass pe 3 fișiere flag-uite
 
            Fix și re-verificare? sau commit așa?
 
@@ -137,9 +138,16 @@ supernicu/
 │   ├── assets/                # Brand assets
 │   └── references/            # DS reference pages
 └── hooks/
-    ├── pre-commit-build.sh    # Verifică build verde înainte de commit
-    └── pre-commit-spec.sh     # Avertizează dacă pagini modificate n-au SPEC
+    ├── pre-commit-build.sh           # Git hook — verifică build verde înainte de commit
+    ├── pre-commit-spec.sh            # Git hook — avertizează dacă pagini modificate n-au SPEC
+    ├── sync-skill.sh                 # Post-commit — propagă SKILL.md la ~/.claude/skills/
+    ├── build-query-safety-matrix.sh  # Faza 2 — auto-generează Query Safety Matrix (G8)
+    ├── query-tenant-check.sh         # Faza 4 B.1 — flag-ează queries fără tenant scope (G8)
+    ├── schema-preflight.sh           # Faza 2 — scan cascade chains + migration safety (G9)
+    └── secrets-scan.sh               # Faza 4 B.3 — secrets/tokens/rate limit scan (G10-G12)
 ```
+
+Toate hook-urile de tip „flag" sunt **WARN-only**. Validarea adâncimii e job-ul review-bono (Stratul F), nu al grep-ului.
 
 ## Bono skills
 
@@ -169,7 +177,7 @@ Standardele canonice Bono (scrise de Prodan, din `bono-ro/bono-skills`) sunt ins
 
 - **Specs-first** — Fiecare pagină primește un SPEC cu 10 secțiuni înainte de orice cod. SPEC-ul = criteriile de acceptare
 - **Security pit of success** — Codul sigur e calea implicită. `FallbackPolicy` deny-by-default, `TenantControllerBase`, anti-IDOR
-- **Swiss Cheese verification** — 5 straturi independente de verificare. Găurile unui strat nu se aliniază cu ale altuia. Toate trebuie să treacă pentru commit
+- **Swiss Cheese verification** — 6 straturi independente de verificare (Build, Security, SPEC, Quality, DS, Independent Review). Găurile unui strat nu se aliniază cu ale altuia. Toate trebuie să treacă pentru commit
 - **Calitate > Viteza** — Pixel-perfect cu SPEC complet. Nu oferim "rapid dar inconsistent"
 - **Self-improving** — Fiecare retrospectivă adaugă reguli în GUARDRAILS.md
 - **Parallel execution** — Backend + frontend rulează simultan în worktrees separate
